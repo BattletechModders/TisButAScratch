@@ -1,0 +1,12 @@
+#Exclude Windows Junk
+desktop.ini
+
+#Exlude MODS build
+MODS/
+
+#Exlude ToDos
+DEVWULF/ToDo.txt
+DEVTBONE/ToDo.txt
+
+#Exclude Temp files from save editor
+TOOLS\BattleTech Save Editor\BtSaveEdit*
