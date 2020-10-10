@@ -29,6 +29,7 @@ namespace TisButAScratch.Framework
     {
         private static PilotInjuryHolder _instance;
         public Dictionary<string, List<string>> pilotInjuriesMap;
+        public int injuryStat;
 
         public static PilotInjuryHolder HolderInstance
         {

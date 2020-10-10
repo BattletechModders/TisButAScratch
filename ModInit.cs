@@ -4,6 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Harmony;
 using System.Reflection;
+using BattleTech;
 using static TisButAScratch.Framework.GlobalVars;
 using TisButAScratch.Framework;
 
@@ -49,9 +50,20 @@ namespace TisButAScratch
         public bool enableFatigue = false;
         public bool enablePsych = false;
         public bool enableLethalTorsoHead = false;
+        public bool enablePainToleranceInjuries = false;
+        public bool enableInternalDmgInjuries = false;
+        public int internalDmgInjuryLimit = -1;
+        public string internalDmgStatName = "InjureOnStructDmg";
+
+        public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();
+        public float internalDmgLvlReq = 0f;
+
+        public int missionKillSeverityThreshold = -1;
         public int cripplingInjuriesThreshold = -1;
         public int severityCost = 360;
         public float injuryHealTimeMultiplier = 0f;
+
         public List<Injury> InjuryEffectsList = new List<Injury>();
+        public List<Injury> InternalDmgInjuries = new List<Injury>();
     }
 }

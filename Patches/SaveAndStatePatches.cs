@@ -238,6 +238,15 @@ namespace TisButAScratch.Patches
             }
         }
 
+        [HarmonyPatch(typeof(AbstractActor), "InitEffectStats", new Type[] {typeof(AbstractActor)})]
+        public static class AbstractActor_InitEffectStats_Patch
+        {
+            public static void Postfix(AbstractActor __instance)
+            {
+                __instance.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
+                __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
+            }
+        }
 
         //adding AI units (i.e., not commander and not your pilotroster) to pilotInjuriesMap
         [HarmonyPatch(typeof(Team), "AddUnit", new Type[] {typeof(AbstractActor)})]
@@ -248,6 +257,8 @@ namespace TisButAScratch.Patches
 
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
+                p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
+                ModInit.modLog.LogMessage($"Added {p.Name} MissionKilledStat");
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{sim.GenerateSimGameUID()}{aiPilotFlag}");
@@ -277,11 +288,24 @@ namespace TisButAScratch.Patches
             }
         }
 
+        //also has to remove CRIPPLED tag from AI pilots so their PilotDefs can be reused
         [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
         static class CombatGameState_OnCombatGameDestroyed_Patch
         {
-            static void Postfix()
+            static void Prefix(CombatGameState __instance, List<AbstractActor> ___allActors)
             {
+                foreach (var actor in ___allActors)
+                {
+                    var p = actor.GetPilot();
+                    if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
+                    {
+                        p.pilotDef.PilotTags.Remove(CrippledTag);
+                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot if present");
+                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
+                        p.pilotDef.PilotTags.RemoveRange(rmt);
+                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot if present");
+                    }
+                }
                 var rm = new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x=>x.EndsWith(aiPilotFlag)));
                 foreach (var key in rm)
                 {

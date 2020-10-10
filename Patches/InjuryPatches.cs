@@ -15,19 +15,40 @@ namespace TisButAScratch.Patches
     {
         //main patch to apply injury effects on injured pilot
         [HarmonyPatch(typeof(Pilot), "InjurePilot", new Type[] {typeof(string), typeof(int),typeof(int), typeof(DamageType), typeof(Weapon),typeof(AbstractActor)})]
+        [HarmonyPriority(Priority.First)]
         public static class Pilot_InjurePilot_Patch
         {
+            public static void Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
+                DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
+            {
+                PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
+                ModInit.modLog.LogMessage($"{__instance.Callsign} has {PilotInjuryHolder.HolderInstance.injuryStat} injuries before InjurePilot; proceeding.");
+            }
+
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
-                ModInit.modLog.LogMessage($"Rolling injury with {dmg} damage for {__instance.Name}");
-                PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
-
-                if (damageType == DamageType.Unknown || damageType == DamageType.NOT_SET)
+                if (PilotInjuryHolder.HolderInstance.injuryStat == __instance.StatCollection.GetValue<int>("Injuries") && !ModInit.modSettings.enablePainToleranceInjuries)
                 {
+                    ModInit.modLog.LogMessage($"{__instance.Callsign} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
                     return;
                 }
 
-                if (ModInit.modSettings.cripplingInjuriesThreshold > 0) //now trying to add up "severity" threshold for crippled injury
+                PilotInjuryHolder.HolderInstance.injuryStat = 0; //wait...why?
+
+                if (ModInit.modSettings.enableInternalDmgInjuries &&
+                    __instance.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName))
+                {
+                    PilotInjuryManager.ManagerInstance.rollInjuryFeedback(__instance, dmg, damageType);
+                    ModInit.modLog.LogMessage($"Rolling neural feedback injury with {dmg} damage for {__instance.Name}");
+                }
+
+                else
+                {
+                    PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
+                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Name}");
+                }
+                
+                if ((ModInit.modSettings.cripplingInjuriesThreshold > 0 || ModInit.modSettings.missionKillSeverityThreshold > 0) && (damageType != DamageType.Unknown || damageType != DamageType.NOT_SET)) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
                 {
                     var pKey = __instance.FetchGUID();
                     var injuryList = new List<Injury>();
@@ -37,26 +58,29 @@ namespace TisButAScratch.Patches
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
 
-                    var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
-
-                    foreach (var injuryLoc in groupedLocs)
+                    if (ModInit.modSettings.cripplingInjuriesThreshold > 0)
                     {
-                        var t = 0;
-                        foreach (var injury in injuryLoc)
-                        {
-                            t += injury.severity;
-                        }
+                        var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
 
-                        if (t > ModInit.modSettings.cripplingInjuriesThreshold)
+                        foreach (var injuryLoc in groupedLocs)
                         {
-                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                                .Add(CRIPPLED.injuryID);
-                            __instance.pilotDef.PilotTags.Add(CrippledTag);
-                            if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
-                                                                              injuryLoc.Key == InjuryLoc.Torso))
+                            var t = 0;
+                            foreach (var injury in injuryLoc)
                             {
-                                __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
-                                    StatCollection.StatOperation.Set, true, -1, true);
+                                t += injury.severity;
+                            }
+
+                            if (t > ModInit.modSettings.cripplingInjuriesThreshold)
+                            {
+                                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
+                                    .Add(CRIPPLED.injuryID);
+                                __instance.pilotDef.PilotTags.Add(CrippledTag);
+                                if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
+                                    injuryLoc.Key == InjuryLoc.Torso))
+                                {
+                                    __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
+                                        StatCollection.StatOperation.Set, true, -1, true);
+                                }
                             }
                         }
                     }
@@ -87,7 +111,7 @@ namespace TisButAScratch.Patches
     {
         public static void Postfix(Pilot __instance, ref bool __result)
         {
-            if (__instance.pilotDef.PilotTags.Contains(CrippledTag))
+            if (__instance.pilotDef.PilotTags.Contains(CrippledTag) || (__instance.StatCollection.GetValue<int>(MissionKilledStat) >= ModInit.modSettings.missionKillSeverityThreshold))
             {
                 __result = true;
             }
@@ -137,6 +161,26 @@ namespace TisButAScratch.Patches
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                     .Clear();
                 ModInit.modLog.LogMessage($"{__instance.Name} has been healed!!");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Mech))]
+    [HarmonyPatch("ApplyStructureStatDamage",
+        new Type[] {typeof(ChassisLocations), typeof(float), typeof(WeaponHitInfo)})]
+
+    public static class Mech_ApplyStructureStatDamage
+    {
+        public static bool Prepare()
+        { return ModInit.modSettings.enableInternalDmgInjuries; }
+
+        public static void Postfix(Mech __instance, ChassisLocations location, float damage)
+        {
+            if ((ModInit.modSettings.internalDmgInjuryLocs.Contains(location) || ModInit.modSettings.internalDmgInjuryLocs.Capacity == 0) &&
+                damage >= ModInit.modSettings.internalDmgLvlReq && __instance.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName))
+            {
+                var p = __instance.GetPilot();
+                p.InjurePilot(p.FetchGUID(), -1, 1, DamageType.ComponentExplosion, null, null);
             }
         }
     }

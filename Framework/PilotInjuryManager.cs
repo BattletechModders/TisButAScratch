@@ -25,6 +25,7 @@ namespace TisButAScratch.Framework
     {
         private static PilotInjuryManager _instance;
         public List<Injury> InjuryEffectsList;
+        public List<Injury> InternalDmgInjuries;
 
         public static PilotInjuryManager ManagerInstance
         {
@@ -51,6 +52,23 @@ namespace TisButAScratch.Framework
                 }
                 InjuryEffectsList.Add(injuryEffect);
             }
+
+            if (ModInit.modSettings.enableInternalDmgInjuries)
+            {
+                InternalDmgInjuries = new List<Injury>();
+
+                foreach (var internalDmgEffect in ModInit.modSettings.InternalDmgInjuries)
+                {
+                    ModInit.modLog.LogMessage($"Adding effects for {internalDmgEffect.injuryName}!");
+                    foreach (var jObject in internalDmgEffect.effectDataJO)
+                    {
+                        var effectData = new EffectData();
+                        effectData.FromJSON(jObject.ToString());
+                        internalDmgEffect.effects.Add(effectData);
+                    }
+                    InternalDmgInjuries.Add(internalDmgEffect);
+                }
+            }
         }
     
 
@@ -66,7 +84,6 @@ namespace TisButAScratch.Framework
                     ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Id}");
                 }
             }
-            
         }
 
         protected void applyInjuryEffects(AbstractActor actor, Injury injury)
@@ -126,9 +143,44 @@ namespace TisButAScratch.Framework
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
-                
+
+                pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
+                    StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);
+                ModInit.modLog.LogMessage(
+                    $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
+
                 applyInjuryEffects(pilot.ParentActor, chosen);
                 
+            }
+        }
+
+        internal void rollInjuryFeedback(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
+        {
+            var loc = InjuryLoc.Head;
+
+
+            for (int i = 0; i < dmg; i++)
+            {
+                var injuryList = new List<Injury>(ManagerInstance.InternalDmgInjuries);
+
+
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);//this done to make sure CRIPPLED doesn't show up
+                                                                                   //some kind of Guts check for severity maybe?
+                var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
+                ModInit.modLog.LogMessage($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+                var pKey = pilot.FetchGUID();
+
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
+                ModInit.modLog.LogMessage(
+                    $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
+
+                pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
+                    StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);
+                ModInit.modLog.LogMessage(
+                    $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
+
+                applyInjuryEffects(pilot.ParentActor, chosen);
+
             }
         }
 

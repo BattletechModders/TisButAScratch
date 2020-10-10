@@ -19,6 +19,7 @@ namespace TisButAScratch.Framework
         internal const string iGUID = "iGUID_";
         internal const string injuryStateTag = "injuryState_";
         internal const string CrippledTag = "CRIPPLED";
+        internal const string MissionKilledStat = "MissionKilled";
 
 
         internal static Injury CRIPPLED = new Injury
