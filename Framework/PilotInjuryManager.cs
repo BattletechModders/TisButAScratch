@@ -81,7 +81,7 @@ namespace TisButAScratch.Framework
                 foreach (Injury injury in ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Id}");
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}");
                 }
             }
         }
@@ -89,15 +89,15 @@ namespace TisButAScratch.Framework
         protected void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
-            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Id}");
+            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}");
             foreach (EffectData effectData in injury.effects)
             {
-                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Id}");
+                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
-                    string id = ($"InjuryEffect_{p.Description.Id}_{effectData.Description.Id}");
+                    string id = ($"InjuryEffect_{p.Description.Callsign}_{effectData.Description.Id}");
 
                     ModInit.modLog.LogMessage($"Applying {id}");
                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1,

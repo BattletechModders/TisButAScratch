@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static TisButAScratch.Framework.GlobalVars;
 using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.TMProWrapper;
@@ -20,7 +21,6 @@ namespace TisButAScratch.Patches
     {
         [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
         [HarmonyAfter(new string[] {"ca.jwolf.MechAffinity"})] //without whom this would not have happened
-
         public static class SGBarracksRosterSlot_Refresh_Patch
         {
             public static void Postfix(SGBarracksRosterSlot __instance, GameObject ___incapacitatedObj)
@@ -30,9 +30,17 @@ namespace TisButAScratch.Patches
                     return;
                 }
 
-                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null) return;
+ //               if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null) return;
+                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(CrippledTag)) return;
+
                 var tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
 
+                if (tooltip == null && __instance.Pilot.pilotDef.PilotTags.Contains(CrippledTag))
+                {
+                    ___incapacitatedObj.gameObject.SetActive(true);
+                       tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
+                    tooltip.gameObject.SetActive(true);
+                }
 
                 Pilot pilot = __instance.Pilot;
                 string Desc = tooltip.GetText();
@@ -49,31 +57,62 @@ namespace TisButAScratch.Patches
             }
         }
 
-        [HarmonyPatch(typeof(SGBarracksDossierPanel), "SetPilot", new Type[]{typeof(Pilot), typeof(SGBarracksMWDetailPanel), typeof(bool), typeof(bool)})]
+        [HarmonyPatch(typeof(SGBarracksDossierPanel), "SetPilot",
+            new Type[] {typeof(Pilot), typeof(SGBarracksMWDetailPanel), typeof(bool), typeof(bool)})]
         [HarmonyAfter(new string[] {"ca.jwolf.MechAffinity"})] //without whom this would not have happened
         public static class SGBarracksDossierPanel_SetPilot_Patch
         {
-            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, GameObject ___injureBackground)
+            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, GameObject ___injureBackground,
+                GameObject ___timeoutBackground)
             {
-                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null) return;
-                var tooltip = ___injureBackground.GetComponentInChildren<HBSTooltip>(false);
+//                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null) return; //this was original, worked with injuries but not crippled
 
-                string Desc = tooltip.GetText();
-                if (String.IsNullOrEmpty(Desc))
+                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
+                    !p.pilotDef.PilotTags.Contains(CrippledTag)) return;
+
+                if (p.pilotDef.PilotTags.Contains(CrippledTag) && !___injureBackground.activeSelf)
                 {
-                    Desc = "";
+                    ___timeoutBackground.SetActive(true);
+
+                    var tooltip = ___timeoutBackground.GetComponentInChildren<HBSTooltip>(true);
+
+                    tooltip.gameObject.SetActive(true);
+
+                    string Desc = tooltip.GetText();
+                    if (String.IsNullOrEmpty(Desc))
+                    {
+                        Desc = "";
+                    }
+
+                    Desc += "<b>Injuries:</b>";
+                    Desc += InjuryDescriptions.getPilotInjuryDesc(p);
+
+                    var descDef = new BaseDescriptionDef("Injuries", p.Callsign, Desc, null);
+                    tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
+                    return;
                 }
 
-                Desc += "<b>Injuries:</b>";
-                Desc += InjuryDescriptions.getPilotInjuryDesc(p);
+                else
+                {
+                    var tooltip = ___injureBackground.GetComponentInChildren<HBSTooltip>(false);
 
-                var descDef = new BaseDescriptionDef("Injuries", p.Callsign, Desc, null);
-                tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
+                    string Desc = tooltip.GetText();
+                    if (String.IsNullOrEmpty(Desc))
+                    {
+                        Desc = "";
+                    }
+
+                    Desc += "<b>Injuries:</b>";
+                    Desc += InjuryDescriptions.getPilotInjuryDesc(p);
+
+                    var descDef = new BaseDescriptionDef("Injuries", p.Callsign, Desc, null);
+                    tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
+                }
             }
         }
+
         [HarmonyPatch(typeof(TaskManagementElement), "UpdateTaskInfo")]
         [HarmonyAfter(new string[] { "ca.jwolf.MechAffinity" })] //without whom this would not have happened
-
         public static class TaskManagementElement_UpdateTaskInfo_Patch
         {
             public static void Postfix(TaskManagementElement __instance, WorkOrderEntry ___entry, LocalizableText ___subTitleText)

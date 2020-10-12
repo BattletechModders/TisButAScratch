@@ -3,6 +3,7 @@ using BattleTech;
 using Harmony;
 using System.Collections.Generic;
 using System.Linq;
+using static TisButAScratch.Framework.GlobalVars;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,20 @@ namespace TisButAScratch.Framework
                         var description = $"{injury.injuryName}: {injury.description}";
                         rtrn += description + "\n\n";
                     }
+                }
+
+                foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
+                {
+                    foreach (Injury feedbackinjury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
+                    {
+                        var description = $"{feedbackinjury.injuryName}: {feedbackinjury.description}";
+                        rtrn += description + "\n\n";
+                    }
+                }
+
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID].Contains(CRIPPLED.injuryID))
+                {
+                    rtrn += CRIPPLED.description;
                 }
                 return rtrn;
             }

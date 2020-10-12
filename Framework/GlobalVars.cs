@@ -14,7 +14,6 @@ namespace TisButAScratch.Framework
     public class GlobalVars
     {
         internal static SimGameState sim;
-        internal static CombatGameState combat;
         internal const string aiPilotFlag = "AI_TEMP_";
         internal const string iGUID = "iGUID_";
         internal const string injuryStateTag = "injuryState_";

@@ -55,13 +55,15 @@ namespace TisButAScratch
         public int internalDmgInjuryLimit = -1;
         public string internalDmgStatName = "InjureOnStructDmg";
 
-        public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();
+        
         public float internalDmgLvlReq = 0f;
 
         public int missionKillSeverityThreshold = -1;
         public int cripplingInjuriesThreshold = -1;
         public int severityCost = 360;
         public float injuryHealTimeMultiplier = 0f;
+
+        public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();
 
         public List<Injury> InjuryEffectsList = new List<Injury>();
         public List<Injury> InternalDmgInjuries = new List<Injury>();

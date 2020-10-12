@@ -52,7 +52,7 @@ namespace TisButAScratch.Patches
                     if(!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
+                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
                     }
                 }
                 var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x=>!curPilots.Contains(x));
@@ -122,7 +122,7 @@ namespace TisButAScratch.Patches
                                 t += injury.severity;
                             }
 
-                            if (t > ModInit.modSettings.cripplingInjuriesThreshold)
+                            if (t >= ModInit.modSettings.cripplingInjuriesThreshold)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                                     .Add(CRIPPLED.injuryID);
@@ -155,7 +155,7 @@ namespace TisButAScratch.Patches
                     if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
+                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
                     }
 
                     /// this bigass clusterfuck is just for if you have existing injuries when first loading up TBAS
@@ -164,7 +164,7 @@ namespace TisButAScratch.Patches
                     {
                         var dmg = p.StatCollection.GetValue<int>("Injuries") -
                                   PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                        ModInit.modLog.LogMessage($"{p.Name} is missing {dmg} injuries. Rerolling.");
+                        ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
                         PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
                         if (ModInit.modSettings.cripplingInjuriesThreshold > 0
                         ) //now trying to add up "severity" threshold for crippled injury
@@ -233,17 +233,20 @@ namespace TisButAScratch.Patches
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
+                    ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
                 }
             }
         }
 
-        [HarmonyPatch(typeof(AbstractActor), "InitEffectStats", new Type[] {typeof(AbstractActor)})]
+        [HarmonyPatch(typeof(AbstractActor), "InitEffectStats")]
         public static class AbstractActor_InitEffectStats_Patch
         {
             public static void Postfix(AbstractActor __instance)
             {
-                __instance.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
+                var p = __instance.GetPilot();
+                p.StatCollection.AddStatistic<bool>("NeedsFeedbackInjury", false);
+                p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
+
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
             }
         }
@@ -258,20 +261,20 @@ namespace TisButAScratch.Patches
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
-                ModInit.modLog.LogMessage($"Added {p.Name} MissionKilledStat");
+                ModInit.modLog.LogMessage($"Added {p.Callsign} MissionKilledStat");
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{sim.GenerateSimGameUID()}{aiPilotFlag}");
-                    ModInit.modLog.LogMessage($"Added {p.Name} iGUID tag");
+                    ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag");
                 }
 
                 var pKey = p.FetchGUID();
-                ModInit.modLog.LogMessage($"Fetched {p.Name} iGUID");
+                ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
                 p.StatCollection.AddStatistic("isCrippled", false);
                 if (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add($"{pKey}", new List<string>());
-                    ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Name} to injuryMap");
+                    ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Callsign} to injuryMap");
                 }
 
                 ////below probably not needed, as its done at AddPilotToRoster for real pilots
