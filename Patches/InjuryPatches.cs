@@ -62,7 +62,7 @@ namespace TisButAScratch.Patches
                     
                 }
 
-                if ((ModInit.modSettings.cripplingInjuriesThreshold > 0 ||
+                if ((ModInit.modSettings.cripplingSeverityThreshold > 0 ||
                      ModInit.modSettings.missionKillSeverityThreshold > 0) &&
                     (damageType != DamageType.Unknown || damageType != DamageType.NOT_SET)
                 ) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
@@ -75,7 +75,7 @@ namespace TisButAScratch.Patches
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
 
-                    if (ModInit.modSettings.cripplingInjuriesThreshold > 0)
+                    if (ModInit.modSettings.cripplingSeverityThreshold > 0)
                     {
 
 
@@ -89,7 +89,7 @@ namespace TisButAScratch.Patches
                             t = injuryLoc.Sum(x => x.severity);
 
 
-                            if (t >= ModInit.modSettings.cripplingInjuriesThreshold)
+                            if (t >= ModInit.modSettings.cripplingSeverityThreshold)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                                     .Add(CRIPPLED.injuryID);
@@ -135,7 +135,7 @@ namespace TisButAScratch.Patches
             {
                 if (__instance.pilotDef.PilotTags.Contains(CrippledTag) ||
                     (__instance.StatCollection.GetValue<int>(MissionKilledStat) >=
-                     ModInit.modSettings.missionKillSeverityThreshold))
+                     ModInit.modSettings.missionKillSeverityThreshold && ModInit.modSettings.missionKillSeverityThreshold > 0))
                 {
                     __result = true;
                 }

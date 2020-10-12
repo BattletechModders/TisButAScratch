@@ -52,14 +52,15 @@ namespace TisButAScratch
         public bool enableLethalTorsoHead = false;
         public bool enablePainToleranceInjuries = false;
         public bool enableInternalDmgInjuries = false;
-        public int internalDmgInjuryLimit = -1;
         public string internalDmgStatName = "InjureOnStructDmg";
+        public int internalDmgInjuryLimit = -1;
+        
 
         
         public float internalDmgLvlReq = 0f;
 
         public int missionKillSeverityThreshold = -1;
-        public int cripplingInjuriesThreshold = -1;
+        public int cripplingSeverityThreshold = -1;
         public int severityCost = 360;
         public float injuryHealTimeMultiplier = 0f;
 

@@ -25,7 +25,7 @@ namespace TisButAScratch.Framework
         {
             injuryID = "CRIPPLED",
             injuryName = "CRIPPLED",
-            injuryLoc = InjuryLoc.INVALID_UNSET,
+            injuryLoc = InjuryLoc.NOT_SET,
             couldBeThermal = false,
             description = "Whether due to amputation or extensive tissue damage, this pilot is crippled and is unable to deploy without rehabilitation.",
             severity = 100,
@@ -40,7 +40,7 @@ namespace TisButAScratch.Framework
 
         public enum InjuryLoc
         {
-            INVALID_UNSET,
+            NOT_SET,
             Psych,
             Head,
             ArmL,

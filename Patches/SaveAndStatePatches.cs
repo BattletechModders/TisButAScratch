@@ -101,7 +101,7 @@ namespace TisButAScratch.Patches
                               PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                     ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
                     PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
-                    if (ModInit.modSettings.cripplingInjuriesThreshold > 0
+                    if (ModInit.modSettings.cripplingSeverityThreshold > 0
                     ) //now trying to add up "severity" threshold for crippled injury
                     {
 
@@ -122,7 +122,7 @@ namespace TisButAScratch.Patches
                                 t += injury.severity;
                             }
 
-                            if (t >= ModInit.modSettings.cripplingInjuriesThreshold)
+                            if (t >= ModInit.modSettings.cripplingSeverityThreshold)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                                     .Add(CRIPPLED.injuryID);
@@ -166,7 +166,7 @@ namespace TisButAScratch.Patches
                                   PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                         ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
                         PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
-                        if (ModInit.modSettings.cripplingInjuriesThreshold > 0
+                        if (ModInit.modSettings.cripplingSeverityThreshold > 0
                         ) //now trying to add up "severity" threshold for crippled injury
                         {
 
@@ -188,7 +188,7 @@ namespace TisButAScratch.Patches
                                     t += injury.severity;
                                 }
 
-                                if (t > ModInit.modSettings.cripplingInjuriesThreshold)
+                                if (t > ModInit.modSettings.cripplingSeverityThreshold)
                                 {
                                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                                         .Add(CRIPPLED.injuryID);
@@ -246,7 +246,7 @@ namespace TisButAScratch.Patches
                 var p = __instance.GetPilot();
                 p.StatCollection.AddStatistic<bool>("NeedsFeedbackInjury", false);
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
-
+                p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
             }
         }
@@ -260,7 +260,7 @@ namespace TisButAScratch.Patches
 
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
-                p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
+                
                 ModInit.modLog.LogMessage($"Added {p.Callsign} MissionKilledStat");
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {

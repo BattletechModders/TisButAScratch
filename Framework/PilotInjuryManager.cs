@@ -109,7 +109,7 @@ namespace TisButAScratch.Framework
 
         internal void rollInjury(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
-            var loc = InjuryLoc.INVALID_UNSET;
+            var loc = InjuryLoc.NOT_SET;
             
 
             for (int i = 0; i < dmg; i++)
@@ -186,7 +186,7 @@ namespace TisButAScratch.Framework
 
         internal void rollInjurySG(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
-            var loc = InjuryLoc.INVALID_UNSET;
+            var loc = InjuryLoc.NOT_SET;
 
 
             for (int i = 0; i < dmg; i++)
