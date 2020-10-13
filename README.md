@@ -46,19 +46,19 @@ Other settings available follow:
 
 ```
 {
-  "enableLogging" : true,
-	"enableLethalTorsoHead" : true,
-	"enableInternalDmgInjuries" : true,
-  "internalDmgStatName" : "InjureOnStructDmg",
-	"internalDmgInjuryLimit" : 1,
-	"internalDmgLvlReq" : 2.9,
-	"missionKillSeverityThreshold" : 4,
-	"cripplingSeverityThreshold" : 2,
-	"severityCost" : 360,
-	"injuryHealTimeMultiplier" : 2.5,	
-	"internalDmgInjuryLocs" : ["Head", "CenterTorso"],
-  "InjuryEffectsList": [],
-  "InternalDmgInjuries": []
+"enableLogging" : true,
+"enableLethalTorsoHead" : true,
+"enableInternalDmgInjuries" : true,
+"internalDmgStatName" : "InjureOnStructDmg",
+"internalDmgInjuryLimit" : 1,
+"internalDmgLvlReq" : 2.9,
+"missionKillSeverityThreshold" : 4,
+"cripplingSeverityThreshold" : 2,
+"severityCost" : 360,
+"injuryHealTimeMultiplier" : 2.5,	
+"internalDmgInjuryLocs" : ["Head", "CenterTorso"],
+"InjuryEffectsList": [],
+"InternalDmgInjuries": []
     
 ```
 
