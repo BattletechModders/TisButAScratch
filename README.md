@@ -1,6 +1,6 @@
 # TisButAScratch
 
-This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Possible injury locations are: Head, ArmL, Torso, ArmR, LegL, and LegR.
+This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Possible injury locations (`injuryLoc`) are: Head, ArmL, Torso, ArmR, LegL, and LegR.
 
 Injuries are defined in the settings.json, and have the following structure:
 ```
