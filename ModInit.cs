@@ -48,17 +48,16 @@ namespace TisButAScratch
     {
         public bool enableLogging = false;
         public bool enableFatigue = false;
-        public bool enablePsych = false;
         public bool enableLethalTorsoHead = false;
         public bool enablePainToleranceInjuries = false;
+
+        public bool BleedingOutLethal = false;
+        public string BleedingOutSuffix = "_bleedout";
+
         public bool enableInternalDmgInjuries = false;
         public string internalDmgStatName = "InjureOnStructDmg";
         public int internalDmgInjuryLimit = -1;
-        
-
-        
         public float internalDmgLvlReq = 0f;
-
         public int missionKillSeverityThreshold = -1;
         public int cripplingSeverityThreshold = -1;
         public int severityCost = 360;

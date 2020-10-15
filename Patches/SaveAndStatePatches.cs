@@ -245,6 +245,7 @@ namespace TisButAScratch.Patches
             {
                 var p = __instance.GetPilot();
                 p.StatCollection.AddStatistic<bool>("NeedsFeedbackInjury", false);
+                p.StatCollection.AddStatistic<bool>("BledOut", false);
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
@@ -295,11 +296,20 @@ namespace TisButAScratch.Patches
         [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
         static class CombatGameState_OnCombatGameDestroyed_Patch
         {
+
             static void Prefix(CombatGameState __instance, List<AbstractActor> ___allActors)
             {
+                var rm = new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => x.EndsWith(aiPilotFlag)));
+                foreach (var key in rm)
+                {
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
+                    ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
+                }
+
                 foreach (var actor in ___allActors)
                 {
                     var p = actor.GetPilot();
+                    var pKey = p.FetchGUID();
                     if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
                     {
                         p.pilotDef.PilotTags.Remove(CrippledTag);
@@ -308,12 +318,14 @@ namespace TisButAScratch.Patches
                         p.pilotDef.PilotTags.RemoveRange(rmt);
                         ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot if present");
                     }
-                }
-                var rm = new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x=>x.EndsWith(aiPilotFlag)));
-                foreach (var key in rm)
-                {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
+
+                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != null))
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(inj.injuryID);
+                        ModInit.modLog.LogMessage($"Removed {inj.injuryName} with bleeding effect");
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(inj.injuryID_Post);
+                        ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} for post-combat injury");
+                    }
                 }
             }
         }

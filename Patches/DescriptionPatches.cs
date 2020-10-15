@@ -120,7 +120,6 @@ namespace TisButAScratch.Patches
                 if (___entry.Type == WorkOrderType.MedLabHeal)
                 {
                     ___subTitleText.SetText("INJURED");
-
                 }
             }
         }

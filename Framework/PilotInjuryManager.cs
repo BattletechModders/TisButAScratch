@@ -21,7 +21,7 @@ namespace TisButAScratch.Framework
         }
     }
 
-    public class PilotInjuryManager //need to rewrite aplyPassiveeffects from mechaffinity
+    public class PilotInjuryManager
     {
         private static PilotInjuryManager _instance;
         public List<Injury> InjuryEffectsList;
@@ -40,7 +40,6 @@ namespace TisButAScratch.Framework
         internal void Initialize()
         {
             InjuryEffectsList = new List<Injury>();
- //           ManagerInstance.InjuryEffectsList.AddRange(ModInit.modSettings.InjuryEffectsList);
             foreach (var injuryEffect in ModInit.modSettings.InjuryEffectsList) 
             {
                 ModInit.modLog.LogMessage($"Adding effects for {injuryEffect.injuryName}!");
@@ -110,7 +109,6 @@ namespace TisButAScratch.Framework
         internal void rollInjury(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
             var loc = InjuryLoc.NOT_SET;
-            
 
             for (int i = 0; i < dmg; i++)
             {
@@ -134,8 +132,7 @@ namespace TisButAScratch.Framework
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
                 }
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);//this done to make sure CRIPPLED doesn't show up
-                            //some kind of Guts check for severity maybe?
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();
@@ -158,14 +155,12 @@ namespace TisButAScratch.Framework
         {
             var loc = InjuryLoc.Head;
 
-
             for (int i = 0; i < dmg; i++)
             {
                 var injuryList = new List<Injury>(ManagerInstance.InternalDmgInjuries);
 
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);//this done to make sure CRIPPLED doesn't show up
-                                                                                   //some kind of Guts check for severity maybe?
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();
@@ -186,33 +181,16 @@ namespace TisButAScratch.Framework
 
         internal void rollInjurySG(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
-            var loc = InjuryLoc.NOT_SET;
-
+            InjuryLoc loc;
 
             for (int i = 0; i < dmg; i++)
             {
-                var injuryList = new List<Injury>(ManagerInstance.InjuryEffectsList);
-                if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf)
-                {
-                    loc = (InjuryLoc)UnityEngine.Random.Range(3, 8);
+                var injuryList = new List<Injury>(PilotInjuryManager.ManagerInstance.InjuryEffectsList);
+                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
-                    injuryList.RemoveAll(x => x.couldBeThermal == false || x.severity >= 100);
-                }
 
-                else if (damageType == DamageType.Knockdown || damageType == DamageType.KnockdownSelf)
-                {
-                    loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
-                    injuryList.RemoveAll(x => x.couldBeThermal == true || x.severity >= 100);
-                }
-                else
-                {
-                    loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
-                }
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);//this done to make sure CRIPPLED doesn't show up
-                                                                                   //some kind of Guts check for severity maybe?
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();

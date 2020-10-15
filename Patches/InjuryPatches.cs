@@ -46,12 +46,13 @@ namespace TisButAScratch.Patches
                 PilotInjuryHolder.HolderInstance.injuryStat = 0; //wait...why?
 
                 if (ModInit.modSettings.enableInternalDmgInjuries &&
-                    __instance.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName) && __instance.StatCollection.GetValue<bool>("NeedsFeedbackInjury"))
+                    __instance.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName) &&
+                    __instance.StatCollection.GetValue<bool>("NeedsFeedbackInjury"))
                 {
                     ModInit.modLog.LogMessage(
                         $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}");
                     PilotInjuryManager.ManagerInstance.rollInjuryFeedback(__instance, dmg, damageType);
-                    
+
                     return;
                 }
 
@@ -59,12 +60,12 @@ namespace TisButAScratch.Patches
                 {
                     ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign}");
                     PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
-                    
+
                 }
 
                 if ((ModInit.modSettings.cripplingSeverityThreshold > 0 ||
                      ModInit.modSettings.missionKillSeverityThreshold > 0) &&
-                    (damageType != DamageType.Unknown || damageType != DamageType.NOT_SET)
+                    (damageType != DamageType.Unknown && damageType != DamageType.NOT_SET)
                 ) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
                 {
                     var pKey = __instance.FetchGUID();
@@ -81,12 +82,10 @@ namespace TisButAScratch.Patches
 
                         var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
 
-                        
+
                         foreach (var injuryLoc in groupedLocs)
                         {
-                            var t = new int();
-
-                            t = injuryLoc.Sum(x => x.severity);
+                            var t = injuryLoc.Sum(x => x.severity);
 
 
                             if (t >= ModInit.modSettings.cripplingSeverityThreshold)
@@ -101,7 +100,8 @@ namespace TisButAScratch.Patches
                                 {
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                                         StatCollection.StatOperation.Set, true, -1, true);
-                                    ModInit.modLog.LogMessage($"{__instance.Callsign} has crippled Torso or Head; lethal injury!");
+                                    ModInit.modLog.LogMessage(
+                                        $"{__instance.Callsign} has crippled Torso or Head; lethal injury!");
                                 }
                             }
                         }
@@ -133,9 +133,10 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if (__instance.pilotDef.PilotTags.Contains(CrippledTag) ||
+                if (__instance.pilotDef.PilotTags.Contains(CrippledTag) || __instance.StatCollection.GetValue<bool>("BledOut") ||
                     (__instance.StatCollection.GetValue<int>(MissionKilledStat) >=
-                     ModInit.modSettings.missionKillSeverityThreshold && ModInit.modSettings.missionKillSeverityThreshold > 0))
+                     ModInit.modSettings.missionKillSeverityThreshold &&
+                     ModInit.modSettings.missionKillSeverityThreshold > 0))
                 {
                     __result = true;
                 }
@@ -143,15 +144,16 @@ namespace TisButAScratch.Patches
         }
 
         [HarmonyPatch(typeof(Contract), "FinalizeKilledMechWarriors", typeof(SimGameState))]
-        [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
+        [HarmonyAfter(new string[] {"co.uk.cwolf.MissionControl"})]
         public class ContractFinalizeKilledMechwarriorsPatch
         {
             private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
             private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
             private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
+
             public static bool Prefix(Contract __instance)
             {
-                pushReport.Invoke(__instance, new object[]{ "MechWarriorFinalizeKill" });
+                pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
                 foreach (UnitResult unitResult in __instance.PlayerUnitResults)
                 {
                     Pilot pilot = unitResult.pilot;
@@ -165,7 +167,9 @@ namespace TisButAScratch.Patches
                     }
 
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
-                             ModInit.modSettings.missionKillSeverityThreshold || unitResult.pilot.pilotDef.PilotTags.Contains(CrippledTag)) && (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries))
+                              ModInit.modSettings.missionKillSeverityThreshold ||
+                              unitResult.pilot.pilotDef.PilotTags.Contains(CrippledTag)) &&
+                             (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries))
 
                     {
                         return false;
@@ -173,17 +177,20 @@ namespace TisButAScratch.Patches
 
                     else
                     {
-                        float num = pilot.LethalInjuries ? sim.Constants.Pilot.LethalDeathChance : sim.Constants.Pilot.IncapacitatedDeathChance;
-                        num = Mathf.Max(0f, num - sim.Constants.Pilot.GutsDeathReduction * (float)pilot.Guts);
+                        float num = pilot.LethalInjuries
+                            ? sim.Constants.Pilot.LethalDeathChance
+                            : sim.Constants.Pilot.IncapacitatedDeathChance;
+                        num = Mathf.Max(0f, num - sim.Constants.Pilot.GutsDeathReduction * (float) pilot.Guts);
                         float num2 = sim.NetworkRandom.Float(0f, 1f);
-                        string s = string.Format("Pilot {0} needs to roll above {1} to survive. They roll {2} resulting in {3}", new object[]
-                        {
-                            pilot.Name,
-                            num,
-                            num2,
-                            (num2 < num) ? "DEATH" : "LIFE"
-                        });
-                        reportLog.Invoke(__instance, new object[] { s });
+                        string s = string.Format(
+                            "Pilot {0} needs to roll above {1} to survive. They roll {2} resulting in {3}", new object[]
+                            {
+                                pilot.Name,
+                                num,
+                                num2,
+                                (num2 < num) ? "DEATH" : "LIFE"
+                            });
+                        reportLog.Invoke(__instance, new object[] {s});
                         if (num2 < num)
                         {
                             __instance.KilledPilots.Add(pilot);
@@ -194,7 +201,8 @@ namespace TisButAScratch.Patches
                         }
                     }
                 }
-                popReport.Invoke(__instance, new object[] {});
+
+                popReport.Invoke(__instance, new object[] { });
                 return false;
             }
         }
@@ -265,7 +273,7 @@ namespace TisButAScratch.Patches
                 var p = __instance.GetPilot();
                 var internalDmgInjuryCount = p.StatCollection.GetValue<int>("internalDmgInjuryCount");
 
-                
+
 
                 if ((ModInit.modSettings.internalDmgInjuryLocs.Contains(location) ||
                      ModInit.modSettings.internalDmgInjuryLocs.Capacity == 0) &&
@@ -275,12 +283,14 @@ namespace TisButAScratch.Patches
                      ModInit.modSettings.internalDmgInjuryLimit) || ModInit.modSettings.internalDmgInjuryLimit < 1)
 
                 {
-                    ModInit.modLog.LogMessage($"{p.Callsign} has {internalDmgInjuryCount} preexisting feedback injuries!");
+                    ModInit.modLog.LogMessage(
+                        $"{p.Callsign} has {internalDmgInjuryCount} preexisting feedback injuries!");
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
                         StatCollection.StatOperation.Set, true, -1, true);
 
-                    ModInit.modLog.LogMessage($"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign} from structure damage!");
+                    ModInit.modLog.LogMessage(
+                        $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign} from structure damage!");
 
                     p.InjurePilot(p.FetchGUID(), -1, 1, DamageType.ComponentExplosion, null, null);
 
@@ -289,6 +299,26 @@ namespace TisButAScratch.Patches
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
                         StatCollection.StatOperation.Set, false, -1, true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Effect))]
+        [HarmonyPatch("OnEffectExpiration")]
+        public static class Effect_OnEffectExpiration_Patch
+        {
+            public static void Postfix(Effect __instance)
+            {
+                if (__instance.id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && __instance.Target is AbstractActor target)
+                {
+                    var p = target.GetPilot();
+                    p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
+                        StatCollection.StatOperation.Set, true, -1, true);
+                    ModInit.modLog.LogMessage(
+                        $"{p.Callsign} has bled out!");
+
+                    if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
+                        StatCollection.StatOperation.Set, true, -1, true);
                 }
             }
         }

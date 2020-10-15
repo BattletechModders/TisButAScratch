@@ -14,6 +14,7 @@ namespace TisButAScratch.Framework
     public class Injury
     {
         public string injuryID = "";
+        public string injuryID_Post = "";
         public string injuryName = "";
         public InjuryLoc injuryLoc = InjuryLoc.NOT_SET;
         public bool couldBeThermal = false;
