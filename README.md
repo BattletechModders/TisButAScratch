@@ -1,20 +1,25 @@
 # TisButAScratch
 
-This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Possible injury locations (`injuryLoc`) are: Head, ArmL, Torso, ArmR, LegL, and LegR.
+This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself.
 
 Injuries are defined in the settings.json, and have the following structure:
 ```
 "InjuryEffectsList": [
 		{
-			"injuryID" : "HeadConcussion",
-			"injuryName" : "Concussion",
-			"injuryLoc" : "Head",
+			"injuryID" : "ArmLBrokenCompound",
+			"injuryID_Post" : "ArmLBroken",
+			"injuryName" : "Compound Fracture - Left Arm",
+			"injuryLoc" : "ArmL",
 			"couldBeThermal" : false,
 			"severity" : 1,
-			"description" : "This pilot is concussed. Things are spinny.",
+			"description" : "This pilot has a compound fracture in their arm, and is suffering an accuracy penalty.",
 			"effectDataJO" : [
 				{
 					"durationData": {
+						"duration": 4,
+						"ticksOnActivations": true,
+						"useActivationsOfTarget": true,
+						"stackLimit": 1
 					},
 					"targetingData": {
 						"effectTriggerType": "Passive",
@@ -23,31 +28,52 @@ Injuries are defined in the settings.json, and have the following structure:
 					},
 					"effectType": "StatisticEffect",
 					"Description": {
-						"Id": "Concussed",
-						"Name": "Concussed Instability",
-						"Details": "This pilot is concussed. Things are spinny.",
-						"Icon": "knockout"
+						"Id": "ArmLCmpdBroken_bleedout",
+						"Name": "Broken Arm, Compound - Left",
+						"Details": "This pilot has a compound fracture in their arm, and is suffering an accuracy penalty.",
+						"Icon": "brokenarm"
 					},
 					"nature": "Buff",
 					"statisticData": {
-						"statName": "UnsteadyThreshold",
-						"operation": "Float_Multiply",
-						"modValue": "0.75",
-						"modType": "System.Single"
+						"modType": "System.Single",
+						"modValue": "7.0",
+						"operation": "Float_Add",
+						"statName": "AccuracyModifier",
+						"targetAmmoCategory": "NotSet",
+						"targetCollection": "Weapon",
+						"targetWeaponCategory": "NotSet",
+						"targetWeaponSubType": "NotSet",
+						"targetWeaponType": "NotSet"
 					}
 				}
 			]
 		},
 ```
+`injuryID` -  the unique ID of this injury.
 
-Of note, `couldBeThermal` is used to determine if this injury can occur due to overheating or knockdown (it wouldn't make sense to have a broken arm from overheating, or to recieve severe burns from being knocked down, for example). `severity` is used in conjunction with both the `missionKillSeverityThreshold` and `cripplingSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `CRIPPLED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `cripplingSeverityThreshold` (value < 1 disables crippling injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds the value set in `missionKillSeverityThreshold` (value < 1 disables this feature).
+`injuryName` - the human-legible name of this injury.
 
-Other settings available follow:
+`injuryID_Post` - optionally defines the injuryID of an injury that will <i>replace</i> this injury after combat has ended; required for injuries that inflict Bleeding Out.
+
+`injuryLoc` - the location of the injury. Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`
+
+`couldBeThermal` - used to determine if this injury can occur due to overheating or knockdown (it wouldn't make sense to have a broken arm from overheating, or to recieve severe burns from being knocked down, for example).
+
+`severity` - used in conjunction with both the below settings `missionKillSeverityThreshold` and `cripplingSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `CRIPPLED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `cripplingSeverityThreshold` (value < 1 disables crippling injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds the value set in `missionKillSeverityThreshold` (value < 1 disables this feature).
+
+`description` - human-legible description of this injury and its effects.
+
+`effectDataJO` - list of status effects this injury applies. Importantly, `durationData` is used in conjunction with the status effect name suffix and `BleedingOutSuffix` setting below to note than an injury should inflict Bleeding Out, and either incapacitate or kill the pilot on expiration. 
+
+Overall settings available follow:
 
 ```
 {
 "enableLogging" : true,
 "enableLethalTorsoHead" : true,
+"BleedingOutLethal" : false,
+"BleedingOutSuffix" : "_bleedout",
+"BleedingOutTimerString" : "rounds",
 "enableInternalDmgInjuries" : true,
 "internalDmgStatName" : "InjureOnStructDmg",
 "internalDmgInjuryLimit" : 1,
@@ -67,6 +93,12 @@ Other settings available follow:
 `enableLethalTorsoHead` - bool, if `true`, CRIPPLED Torso or Head is lethal.
 
 `enableInternalDmgInjuries` - bool, if `true`, enables a feature that injures pilots when they recieve structure damage if certain equipment is mounted (i.e DNI or EI cockpits).
+
+`BleedingOutLethal` - bool, determines whether bleeding out from an injury is lethal (`true`) or merely incapacitates (`false`)
+
+`BleedingOutSuffix` - string, ending string of <b>status effect Id, not the `injuryID`</b> to denote whether the injury should inflict "Bleeding Out" and incapacitate or kill the pilot on expiration (per `BleedingOutLethal`)
+
+`BleedingOutTimerString` - string, what word to use in Bleeding Out status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
 
 `internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries. Example stat effect given below: 
 
