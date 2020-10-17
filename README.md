@@ -140,10 +140,12 @@ Overall settings available follow:
 
 `severityCost` - int, increases healing time required as a factor of severity
 
-`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` is added after this multiplier)
+`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` is added before this multiplier)
 
 `internalDmgInjuryLocs` - List<string>, internal damage must by in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 
 `InjuryEffectsList` - List<Injury>, list of all possible injuries. All injury locations need to have an injury for each value of `couldBeThermal` represented, with the exception of `Head`. Overheating will never inflict a head injury, so `Head` does not need an Injury where `couldBeThermal :true`
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
+	
+A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla + (severity * severityCost) * injuryHealTimeMultiplier`
