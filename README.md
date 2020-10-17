@@ -2,7 +2,7 @@
 
 This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Injuries are specific to a location; Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`.
 
-Features included:
+## Features included:
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `CRIPPLED` (see below).
 
@@ -61,6 +61,7 @@ Injuries are defined in the settings.json, and have the following structure:
 			]
 		},
 ```
+
 `injuryID` -  the unique ID of this injury.
 
 `injuryName` - the human-legible name of this injury.
@@ -77,7 +78,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `effectDataJO` - list of status effects this injury applies. Importantly, `durationData` is used in conjunction with the status effect name suffix and `BleedingOutSuffix` setting below to note than an injury should inflict <b>Bleeding Out</b>, and either incapacitate or kill the pilot on expiration. 
 
-Overall settings available follow:
+## General Settings:
 
 ```
 {
@@ -112,7 +113,8 @@ Overall settings available follow:
 
 `BleedingOutTimerString` - string, what word to use in <b>Bleeding Out</b> status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
 
-`internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries. Example stat effect given below: 
+`internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries. 
+Example stat effect given below: 
 
 ```
 {
