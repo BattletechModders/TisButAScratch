@@ -107,6 +107,8 @@ Injuries are defined in the settings.json, and have the following structure:
 "missionKillSeverityThreshold" : 4,
 "cripplingSeverityThreshold" : 2,
 "severityCost" : 360,
+"crippledCost" : 1080,
+"medtechCrippledMultiplier" : 0.75,
 "injuryHealTimeMultiplier" : 2.5,	
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
@@ -167,7 +169,11 @@ Example stat effect given below:
 
 `severityCost` - int, increases healing time required as a factor of severity
 
-`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` is added before this multiplier)
+`crippledCost` - int, increases healing time required as a factor of pilot having `CRIPPLED` tag
+
+`medtechCrippledMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `crippledCost = 2000`,  `MedTechSkill = 10`, and `medtechCrippledMultiplier`, injury healing cost would be `2000/ (10 * .5)
+
+`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `crippledCost` are added after this multiplier)
 
 `internalDmgInjuryLocs` - List<string>, internal damage must by in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 
