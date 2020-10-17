@@ -1,6 +1,18 @@
 # TisButAScratch
 
-This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself.
+This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Injuries are specific to a location; Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`.
+
+Features included:
+
+<b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `CRIPPLED` (see below).
+
+<b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a tag on the pilot that can only be removed through events.
+
+<b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i<> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
+
+<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings).
+
+<b>Increased Injury Heal Time</b>: Injuries take longer to heal, defined in the settings below.
 
 Injuries are defined in the settings.json, and have the following structure:
 ```
@@ -53,7 +65,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `injuryName` - the human-legible name of this injury.
 
-`injuryID_Post` - optionally defines the injuryID of an injury that will <i>replace</i> this injury after combat has ended; required for injuries that inflict Bleeding Out.
+`injuryID_Post` - optionally defines the injuryID of an injury that will <i>replace</i> this injury after combat has ended; required for injuries that inflict <b>Bleeding Out</b>.
 
 `injuryLoc` - the location of the injury. Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`
 
@@ -63,7 +75,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `description` - human-legible description of this injury and its effects.
 
-`effectDataJO` - list of status effects this injury applies. Importantly, `durationData` is used in conjunction with the status effect name suffix and `BleedingOutSuffix` setting below to note than an injury should inflict Bleeding Out, and either incapacitate or kill the pilot on expiration. 
+`effectDataJO` - list of status effects this injury applies. Importantly, `durationData` is used in conjunction with the status effect name suffix and `BleedingOutSuffix` setting below to note than an injury should inflict <b>Bleeding Out</b>, and either incapacitate or kill the pilot on expiration. 
 
 Overall settings available follow:
 
@@ -94,11 +106,11 @@ Overall settings available follow:
 
 `enableInternalDmgInjuries` - bool, if `true`, enables a feature that injures pilots when they recieve structure damage if certain equipment is mounted (i.e DNI or EI cockpits).
 
-`BleedingOutLethal` - bool, determines whether bleeding out from an injury is lethal (`true`) or merely incapacitates (`false`)
+`BleedingOutLethal` - bool, determines whether <b>Bleeding Out</b> from an injury is lethal (`true`) or merely incapacitates (`false`)
 
-`BleedingOutSuffix` - string, ending string of <b>status effect Id, not the `injuryID`</b> to denote whether the injury should inflict "Bleeding Out" and incapacitate or kill the pilot on expiration (per `BleedingOutLethal`)
+`BleedingOutSuffix` - string, ending string of <i>status effect Id, not the `injuryID`</i> to denote whether the injury should inflict <b>Bleeding Out</b> and incapacitate or kill the pilot on expiration (per `BleedingOutLethal`)
 
-`BleedingOutTimerString` - string, what word to use in Bleeding Out status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
+`BleedingOutTimerString` - string, what word to use in <b>Bleeding Out</b> status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
 
 `internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries. Example stat effect given below: 
 
