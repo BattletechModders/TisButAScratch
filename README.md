@@ -148,4 +148,4 @@ Overall settings available follow:
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
 	
-A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla + (severity * severityCost) * injuryHealTimeMultiplier`
+A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla + (severity * severityCost) * injuryHealTimeMultiplier`.
