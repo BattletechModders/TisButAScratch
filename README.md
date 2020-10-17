@@ -8,8 +8,13 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
 
+<b>Pilot Portrait</b>
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/portraitstatus.png)
+
+<b>Barracks</b>
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/barracksstatus.png)
 
 <b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
 
