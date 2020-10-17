@@ -69,7 +69,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `injuryLoc` - the location of the injury. Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`
 
-`couldBeThermal` - used to determine if this injury can occur due to overheating or knockdown (it wouldn't make sense to have a broken arm from overheating, or to recieve severe burns from being knocked down, for example).
+`couldBeThermal` - used to determine if this injury can occur due to overheating or knockdown (it wouldn't make sense to have a broken arm from overheating, or to recieve severe burns from being knocked down, for example). <b>IMPORTANT</b> There needs to be at least one injury defined for every 
 
 `severity` - used in conjunction with both the below settings `missionKillSeverityThreshold` and `cripplingSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `CRIPPLED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `cripplingSeverityThreshold` (value < 1 disables crippling injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds the value set in `missionKillSeverityThreshold` (value < 1 disables this feature).
 
