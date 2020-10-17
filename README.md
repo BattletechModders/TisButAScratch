@@ -6,7 +6,7 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `CRIPPLED` (see below).
 
-<b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a tag on the pilot that can only be removed through events.
+<b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
