@@ -93,6 +93,15 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage($"Added Commander to pilotInjuriesMap");
                 }
 
+                foreach (var id in new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]))
+                {
+                    if (PilotInjuryManager.ManagerInstance.InjuryEffectsList.All(x => x.injuryID != id) && PilotInjuryManager.ManagerInstance.InternalDmgInjuries.All(x => x.injuryID != id))
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(id);
+                        ModInit.modLog.LogMessage($"Removed deprecated injury from Commander with id {id}");
+                    }
+                }
+
                 /// this bigass clusterfuck is just for if you have existing injuries when first loading up TBAS
                 if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
                     sim.Commander.StatCollection.GetValue<int>("Injuries"))
@@ -101,8 +110,7 @@ namespace TisButAScratch.Patches
                               PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                     ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
                     PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
-                    if (ModInit.modSettings.cripplingSeverityThreshold > 0
-                    ) //now trying to add up "severity" threshold for crippled injury
+                    if (ModInit.modSettings.cripplingSeverityThreshold > 0) //now trying to add up "severity" threshold for crippled injury
                     {
 
                         var injuryList = new List<Injury>();
@@ -156,6 +164,15 @@ namespace TisButAScratch.Patches
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
                         ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
+                    }
+
+                    foreach (var id in new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]))
+                    {
+                        if (PilotInjuryManager.ManagerInstance.InjuryEffectsList.All(x => x.injuryID != id) && PilotInjuryManager.ManagerInstance.InternalDmgInjuries.All(x => x.injuryID != id))
+                        {
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(id);
+                            ModInit.modLog.LogMessage($"Removed deprecated injury from {p.Callsign} with id {id}");
+                        }
                     }
 
                     /// this bigass clusterfuck is just for if you have existing injuries when first loading up TBAS
@@ -293,24 +310,28 @@ namespace TisButAScratch.Patches
         }
 
         //also has to remove CRIPPLED tag from AI pilots so their PilotDefs can be reused
-        [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
-        static class CombatGameState_OnCombatGameDestroyed_Patch
+ //       [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
+        [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
+ //       static class CombatGameState_OnCombatGameDestroyed_Patch
+        static class Contract_CompleteContract_Patch
         {
 
-            static void Prefix(CombatGameState __instance, List<AbstractActor> ___allActors)
+//            static void Prefix(CombatGameState __instance)
+            static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
-
-                foreach (var actor in ___allActors)
+            //    var actors = __instance.AllActors;
+                var actors = UnityGameInstance.BattleTechGame.Combat.AllActors;
+                foreach (var actor in actors)
                 {
                     var p = actor.GetPilot();
                     var pKey = p.FetchGUID();
                     if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
                     {
                         p.pilotDef.PilotTags.Remove(CrippledTag);
-                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot if present");
+                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
                         var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
                         p.pilotDef.PilotTags.RemoveRange(rmt);
-                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot if present");
+                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
                     }
 
                     foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
@@ -318,9 +339,9 @@ namespace TisButAScratch.Patches
                         if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(inj.injuryID);
-                            ModInit.modLog.LogMessage($"Removed {inj.injuryName} with bleeding effect");
+                            ModInit.modLog.LogMessage($"Removed {inj.injuryName} with bleeding effect from {p.Callsign}");
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(inj.injuryID_Post);
-                            ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} for post-combat injury");
+                            ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} to {p.Callsign} for post-combat injury");
                         }
                     }
                 }

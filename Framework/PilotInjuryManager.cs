@@ -77,6 +77,11 @@ namespace TisButAScratch.Framework
             var pKey = p.FetchGUID();
             foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
             {
+                foreach (Injury injury in ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
+                {
+                    this.applyInjuryEffects(actor, injury);
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}");
+                }
                 foreach (Injury injury in ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
@@ -113,24 +118,21 @@ namespace TisButAScratch.Framework
             for (int i = 0; i < dmg; i++)
             {
                 var injuryList = new List<Injury>(ManagerInstance.InjuryEffectsList);
+                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
                 if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf)
                 {
-                    loc = (InjuryLoc) UnityEngine.Random.Range(3, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
                     injuryList.RemoveAll(x => x.couldBeThermal == false || x.severity >= 100);
                 }
 
                 else if (damageType == DamageType.Knockdown || damageType == DamageType.KnockdownSelf)
                 {
-                    loc = (InjuryLoc) UnityEngine.Random.Range(2, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
                     injuryList.RemoveAll(x => x.couldBeThermal == true || x.severity >= 100);
                 }
                 else
                 {
-                    loc = (InjuryLoc) UnityEngine.Random.Range(2, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
+                    injuryList.RemoveAll(x => x.severity >= 100);
                 }
+                ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
@@ -190,7 +192,8 @@ namespace TisButAScratch.Framework
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || x.injuryID_Post != null);
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || x.injuryID_Post != "");
+
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();

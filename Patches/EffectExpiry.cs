@@ -58,12 +58,17 @@ namespace TisButAScratch.Patches
                             tgtEffect.Duration.numMovementsRemaining,
                             tgtEffect.Duration.numPhasesRemaining,
                             tgtEffect.Duration.numRoundsRemaining
-                        }.Max();
-
-                        var txt = new Text("\n<color=#FF0000>Unit is bleeding out! {0} {1} remaining!</color=#FF0000>", new object[]
+                        }.Max() - 1;
+                        var eject = "";
+                        if (durationInfo <= 0)
+                        {
+                            eject = "EJECT NOW OR DIE!";
+                        }
+                        var txt = new Text("\n<color=#FF0000>Unit is bleeding out! {0} {1} remaining! {2}</color=#FF0000>", new object[]
                         {
                             durationInfo,
-                            ModInit.modSettings.BleedingOutTimerString
+                            ModInit.modSettings.BleedingOutTimerString,
+                            eject
                         });
                         __result.AppendLine(txt);
                     }

@@ -230,7 +230,7 @@ namespace TisButAScratch.Patches
 
                 var sev = Math.Max((injuryList.Sum(x => x.severity) - 1), 0);
 
-                __result = Mathf.RoundToInt(__result + (sev * ModInit.modSettings.severityCost) * ModInit.modSettings.injuryHealTimeMultiplier);
+                __result = Mathf.RoundToInt((__result * ModInit.modSettings.injuryHealTimeMultiplier) + (sev * ModInit.modSettings.severityCost));
             }
         }
 
