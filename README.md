@@ -6,11 +6,19 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `CRIPPLED` (see below).
 
+Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
+
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/portraitstatus.png)
+
 <b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
-<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings).
+<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings). The status effect gives an indicator of many rounds, activations, etc. remain before the pilot bleeds out. End the mission or eject the pilot to avoid death/incapacitation.
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/bleedingout.png)
+
 
 <b>Increased Injury Heal Time</b>: Injuries take longer to heal, defined in the settings below.
 
