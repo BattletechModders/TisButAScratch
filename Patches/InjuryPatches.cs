@@ -169,7 +169,7 @@ namespace TisButAScratch.Patches
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
                               ModInit.modSettings.missionKillSeverityThreshold ||
                               unitResult.pilot.pilotDef.PilotTags.Contains(CrippledTag)) &&
-                             (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries))
+                             (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 
                     {
                         return false;
@@ -230,8 +230,7 @@ namespace TisButAScratch.Patches
 
                 var sev = Math.Max((injuryList.Sum(x => x.severity) - 1), 0);
 
-                __result = Mathf.RoundToInt(__result * ModInit.modSettings.injuryHealTimeMultiplier) +
-                           (sev * ModInit.modSettings.severityCost);
+                __result = Mathf.RoundToInt(__result + (sev * ModInit.modSettings.severityCost) * ModInit.modSettings.injuryHealTimeMultiplier);
             }
         }
 
@@ -309,6 +308,7 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Effect __instance)
             {
+
                 if (__instance.id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && __instance.Target is AbstractActor target)
                 {
                     var p = target.GetPilot();
@@ -316,6 +316,8 @@ namespace TisButAScratch.Patches
                         StatCollection.StatOperation.Set, true, -1, true);
                     ModInit.modLog.LogMessage(
                         $"{p.Callsign} has bled out!");
+
+                    target.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), true);
 
                     if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                         StatCollection.StatOperation.Set, true, -1, true);

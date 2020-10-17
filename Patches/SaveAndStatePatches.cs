@@ -299,12 +299,6 @@ namespace TisButAScratch.Patches
 
             static void Prefix(CombatGameState __instance, List<AbstractActor> ___allActors)
             {
-                var rm = new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => x.EndsWith(aiPilotFlag)));
-                foreach (var key in rm)
-                {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
-                }
 
                 foreach (var actor in ___allActors)
                 {
@@ -319,13 +313,23 @@ namespace TisButAScratch.Patches
                         ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot if present");
                     }
 
-                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != null))
+                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
                     {
-                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(inj.injuryID);
-                        ModInit.modLog.LogMessage($"Removed {inj.injuryName} with bleeding effect");
-                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(inj.injuryID_Post);
-                        ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} for post-combat injury");
+                        if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
+                        {
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(inj.injuryID);
+                            ModInit.modLog.LogMessage($"Removed {inj.injuryName} with bleeding effect");
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(inj.injuryID_Post);
+                            ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} for post-combat injury");
+                        }
                     }
+                }
+
+                var rm = new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => x.EndsWith(aiPilotFlag)));
+                foreach (var key in rm)
+                {
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
+                    ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                 }
             }
         }

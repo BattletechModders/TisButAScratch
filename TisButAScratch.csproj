@@ -70,6 +70,7 @@
     <Compile Include="Framework\PilotInjuryManager.cs" />
     <Compile Include="Framework\Logger.cs" />
     <Compile Include="ModInit.cs" />
+    <Compile Include="Patches\EffectExpiry.cs" />
     <Compile Include="Patches\DescriptionPatches.cs" />
     <Compile Include="Patches\InjuryPatches.cs" />
     <Compile Include="Patches\SaveAndStatePatches.cs" />

@@ -190,7 +190,7 @@ namespace TisButAScratch.Framework
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || x.injuryID_Post != null);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();

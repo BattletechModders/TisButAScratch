@@ -53,6 +53,7 @@ namespace TisButAScratch
 
         public bool BleedingOutLethal = false;
         public string BleedingOutSuffix = "_bleedout";
+        public string BleedingOutTimerString = "activations";
 
         public bool enableInternalDmgInjuries = false;
         public string internalDmgStatName = "InjureOnStructDmg";
