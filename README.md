@@ -6,7 +6,7 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
 
-Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
+Injuries can by checked be hovering over the red "injured" indicator in pilot portraits, both in the barracks roster list and the lance selection panel, or by hovering over the "injured" status bar in the pilot details panel of the barracks. e.g.:
 
 <b>Pilot Portrait</b>
 
@@ -131,8 +131,8 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `BleedingOutTimerString` - string, what word to use in <b>Bleeding Out</b> status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
 
-`internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries. 
-Example stat effect given below: 
+`internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries.
+Example stat effect added to DNI cockpit given below: 
 
 ```
 {
@@ -164,7 +164,7 @@ Example stat effect given below:
 
 `internalDmgInjuryLimit` - int, defines the maximum number of injuries a pilot can recieve due to the above effect. Disabled if < 1.
 
-`internalDmgLvlReq` - float, required single-point internal damage for pilot to be injured. e.g., if this was set to 50, LRMs would <i>never</i> inflict an injury.
+`internalDmgLvlReq` - float, required single-point internal damage for pilot to be injured. e.g., if this was set to 20, LRMs would <i>never</i> inflict an injury; even though the total damage of the salvo might by >20, no single missile inflicts >20 damage.
 
 `timeHealsAllWounds` - bool, if true debilitating injuries will heal with time. if false, pilots will remain `DEBILITATED` until the tag is removed via event.
 
@@ -176,11 +176,11 @@ Example stat effect given below:
 
 `debilitatedCost` - int, increases healing time required as a factor of pilot having `DEBILITATED` tag
 
-`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier`, injury healing cost would be `2000/ (10 * .5)`
+`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier = 0.5`, injury healing cost would be `2000/ (10 * .5)`
 
 `injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `debiledCost` are added after this multiplier)
 
-`internalDmgInjuryLocs` - List<string>, internal damage must by in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
+`internalDmgInjuryLocs` - List<string>, internal damage must be in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 
 `InjuryEffectsList` - List<Injury>, list of all possible injuries. All injury locations need to have an injury for each value of `couldBeThermal` represented, with the exception of `Head`. Overheating will never inflict a head injury, so `Head` does not need an Injury where `couldBeThermal :true`
 
