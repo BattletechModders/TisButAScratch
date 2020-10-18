@@ -6,6 +6,8 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
 
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/debil.png)
+
 Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
 
 <b>Pilot Portrait</b>
@@ -16,7 +18,7 @@ Injuries can be checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/barracksstatus.png)
 
-<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
+<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags). A setting is provided that allows `DEBILITATED` to heal given enough time.
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
@@ -103,13 +105,14 @@ Injuries are defined in the settings.json, and have the following structure:
 "enableInternalDmgInjuries" : true,
 "internalDmgStatName" : "InjureOnStructDmg",
 "internalDmgInjuryLimit" : 1,
-"internalDmgLvlReq" : 2.9,
-"missionKillSeverityThreshold" : 4,
-"cripplingSeverityThreshold" : 2,
+"internalDmgLvlReq" : 20,
+"timeHealsAllWounds" : true,
+"missionKillSeverityThreshold" : 6,
+"debilSeverityThreshold" : 3,
 "severityCost" : 360,
-"debiledCost" : 1080,
-"medtechDebilMultiplier" : 0.75,
-"injuryHealTimeMultiplier" : 2.5,	
+"debiledCost" : 4320,
+"medtechDebilMultiplier" : 0.5,
+"injuryHealTimeMultiplier" : 5.0,	
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
 "InternalDmgInjuries": []
@@ -163,13 +166,15 @@ Example stat effect given below:
 
 `internalDmgLvlReq` - float, required single-point internal damage for pilot to be injured. e.g., if this was set to 50, LRMs would <i>never</i> inflict an injury.
 
+`timeHealsAllWounds` - bool, if true debilitating injuries will heal with time. if false, pilots will remain `DEBILITATED` until the tag is removed via event.
+
 `missionKillSeverityThreshold` - int, as discussed above defines the total `severity` of injuries required for a pilot to be incapacitated. Disabled if < 1.
 
-`cripplingSeverityThreshold` - int, as discussed above defines the total `severity` of injuries in a single location required for a pilot to be `CRIPPLED`. Disabled if < 1.
+`debilSeverityThreshold` - int, as discussed above defines the total `severity` of injuries in a single location required for a pilot to be `DEBILITATED`. Disabled if < 1.
 
 `severityCost` - int, increases healing time required as a factor of severity
 
-`debiledCost` - int, increases healing time required as a factor of pilot having `CRIPPLED` tag
+`debiledCost` - int, increases healing time required as a factor of pilot having `DEBILITATED` tag
 
 `medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier`, injury healing cost would be `2000/ (10 * .5)`
 
@@ -181,4 +186,4 @@ Example stat effect given below:
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
 	
-A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla + (severity * severityCost) * injuryHealTimeMultiplier`.
+A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debiledCost`. `baseCostFromVanilla` is itself altered by pilot health; a pilot with health 3 will heal slower than a pilot with health 4.
