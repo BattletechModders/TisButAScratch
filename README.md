@@ -4,7 +4,7 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 ## Features included:
 
-<b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `CRIPPLED` (see below).
+<b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
 
 Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
 
@@ -16,7 +16,7 @@ Injuries can be checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/barracksstatus.png)
 
-<b>Crippling Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `CRIPPLED` which incapacitates them for the current mission. Pilots that are `CRIPPLED` are unable to drop on contracts, even after their injuries have healed. `CRIPPLED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
+<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags).
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
@@ -85,7 +85,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `couldBeThermal` - used to determine if this injury can occur due to overheating or knockdown (it wouldn't make sense to have a broken arm from overheating, or to recieve severe burns from being knocked down, for example). <b>IMPORTANT:</b> There needs to be at least one injury defined for both every location and value of `couldBeThermal`.
 
-`severity` - used in conjunction with both the below settings `missionKillSeverityThreshold` and `cripplingSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `CRIPPLED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `cripplingSeverityThreshold` (value < 1 disables crippling injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds the value set in `missionKillSeverityThreshold` (value < 1 disables this feature).
+`severity` - used in conjunction with both the below settings `missionKillSeverityThreshold` and `cripplingSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `DEBILITATED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `debilSeverityThreshold` (value < 1 disables debilitating injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds the value set in `missionKillSeverityThreshold` (value < 1 disables this feature).
 
 `description` - human-legible description of this injury and its effects.
 
@@ -107,8 +107,8 @@ Injuries are defined in the settings.json, and have the following structure:
 "missionKillSeverityThreshold" : 4,
 "cripplingSeverityThreshold" : 2,
 "severityCost" : 360,
-"crippledCost" : 1080,
-"medtechCrippledMultiplier" : 0.75,
+"debiledCost" : 1080,
+"medtechDebilMultiplier" : 0.75,
 "injuryHealTimeMultiplier" : 2.5,	
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
@@ -169,9 +169,9 @@ Example stat effect given below:
 
 `severityCost` - int, increases healing time required as a factor of severity
 
-`crippledCost` - int, increases healing time required as a factor of pilot having `CRIPPLED` tag
+`debiledCost` - int, increases healing time required as a factor of pilot having `CRIPPLED` tag
 
-`medtechCrippledMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `crippledCost = 2000`,  `MedTechSkill = 10`, and `medtechCrippledMultiplier`, injury healing cost would be `2000/ (10 * .5)
+`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `crippledCost = 2000`,  `MedTechSkill = 10`, and `medtechCrippledMultiplier`, injury healing cost would be `2000/ (10 * .5)`
 
 `injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `crippledCost` are added after this multiplier)
 
