@@ -63,7 +63,7 @@ namespace TisButAScratch.Patches
 
                 }
 
-                if ((ModInit.modSettings.cripplingSeverityThreshold > 0 ||
+                if ((ModInit.modSettings.debilSeverityThreshold > 0 ||
                      ModInit.modSettings.missionKillSeverityThreshold > 0) &&
                     (damageType != DamageType.Unknown && damageType != DamageType.NOT_SET)
                 ) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
@@ -76,7 +76,7 @@ namespace TisButAScratch.Patches
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
 
-                    if (ModInit.modSettings.cripplingSeverityThreshold > 0)
+                    if (ModInit.modSettings.debilSeverityThreshold > 0)
                     {
 
 
@@ -88,12 +88,10 @@ namespace TisButAScratch.Patches
                             var t = injuryLoc.Sum(x => x.severity);
 
 
-                            if (t >= ModInit.modSettings.cripplingSeverityThreshold)
+                            if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
-                                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                                    .Add(CRIPPLED.injuryID);
-                                __instance.pilotDef.PilotTags.Add(CrippledTag);
-                                ModInit.modLog.LogMessage($"{__instance.Callsign} has been Crippled!");
+                                __instance.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                ModInit.modLog.LogMessage($"{__instance.Callsign} has been debilitated!");
 
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
                                     injuryLoc.Key == InjuryLoc.Torso))
@@ -101,7 +99,7 @@ namespace TisButAScratch.Patches
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                                         StatCollection.StatOperation.Set, true, -1, true);
                                     ModInit.modLog.LogMessage(
-                                        $"{__instance.Callsign} has crippled Torso or Head; lethal injury!");
+                                        $"{__instance.Callsign} has debilitated Torso or Head; lethal injury!");
                                 }
                             }
                         }
@@ -113,13 +111,13 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("CanPilot", MethodType.Getter)]
-        [HarmonyAfter(new string[] {"dZ.Zappo.Pilot_Fatigue"})]
+        [HarmonyPriority(Priority.Last)]
         public static class Pilot_CanPilot_Patch
         {
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 __result = true;
-                if (__instance.pilotDef.PilotTags.Contains(CrippledTag))
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
                 {
                     __result = false;
                 }
@@ -128,12 +126,12 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("IsIncapacitated", MethodType.Getter)]
-
+        [HarmonyPriority(Priority.Last)]
         public static class Pilot_IsIncapacitated_Patch
         {
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if (__instance.pilotDef.PilotTags.Contains(CrippledTag) || __instance.StatCollection.GetValue<bool>("BledOut") ||
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.StatCollection.GetValue<bool>("BledOut") ||
                     (__instance.StatCollection.GetValue<int>(MissionKilledStat) >=
                      ModInit.modSettings.missionKillSeverityThreshold &&
                      ModInit.modSettings.missionKillSeverityThreshold > 0))
@@ -168,7 +166,7 @@ namespace TisButAScratch.Patches
 
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
                               ModInit.modSettings.missionKillSeverityThreshold ||
-                              unitResult.pilot.pilotDef.PilotTags.Contains(CrippledTag)) &&
+                              unitResult.pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) &&
                              (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 
                     {
@@ -229,8 +227,13 @@ namespace TisButAScratch.Patches
                 }
 
                 var sev = Math.Max((injuryList.Sum(x => x.severity) - 1), 0);
+                var crippled = 0f;
+                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && ModInit.modSettings.timeHealsAllWounds)
+                {
+                    crippled = (float) (ModInit.modSettings.debilitatedCost / (ModInit.modSettings.medtechDebilMultiplier * __instance.MedTechSkill));
+                }
 
-                __result = Mathf.RoundToInt((__result * ModInit.modSettings.injuryHealTimeMultiplier) + (sev * ModInit.modSettings.severityCost));
+                __result = Mathf.RoundToInt((__result * ModInit.modSettings.injuryHealTimeMultiplier) + (sev * ModInit.modSettings.severityCost) + crippled);
             }
         }
 
@@ -241,18 +244,12 @@ namespace TisButAScratch.Patches
             public static void Postfix(Pilot __instance)
             {
                 var pKey = __instance.FetchGUID();
-                if (__instance.pilotDef.PilotTags.Contains(CrippledTag))
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Clear();
+                if (ModInit.modSettings.timeHealsAllWounds)
                 {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                        .RemoveAll(x => x != CRIPPLED.injuryID);
-                    ModInit.modLog.LogMessage($"{__instance.Callsign} has been healed, but is still CRIPPLED!");
+                    __instance.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
                 }
-                else
-                {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                        .Clear();
-                    ModInit.modLog.LogMessage($"{__instance.Callsign} has been healed!!");
-                }
+                ModInit.modLog.LogMessage($"{__instance.Callsign} has been healed!!");
             }
         }
 

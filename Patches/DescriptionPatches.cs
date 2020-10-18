@@ -31,11 +31,11 @@ namespace TisButAScratch.Patches
                 }
 
  //               if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null) return;
-                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(CrippledTag)) return;
+                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) return;
 
                 var tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
 
-                if (tooltip == null && __instance.Pilot.pilotDef.PilotTags.Contains(CrippledTag))
+                if (tooltip == null && __instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
                 {
                     ___incapacitatedObj.gameObject.SetActive(true);
                        tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
@@ -68,9 +68,9 @@ namespace TisButAScratch.Patches
 //                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null) return; //this was original, worked with injuries but not crippled
 
                 if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
-                    !p.pilotDef.PilotTags.Contains(CrippledTag)) return;
+                    !p.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) return;
 
-                if (p.pilotDef.PilotTags.Contains(CrippledTag) && !___injureBackground.activeSelf)
+                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !___injureBackground.activeSelf)
                 {
                     ___timeoutBackground.SetActive(true);
 

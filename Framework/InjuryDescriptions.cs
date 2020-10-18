@@ -38,9 +38,9 @@ namespace TisButAScratch.Framework
                     }
                 }
 
-                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID].Contains(CRIPPLED.injuryID))
+                if (pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
                 {
-                    rtrn += CRIPPLED.description;
+                    rtrn += DEBIL.description;
                 }
                 return rtrn;
             }

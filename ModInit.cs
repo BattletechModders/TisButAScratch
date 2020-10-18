@@ -60,8 +60,12 @@ namespace TisButAScratch
         public int internalDmgInjuryLimit = -1;
         public float internalDmgLvlReq = 0f;
         public int missionKillSeverityThreshold = -1;
-        public int cripplingSeverityThreshold = -1;
+
+        public bool timeHealsAllWounds = false;
+        public int debilSeverityThreshold = -1;
         public int severityCost = 360;
+        public int debilitatedCost = 1080;
+        public float medtechDebilMultiplier = 0.75f;
         public float injuryHealTimeMultiplier = 0f;
 
         public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();

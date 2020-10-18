@@ -110,7 +110,7 @@ namespace TisButAScratch.Patches
                               PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                     ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
                     PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
-                    if (ModInit.modSettings.cripplingSeverityThreshold > 0) //now trying to add up "severity" threshold for crippled injury
+                    if (ModInit.modSettings.debilSeverityThreshold > 0) //now trying to add up "severity" threshold for crippled injury
                     {
 
                         var injuryList = new List<Injury>();
@@ -130,11 +130,9 @@ namespace TisButAScratch.Patches
                                 t += injury.severity;
                             }
 
-                            if (t >= ModInit.modSettings.cripplingSeverityThreshold)
+                            if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
-                                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                                    .Add(CRIPPLED.injuryID);
-                                sim.Commander.pilotDef.PilotTags.Add(CrippledTag);
+                                sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
                                     injuryLoc.Key == InjuryLoc.Torso))
                                 {
@@ -183,7 +181,7 @@ namespace TisButAScratch.Patches
                                   PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                         ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
                         PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
-                        if (ModInit.modSettings.cripplingSeverityThreshold > 0
+                        if (ModInit.modSettings.debilSeverityThreshold > 0
                         ) //now trying to add up "severity" threshold for crippled injury
                         {
 
@@ -205,11 +203,9 @@ namespace TisButAScratch.Patches
                                     t += injury.severity;
                                 }
 
-                                if (t > ModInit.modSettings.cripplingSeverityThreshold)
+                                if (t > ModInit.modSettings.debilSeverityThreshold)
                                 {
-                                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
-                                        .Add(CRIPPLED.injuryID);
-                                    sim.Commander.pilotDef.PilotTags.Add(CrippledTag);
+                                    sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
                                     if (ModInit.modSettings.enableLethalTorsoHead &&
                                         (injuryLoc.Key == InjuryLoc.Head ||
                                          injuryLoc.Key == InjuryLoc.Torso))
@@ -230,6 +226,119 @@ namespace TisButAScratch.Patches
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
                     ModInit.modLog.LogMessage(
                         $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "ApplySimGameEventResult",
+            new Type[] {typeof(SimGameEventResult), typeof(List<object>), typeof(SimGameEventTracker)})]
+        [HarmonyPriority(Priority.Last)]
+        public static class SGS_ApplySimGameEventResult
+        {
+            public static void Postfix(SimGameState __instance, SimGameEventResult result,List<object> objects, SimGameEventTracker tracker)
+            {
+                for (var i = 0; i < objects.Count; i++)
+                {
+                    var obj = objects[i];
+                    if (result.Scope == EventScope.MechWarrior || result.Scope == EventScope.SecondaryMechWarrior ||
+                        result.Scope == EventScope.TertiaryMechWarrior)
+                    {
+                        var p = (Pilot) obj;
+                        var pKey = p.FetchGUID();
+                        if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
+                            p.StatCollection.GetValue<int>("Injuries"))
+                        {
+                            var dmg = p.StatCollection.GetValue<int>("Injuries") -
+                                      PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
+                            ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
+                            PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
+                            if (ModInit.modSettings.debilSeverityThreshold > 0
+                            ) //now trying to add up "severity" threshold for crippled injury
+                            {
+
+                                var injuryList = new List<Injury>();
+                                foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
+                                {
+                                    injuryList.AddRange(
+                                        PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(
+                                            x => x.injuryID == id));
+                                }
+
+                                var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
+
+                                foreach (var injuryLoc in groupedLocs)
+                                {
+                                    var t = 0;
+                                    foreach (var injury in injuryLoc)
+                                    {
+                                        t += injury.severity;
+                                    }
+
+                                    if (t > ModInit.modSettings.debilSeverityThreshold)
+                                    {
+                                        sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                        if (ModInit.modSettings.enableLethalTorsoHead &&
+                                            (injuryLoc.Key == InjuryLoc.Head ||
+                                             injuryLoc.Key == InjuryLoc.Torso))
+                                        {
+                                            sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
+                                                "LethalInjury",
+                                                StatCollection.StatOperation.Set, true, -1, true);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (result.Scope == EventScope.Commander)
+                    {
+                        var pKey = sim.Commander.FetchGUID();
+                        if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
+                            sim.Commander.StatCollection.GetValue<int>("Injuries"))
+                        {
+                            var dmg = sim.Commander.StatCollection.GetValue<int>("Injuries") -
+                                      PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
+                            ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
+                            PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
+                            if (ModInit.modSettings.debilSeverityThreshold > 0
+                            ) //now trying to add up "severity" threshold for crippled injury
+                            {
+
+                                var injuryList = new List<Injury>();
+                                foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
+                                {
+                                    injuryList.AddRange(
+                                        PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(
+                                            x => x.injuryID == id));
+                                }
+
+                                var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
+
+                                foreach (var injuryLoc in groupedLocs)
+                                {
+                                    var t = 0;
+                                    foreach (var injury in injuryLoc)
+                                    {
+                                        t += injury.severity;
+                                    }
+
+                                    if (t >= ModInit.modSettings.debilSeverityThreshold)
+                                    {
+                                        sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                        if (ModInit.modSettings.enableLethalTorsoHead &&
+                                            (injuryLoc.Key == InjuryLoc.Head ||
+                                             injuryLoc.Key == InjuryLoc.Torso))
+                                        {
+                                            sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
+                                                "LethalInjury",
+                                                StatCollection.StatOperation.Set, true, -1, true);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -301,11 +410,17 @@ namespace TisButAScratch.Patches
                 //                  PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
                 //                  ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
                 //              }
-
-
                 PilotInjuryManager.ManagerInstance.GatherAndApplyInjuries(unit);
                 ModInit.modLog.LogMessage($"Initializing injury effects for {p?.Description?.Callsign}");
 
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
+                    p.StatCollection.GetValue<int>("Injuries"))
+                {
+                    ModInit.modLog.LogMessage($"{p.Callsign}'s Injury stat < existing injuries. Adding to Injury stat.");
+                    p.StatCollection.ModifyStat<int>("TBAS_Injuries", -1,
+                        "Injuries",
+                        StatCollection.StatOperation.Set, PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count, -1, true);
+                }
             }
         }
 
@@ -327,7 +442,7 @@ namespace TisButAScratch.Patches
                     var pKey = p.FetchGUID();
                     if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
                     {
-                        p.pilotDef.PilotTags.Remove(CrippledTag);
+                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
                         ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
                         var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
                         p.pilotDef.PilotTags.RemoveRange(rmt);
