@@ -186,4 +186,4 @@ Example stat effect given below:
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
 	
-A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debiledCost`. `baseCostFromVanilla` is itself altered by pilot health; a pilot with health 3 will heal slower than a pilot with health 4.
+A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debiledCost`. In vanilla, `baseCostFromVanilla` is itself altered by pilot health; a pilot with health 3 will heal slower than a pilot with health 4. This behavior is not changed.
