@@ -110,7 +110,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "missionKillSeverityThreshold" : 6,
 "debilSeverityThreshold" : 3,
 "severityCost" : 360,
-"debiledCost" : 4320,
+"debilitatedCost" : 4320,
 "medtechDebilMultiplier" : 0.5,
 "injuryHealTimeMultiplier" : 5.0,	
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
@@ -174,7 +174,7 @@ Example stat effect given below:
 
 `severityCost` - int, increases healing time required as a factor of severity
 
-`debiledCost` - int, increases healing time required as a factor of pilot having `DEBILITATED` tag
+`debilitatedCost` - int, increases healing time required as a factor of pilot having `DEBILITATED` tag
 
 `medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier`, injury healing cost would be `2000/ (10 * .5)`
 
@@ -186,4 +186,4 @@ Example stat effect given below:
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
 	
-A note on injury healing time: the formula for injury healing time is `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debiledCost`. In vanilla, `baseCostFromVanilla` is itself altered by pilot health; a pilot with health 3 will heal slower than a pilot with health 4. This behavior is not changed.
+A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost is therefore `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debilitatedCost`.
