@@ -6,8 +6,6 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 <b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
 
-![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/debil.png)
-
 Injuries can be checked be hovering over the red "injured" indicator in pilot portraits, or by hovering over the "injured" status bar in the barracks. e.g.
 
 <b>Pilot Portrait</b>
@@ -18,7 +16,9 @@ Injuries can be checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/barracksstatus.png)
 
-<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags). A setting is provided that allows `DEBILITATED` to heal given enough time.
+<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags). A setting is provided that allows `DEBILITATED` to heal given enough time. An example event is included wherein the player can choose to pay for a "prosthesis" which removes `DEBILITATED`, allowing the pilot to be used in contracts, although they will still suffer the effects of the initial injury until that injury heals.
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/debil.png)
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
