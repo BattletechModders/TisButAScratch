@@ -171,9 +171,9 @@ Example stat effect given below:
 
 `debiledCost` - int, increases healing time required as a factor of pilot having `CRIPPLED` tag
 
-`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `crippledCost = 2000`,  `MedTechSkill = 10`, and `medtechCrippledMultiplier`, injury healing cost would be `2000/ (10 * .5)`
+`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier`, injury healing cost would be `2000/ (10 * .5)`
 
-`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `crippledCost` are added after this multiplier)
+`injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `debiledCost` are added after this multiplier)
 
 `internalDmgInjuryLocs` - List<string>, internal damage must by in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 
