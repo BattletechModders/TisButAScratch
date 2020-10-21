@@ -20,6 +20,10 @@ Injuries can by checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/debil.png)
 
+<b>NEW</b> - a line has been added to these tooltips to indicate the current severity of injuries and the threshold for becoming debilitated:
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/severity.png)
+
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
 <b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings). The status effect gives an indicator of many rounds, activations, etc. remain before the pilot bleeds out. End the mission or eject the pilot to avoid death/incapacitation.
@@ -117,7 +121,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
 "InternalDmgInjuries": []
-    
+ 
 ```
 
 `enableLogging` - bool, enables logging.
