@@ -99,6 +99,7 @@ Injuries are defined in the settings.json, and have the following structure:
 {
 "enableLogging" : true,
 "enableLethalTorsoHead" : true,
+"debilIncapacitates" : false,
 "BleedingOutLethal" : false,
 "BleedingOutSuffix" : "_bleedout",
 "BleedingOutTimerString" : "rounds",
@@ -122,6 +123,8 @@ Injuries are defined in the settings.json, and have the following structure:
 `enableLogging` - bool, enables logging.
 
 `enableLethalTorsoHead` - bool, if `true`, CRIPPLED Torso or Head is lethal.
+
+`debilIncapacitates` - bool, if 'true', becoming debilitated will immediately incapacitate pilots during missions
 
 `enableInternalDmgInjuries` - bool, if `true`, enables a feature that injures pilots when they recieve structure damage if certain equipment is mounted (i.e DNI or EI cockpits).
 
