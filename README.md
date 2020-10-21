@@ -193,4 +193,6 @@ Example stat effect added to DNI cockpit given below:
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
 	
-A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost is therefore `baseCostFromVanilla * injuryHealTimeMultiplier + (severity * severityCost) + debilitatedCost`.
+A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
+
+`(SimGameConstants.BaseInjuryDamageCost / pilothealth / [SimGameConstants.DailyHealValue +  {SimGameConstants.MedTechSkillMod * #medtech}]) * injuryHealTimeMultiplier + (severity * severityCost) + (debilitatedCost / [medtechDebilMultiplier * #medtech])`
