@@ -19,24 +19,32 @@ namespace TisButAScratch.Framework
             var pilotID = pilot.FetchGUID();
             if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pilotID))
             {
-                var rtrn = "\n";
+                var rtrn = $"\n";
+                if (ModInit.modSettings.debilSeverityThreshold > 0)
+                {
+                    rtrn += $"<color=#FF0000>Debilitating Severity Threshold Per-Location: {ModInit.modSettings.debilSeverityThreshold}</color=#FF0000>\n\n";
+                }
                 foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
                 {
                     foreach (Injury injury in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                     {
-                        var description = $"{injury.injuryName}: {injury.description}";
+                        var description = $"Severity {injury.severity}: {injury.injuryName}: {injury.description}";
                         rtrn += description + "\n\n";
                     }
                 }
 
-                foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
+                if (ModInit.modSettings.enableInternalDmgInjuries)
                 {
-                    foreach (Injury feedbackinjury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
+                    foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
                     {
-                        var description = $"{feedbackinjury.injuryName}: {feedbackinjury.description}";
-                        rtrn += description + "\n\n";
+                        foreach (Injury feedbackinjury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
+                        {
+                            var description = $"Severity {feedbackinjury.severity}: {feedbackinjury.injuryName}: {feedbackinjury.description}";
+                            rtrn += description + "\n\n";
+                        }
                     }
                 }
+                
 
                 if (pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
                 {

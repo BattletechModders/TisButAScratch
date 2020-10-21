@@ -49,7 +49,7 @@ namespace TisButAScratch
         public bool enableLogging = false;
         public bool enableFatigue = false;
         public bool enableLethalTorsoHead = false;
-        public bool enablePainToleranceInjuries = false;
+        public bool debilIncapacitates = false;
 
         public bool BleedingOutLethal = false;
         public string BleedingOutSuffix = "_bleedout";

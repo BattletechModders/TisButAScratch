@@ -23,6 +23,7 @@ namespace TisButAScratch.Patches
         {
             public static void Prefix(SimGameState __instance)
             {
+                PilotInjuryManager.PreloadIcons();
                 sim = __instance;
                 var curPilots = new List<string>();
 
@@ -78,6 +79,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(SimGameState __instance)
             {
                 sim = __instance;
+                PilotInjuryManager.PreloadIcons();
                 var curPilots = new List<string>();
                 PilotInjuryHolder.HolderInstance.DeserializeInjuryState();
                 ModInit.modLog.LogMessage($"Successfully deserialized or determined deserializing unnecessary.");

@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using UnityEngine;
 using System.Threading.Tasks;
+using SVGImporter;
 using BattleTech;
 using static TisButAScratch.Framework.GlobalVars;
 using Newtonsoft.Json.Linq;
@@ -69,7 +70,30 @@ namespace TisButAScratch.Framework
                 }
             }
         }
-    
+        internal static void PreloadIcons()
+        {
+            var dm = UnityGameInstance.BattleTechGame.DataManager;
+            var loadRequest = dm.CreateLoadRequest();
+            foreach (var injury in PilotInjuryManager.ManagerInstance.InjuryEffectsList)
+            {
+                foreach (var effectData in injury.effects)
+                {
+                    loadRequest.AddLoadRequest<SVGAsset>(BattleTechResourceType.SVGAsset, effectData.Description.Icon, null);
+                }
+            }
+
+            if (ModInit.modSettings.enableInternalDmgInjuries)
+            {
+                foreach (var injury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries)
+                {
+                    foreach (var effectData in injury.effects)
+                    {
+                        loadRequest.AddLoadRequest<SVGAsset>(BattleTechResourceType.SVGAsset, effectData.Description.Icon, null);
+                    }
+                }
+            }
+            loadRequest.ProcessRequests();
+        }
 
         internal void GatherAndApplyInjuries(AbstractActor actor)
         {

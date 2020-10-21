@@ -35,15 +35,12 @@ namespace TisButAScratch.Patches
                 DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
                 if (PilotInjuryHolder.HolderInstance.injuryStat ==
-                    __instance.StatCollection.GetValue<int>("Injuries") &&
-                    !ModInit.modSettings.enablePainToleranceInjuries)
+                    __instance.StatCollection.GetValue<int>("Injuries"))
                 {
                     ModInit.modLog.LogMessage(
                         $"{__instance.Callsign} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
                     return;
                 }
-
-                PilotInjuryHolder.HolderInstance.injuryStat = 0; //wait...why?
 
                 if (ModInit.modSettings.enableInternalDmgInjuries &&
                     __instance.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName) &&
@@ -131,10 +128,9 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.StatCollection.GetValue<bool>("BledOut") ||
-                    (__instance.StatCollection.GetValue<int>(MissionKilledStat) >=
-                     ModInit.modSettings.missionKillSeverityThreshold &&
-                     ModInit.modSettings.missionKillSeverityThreshold > 0))
+                if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || 
+                    __instance.StatCollection.GetValue<bool>("BledOut") ||
+                    (__instance.StatCollection.GetValue<int>(MissionKilledStat) >= ModInit.modSettings.missionKillSeverityThreshold && ModInit.modSettings.missionKillSeverityThreshold > 0))
                 {
                     __result = true;
                 }
