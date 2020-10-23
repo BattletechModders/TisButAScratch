@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using SVGImporter;
 using BattleTech;
+using Localize;
 using static TisButAScratch.Framework.GlobalVars;
 using Newtonsoft.Json.Linq;
 
@@ -104,12 +105,12 @@ namespace TisButAScratch.Framework
                 foreach (Injury injury in ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}");
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}{pKey}");
                 }
                 foreach (Injury injury in ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}");
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}{pKey}");
                 }
             }
         }
@@ -117,10 +118,11 @@ namespace TisButAScratch.Framework
         protected void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
-            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}");
+            var pKey = p.FetchGUID();
+            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}{pKey}");
             foreach (EffectData effectData in injury.effects)
             {
-                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}");
+                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
@@ -131,6 +133,12 @@ namespace TisButAScratch.Framework
                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1,
                         false);
                 }
+            }
+            //added to display floaties? need totest
+            if (actor.Combat.TurnDirector.GameHasBegun)
+            {
+                actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                    new ShowActorInfoSequence(actor, new Text("{0}! Severity {1} Injury!", new object[] { injury.injuryName, injury.severity }), FloatieMessage.MessageNature.PilotInjury, true)));
             }
         }
 

@@ -70,6 +70,7 @@ namespace TisButAScratch.Patches
                             ModInit.modSettings.BleedingOutTimerString,
                             eject
                         });
+
                         __result.AppendLine(txt);
                     }
                 }

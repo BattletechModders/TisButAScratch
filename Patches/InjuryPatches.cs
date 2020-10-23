@@ -34,11 +34,13 @@ namespace TisButAScratch.Patches
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
                 DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
-                if (PilotInjuryHolder.HolderInstance.injuryStat ==
+                var pKey = __instance.FetchGUID();
+
+                if (PilotInjuryHolder.HolderInstance.injuryStat >= //changed to <= instead of == 1021
                     __instance.StatCollection.GetValue<int>("Injuries"))
                 {
                     ModInit.modLog.LogMessage(
-                        $"{__instance.Callsign} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
+                        $"{__instance.Callsign}{pKey} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
                     return;
                 }
 
@@ -47,7 +49,7 @@ namespace TisButAScratch.Patches
                     __instance.StatCollection.GetValue<bool>("NeedsFeedbackInjury"))
                 {
                     ModInit.modLog.LogMessage(
-                        $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}");
+                        $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}{pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjuryFeedback(__instance, dmg, damageType);
 
                     return;
@@ -55,7 +57,7 @@ namespace TisButAScratch.Patches
 
                 else
                 {
-                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign}");
+                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign}{pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
 
                 }
@@ -65,7 +67,7 @@ namespace TisButAScratch.Patches
                     (damageType != DamageType.Unknown && damageType != DamageType.NOT_SET)
                 ) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
                 {
-                    var pKey = __instance.FetchGUID();
+                    
                     var injuryList = new List<Injury>();
                     foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
                     {
@@ -88,7 +90,7 @@ namespace TisButAScratch.Patches
                             if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
                                 __instance.pilotDef.PilotTags.Add(DEBILITATEDTAG);
-                                ModInit.modLog.LogMessage($"{__instance.Callsign} has been debilitated!");
+                                ModInit.modLog.LogMessage($"{__instance.Callsign}{pKey} has been debilitated!");
 
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
                                     injuryLoc.Key == InjuryLoc.Torso))
@@ -96,7 +98,7 @@ namespace TisButAScratch.Patches
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                                         StatCollection.StatOperation.Set, true, -1, true);
                                     ModInit.modLog.LogMessage(
-                                        $"{__instance.Callsign} has debilitated Torso or Head; lethal injury!");
+                                        $"{__instance.Callsign}{pKey} has debilitated Torso or Head; lethal injury!");
                                 }
                             }
                         }
@@ -263,6 +265,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(Mech __instance, ChassisLocations location, float damage)
             {
                 var p = __instance.GetPilot();
+                var pKey = p.FetchGUID();
                 var internalDmgInjuryCount = p.StatCollection.GetValue<int>("internalDmgInjuryCount");
 
 
@@ -276,13 +279,13 @@ namespace TisButAScratch.Patches
 
                 {
                     ModInit.modLog.LogMessage(
-                        $"{p.Callsign} has {internalDmgInjuryCount} preexisting feedback injuries!");
+                        $"{p.Callsign}{pKey} has {internalDmgInjuryCount} preexisting feedback injuries!");
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
                         StatCollection.StatOperation.Set, true, -1, true);
 
                     ModInit.modLog.LogMessage(
-                        $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign} from structure damage!");
+                        $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign}{pKey} from structure damage!");
 
                     p.InjurePilot(p.FetchGUID(), -1, 1, DamageType.ComponentExplosion, null, null);
 
@@ -305,10 +308,11 @@ namespace TisButAScratch.Patches
                 if (__instance.id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && __instance.Target is AbstractActor target)
                 {
                     var p = target.GetPilot();
+                    var pKey = p.FetchGUID();
                     p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
                         StatCollection.StatOperation.Set, true, -1, true);
                     ModInit.modLog.LogMessage(
-                        $"{p.Callsign} has bled out!");
+                        $"{p.Callsign}{pKey} has bled out!");
 
                     target.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), true);
 

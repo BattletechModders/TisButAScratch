@@ -35,11 +35,13 @@ namespace TisButAScratch
 
                 ModInit.modSettings = new Settings();
             }
+            //HarmonyInstance.DEBUG = true;
             modLog = new Logger(modDir, "TBAS", modSettings.enableLogging);
             PilotInjuryManager.ManagerInstance.Initialize();
             PilotInjuryHolder.HolderInstance.Initialize();
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            
         }
 
     }
