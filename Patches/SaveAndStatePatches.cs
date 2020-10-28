@@ -243,7 +243,7 @@ namespace TisButAScratch.Patches
         [HarmonyPriority(Priority.Last)]
         public static class SGS_ApplySimGameEventResult
         {
-            public static void Postfix(SimGameState __instance, SimGameEventResult result,List<object> objects, SimGameEventTracker tracker)
+            public static void Postfix(SimGameState __instance, SimGameEventResult result, List<object> objects, SimGameEventTracker tracker)
             {
                 for (var i = 0; i < objects.Count; i++)
                 {
@@ -284,12 +284,12 @@ namespace TisButAScratch.Patches
 
                                     if (t > ModInit.modSettings.debilSeverityThreshold)
                                     {
-                                        sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                        p.pilotDef.PilotTags.Add(DEBILITATEDTAG);
                                         if (ModInit.modSettings.enableLethalTorsoHead &&
                                             (injuryLoc.Key == InjuryLoc.Head ||
                                              injuryLoc.Key == InjuryLoc.Torso))
                                         {
-                                            sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
+                                            p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
                                                 "LethalInjury",
                                                 StatCollection.StatOperation.Set, true, -1, true);
                                         }
@@ -298,17 +298,19 @@ namespace TisButAScratch.Patches
                             }
                         }
                     }
-
-                    if (result.Scope == EventScope.Commander)
+                    else if (result.Scope == EventScope.Commander)
                     {
-                        var pKey = sim.Commander.FetchGUID();
+                        var commander = (Pilot) obj;
+                        if (string.IsNullOrEmpty(commander.FetchGUID())) return;
+                        var pKey = commander.FetchGUID();
                         if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
-                            sim.Commander.StatCollection.GetValue<int>("Injuries"))
+                            commander.StatCollection.GetValue<int>("Injuries"))
                         {
-                            var dmg = sim.Commander.StatCollection.GetValue<int>("Injuries") -
+                            var dmg = commander.StatCollection.GetValue<int>("Injuries") -
                                       PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                             ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
-                            PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
+                            PilotInjuryManager.ManagerInstance.rollInjurySG(commander, dmg,
+                                DamageType.Unknown);
                             if (ModInit.modSettings.debilSeverityThreshold > 0
                             ) //now trying to add up "severity" threshold for crippled injury
                             {
@@ -333,12 +335,12 @@ namespace TisButAScratch.Patches
 
                                     if (t >= ModInit.modSettings.debilSeverityThreshold)
                                     {
-                                        sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                        commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
                                         if (ModInit.modSettings.enableLethalTorsoHead &&
                                             (injuryLoc.Key == InjuryLoc.Head ||
                                              injuryLoc.Key == InjuryLoc.Torso))
                                         {
-                                            sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
+                                            commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
                                                 "LethalInjury",
                                                 StatCollection.StatOperation.Set, true, -1, true);
                                         }
@@ -347,6 +349,7 @@ namespace TisButAScratch.Patches
                             }
                         }
                     }
+                    else return;
                 }
             }
         }
