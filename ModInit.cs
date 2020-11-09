@@ -62,6 +62,8 @@ namespace TisButAScratch
         public int internalDmgInjuryLimit = -1;
         public float internalDmgLvlReq = 0f;
         public int missionKillSeverityThreshold = -1;
+        public bool reInjureWeightAppliesCurrentContract = false;
+        public int reInjureLocWeight = 0;
 
         public bool timeHealsAllWounds = false;
         public int debilSeverityThreshold = -1;

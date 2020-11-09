@@ -385,6 +385,7 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<bool>("BledOut", false);
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
+                p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
             }
         }
@@ -409,7 +410,7 @@ namespace TisButAScratch.Patches
                 var pKey = p.FetchGUID();
                 ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
                 p.StatCollection.AddStatistic("isCrippled", false);
-                if (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter))
+                if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add($"{pKey}", new List<string>());
                     ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Callsign} to injuryMap");

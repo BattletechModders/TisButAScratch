@@ -149,8 +149,53 @@ namespace TisButAScratch.Framework
 
             for (int i = 0; i < dmg; i++)
             {
+                //adding locations weights for preexisting injuries
+                var pKey = pilot.FetchGUID();
+                //does pilot have existing injuries
+                var injuryLocs = new List<int>(Enumerable.Range(2,6));
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0)
+                {
+                    var curInjuryList = new List<Injury>();
+                    ModInit.modLog.LogMessage($"{pilot?.Callsign} has preexisting conditions, processing location weight");
+                    foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
+                    {
+                        curInjuryList.AddRange(
+                            PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
+                    }
+
+                    if (ModInit.modSettings.reInjureWeightAppliesCurrentContract)
+                    {
+                        foreach (var inj in curInjuryList)
+                        {
+                            for (int t = 0; t < ModInit.modSettings.reInjureLocWeight; t++)
+                            {
+                                injuryLocs.Add((int)inj.injuryLoc);
+                            }
+                            ModInit.modLog.LogMessage($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
+                        }
+                    }
+                    else
+                    {
+                        foreach (var inj in curInjuryList.Where(x => !pilot.StatCollection.GetValue<List<string>>("LastInjuryId").Contains(x.injuryID)))
+                        {
+                            for (int t = 0; t < ModInit.modSettings.reInjureLocWeight; t++)
+                            {
+                                injuryLocs.Add((int)inj.injuryLoc);
+                            }
+                            ModInit.modLog.LogMessage($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
+                        }
+                    }
+                    ModInit.modLog.LogMessage($"Final list of injury location indices: {string.Join(",", injuryLocs)}");
+                }
+
+
                 var injuryList = new List<Injury>(ManagerInstance.InjuryEffectsList);
-                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
+
+                var idx = UnityEngine.Random.Range(0, injuryLocs.Count);
+                loc = (InjuryLoc)injuryLocs[idx];
+
+//                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8); // old
+
                 if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf)
                 {
                     injuryList.RemoveAll(x => x.couldBeThermal == false || x.severity >= 100);
@@ -169,14 +214,23 @@ namespace TisButAScratch.Framework
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
-                var pKey = pilot.FetchGUID();
 
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
 
+                var newList = pilot.StatCollection.GetValue<List<string>>("LastInjuryId");
+                newList.Add(chosen.injuryID);
+
+                pilot.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",
+                    StatCollection.StatOperation.Set, newList, -1, true);
+
+                ModInit.modLog.LogMessage(
+                    $"Setting {chosen.injuryName} to {pilot?.Callsign}'s LastInjuryId stat. PilotID: {pKey}");
+
                 pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);
+
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
 
