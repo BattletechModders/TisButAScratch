@@ -113,6 +113,8 @@ Injuries are defined in the settings.json, and have the following structure:
 "internalDmgLvlReq" : 20,
 "timeHealsAllWounds" : true,
 "missionKillSeverityThreshold" : 6,
+"reInjureWeightAppliesCurrentContract" : false,
+"reInjureLocWeight" : 11,
 "debilSeverityThreshold" : 3,
 "severityCost" : 360,
 "debilitatedCost" : 4320,
@@ -176,6 +178,12 @@ Example stat effect added to DNI cockpit given below:
 `timeHealsAllWounds` - bool, if true debilitating injuries will heal with time. if false, pilots will remain `DEBILITATED` until the tag is removed via event.
 
 `missionKillSeverityThreshold` - int, as discussed above defines the total `severity` of injuries required for a pilot to be incapacitated. Disabled if < 1.
+
+`reInjureWeightAppliesCurrentContract` - bool, determines whether additional likelihood of injuring a given pilot location (e.g, Left Leg) applies for injuries sustained in the current contract (true), or only for injuries sustained in previous contracts (false).
+
+`reInjureLocWeight` - int, additional weight for currently injured locations to be more likely to be RE-injured. Effectively makes Debilitating Injuries more likely if you're already injured. Table for various values follows:
+
+![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/injuryLocationWeights.png)
 
 `debilSeverityThreshold` - int, as discussed above defines the total `severity` of injuries in a single location required for a pilot to be `DEBILITATED`. Disabled if < 1.
 
