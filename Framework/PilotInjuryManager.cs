@@ -153,7 +153,7 @@ namespace TisButAScratch.Framework
                 var pKey = pilot.FetchGUID();
                 //does pilot have existing injuries
                 var injuryLocs = new List<int>(Enumerable.Range(2,6));
-                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0)
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0 || PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Count > 0)
                 {
                     var curInjuryList = new List<Injury>();
                     ModInit.modLog.LogMessage($"{pilot?.Callsign} has preexisting conditions, processing location weight");
@@ -162,6 +162,13 @@ namespace TisButAScratch.Framework
                         curInjuryList.AddRange(
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
+
+                    foreach (var id in PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey])
+                    {
+                        curInjuryList.AddRange(
+                            PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
+                    }
+
 
                     if (ModInit.modSettings.reInjureWeightAppliesCurrentContract)
                     {
@@ -174,6 +181,7 @@ namespace TisButAScratch.Framework
                             ModInit.modLog.LogMessage($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
                         }
                     }
+
                     else
                     {
                         foreach (var inj in curInjuryList.Where(x => !pilot.StatCollection.GetValue<List<string>>("LastInjuryId").Contains(x.injuryID)))
@@ -215,9 +223,9 @@ namespace TisButAScratch.Framework
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 
-                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
-                    $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
+                    $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
                 var newList = pilot.StatCollection.GetValue<List<string>>("LastInjuryId");
                 newList.Add(chosen.injuryID);
@@ -253,9 +261,9 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 var pKey = pilot.FetchGUID();
 
-                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
-                    $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
+                    $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
                 pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);

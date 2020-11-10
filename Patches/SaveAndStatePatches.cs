@@ -409,19 +409,27 @@ namespace TisButAScratch.Patches
 
                 var pKey = p.FetchGUID();
                 ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
-                p.StatCollection.AddStatistic("isCrippled", false);
-                if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
+                //p.StatCollection.AddStatistic("isCrippled", false); //not needed, is now pilot tag (duh)
+
+                //unneeded now? 110920
+            //    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
+            //    {
+            //        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add($"{pKey}", new List<string>());
+            //        ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Callsign} to injuryMap");
+            //    }
+
+                if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
                 {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add($"{pKey}", new List<string>());
-                    ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Callsign} to injuryMap");
+                    PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
+                    ModInit.modLog.LogMessage($"{p.Name} missing, added to combatInjuriesMap");
                 }
 
-                ////below probably not needed, as its done at AddPilotToRoster for real pilots
-                //              if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
-                //              {
-                //                  PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                //                  ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
-                //              }
+                if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                {
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                    ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
+                }
+
                 PilotInjuryManager.ManagerInstance.GatherAndApplyInjuries(unit);
                 ModInit.modLog.LogMessage($"Initializing injury effects for {p?.Description?.Callsign}");
 
@@ -436,22 +444,30 @@ namespace TisButAScratch.Patches
             }
         }
 
-        //also has to remove CRIPPLED tag from AI pilots so their PilotDefs can be reused
- //       [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
+        //resetting combatinjuriesMap on restart
+        [HarmonyPatch(typeof(LoadTransitioning), "BeginCombatRestart", new Type[] {typeof(Contract)})]
+        static class LoadTransitioning_BeginCombatRestart_Patch
+        {
+            static void Prefix(Contract __instance)
+            {
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
+                ModInit.modLog.LogMessage($"Resetting combatInjuriesMap due to RestartMission button. Somebody must like CTD's.");
+            }
+        }
+
+
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
- //       static class CombatGameState_OnCombatGameDestroyed_Patch
         static class Contract_CompleteContract_Patch
         {
 
-//            static void Prefix(CombatGameState __instance)
             static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
-            //    var actors = __instance.AllActors;
                 var actors = UnityGameInstance.BattleTechGame.Combat.AllActors;
                 foreach (var actor in actors)
                 {
                     var p = actor.GetPilot();
                     var pKey = p.FetchGUID();
+
                     if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
                     {
                         p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
@@ -461,7 +477,13 @@ namespace TisButAScratch.Patches
                         ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
                     }
 
-                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
+                    //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
+
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
+                    ModInit.modLog.LogMessage($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
+
+
+                        foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
                     {
                         if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
                         {

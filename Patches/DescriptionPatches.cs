@@ -119,7 +119,15 @@ namespace TisButAScratch.Patches
             {
                 if (___entry.Type == WorkOrderType.MedLabHeal)
                 {
-                    ___subTitleText.SetText("INJURED");
+                    WorkOrderEntry_MedBayHeal medbayHealEntry = ___entry as WorkOrderEntry_MedBayHeal;
+                    if (medbayHealEntry.Pilot.pilotDef.TimeoutRemaining > 0)
+                    {
+                        ___subTitleText.SetText("UNAVAILABLE");
+                    }
+                    else
+                    {
+                        ___subTitleText.SetText("INJURED");
+                    }
                 }
             }
         }

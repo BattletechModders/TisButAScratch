@@ -74,6 +74,11 @@ namespace TisButAScratch.Patches
                         injuryList.AddRange(
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
+                    foreach (var id in PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey])
+                    {
+                        injuryList.AddRange(
+                            PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
+                    }
 
                     if (ModInit.modSettings.debilSeverityThreshold > 0)
                     {
@@ -116,7 +121,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 __result = true;
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || (__instance.pilotDef.TimeoutRemaining > 0))
                 {
                     __result = false;
                 }
@@ -216,6 +221,12 @@ namespace TisButAScratch.Patches
 
             public static void Postfix(SimGameState __instance, ref int __result, Pilot p)
             {
+                if (p.pilotDef.Injuries == 0) //this should hopefully fix non-injury timeouts being weird due to multipliying injury cost. #hbswhy
+                {
+                    __result =  (p.pilotDef.TimeoutRemaining * __instance.GetDailyHealValue());
+                    return;
+                }
+
                 var pKey = p.FetchGUID();
                 var injuryList = new List<Injury>();
                 foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
