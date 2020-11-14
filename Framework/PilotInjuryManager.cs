@@ -19,6 +19,10 @@ namespace TisButAScratch.Framework
         internal static string FetchGUID(this Pilot pilot)
         {
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
+            if (string.IsNullOrEmpty(guid))
+            {
+                ModInit.modLog.LogMessage($"WTF IS GUID NULL?!");
+            }
             return guid;
         }
     }
