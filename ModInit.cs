@@ -65,6 +65,14 @@ namespace TisButAScratch
         public bool reInjureWeightAppliesCurrentContract = false;
         public int reInjureLocWeight = 0;
 
+        public List<string> crewOrCockpitCustomID = new List<string>();
+        public List<string> lifeSupportCustomID = new List<string>();
+
+        public string isTorsoMountStatName = "isTorsoMount";
+        public bool lifeSupportSupportsLifeTM = false;
+        public bool hostileEnvironmentsEject = true;
+        public List<string> hostileEnvironments = new List<string>();
+
         public bool timeHealsAllWounds = false;
         public int debilSeverityThreshold = -1;
         public int severityCost = 360;

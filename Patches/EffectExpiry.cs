@@ -26,7 +26,7 @@ namespace TisButAScratch.Patches
                 AbilityDef.SpecialRules specialRulesFilter, Vector3 worldPos)
             {
                 if (__instance != null)
-                theInstance = __instance;
+                    theInstance = __instance;
             }
         }
 

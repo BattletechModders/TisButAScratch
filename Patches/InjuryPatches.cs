@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Harmony;
 using BattleTech;
@@ -10,10 +11,112 @@ using static TisButAScratch.Framework.GlobalVars;
 using System.Threading.Tasks;
 using UnityEngine;
 
+using CustomComponents;
+using CustAmmoCategories;
+
 namespace TisButAScratch.Patches
 {
     class InjuryPatches
     {
+        // this should hopefully cause vehile injuries and injuries when certain components are damaged/destroyeded. also implements "forced ejections" for pilots.
+        [HarmonyPatch(typeof(MechComponent), "DamageComponent",
+            new Type[]
+            {
+                typeof(WeaponHitInfo), typeof(ComponentDamageLevel), typeof(bool)
+            })]
+        public static class MechComponent_DamageComponent_Patch
+        {
+            public static void Postfix(MechComponent __instance, WeaponHitInfo hitInfo,
+                ComponentDamageLevel damageLevel, bool applyEffects)
+            {
+
+                if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
+                    (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
+                {
+                    ModInit.modLog.LogMessage($"Head hit, but cockpit components not located in head!");
+                    return;
+                }
+
+                if (ModInit.modSettings.lifeSupportSupportsLifeTM &&
+                    __instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
+                    ModInit.modSettings.lifeSupportCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)))
+                {
+                    if (damageLevel == ComponentDamageLevel.Penalized)
+                    {
+                        ModInit.modLog.LogMessage($"Life support damaged with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is being cooked!");
+                        __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                        return;
+                    }
+                    if (damageLevel == ComponentDamageLevel.Destroyed)
+                    {
+                        ModInit.modLog.LogMessage($"Life support destroyed with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is well-done!");
+                        __instance.parent.GetPilot().LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
+                        return;
+                    }
+                }
+
+                if (((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0) || __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
+                    (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) && (damageLevel == ComponentDamageLevel.Penalized || damageLevel == ComponentDamageLevel.Destroyed))
+                {
+                    ModInit.modLog.LogMessage($"Cockpit components damaged/destroyed, pilot needs injury!");
+                    __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                    return;
+                }
+
+                if (__instance.parent is Mech && !__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) && ModInit.modSettings.hostileEnvironmentsEject &&
+                    ModInit.modSettings.lifeSupportCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
+                    (damageLevel == ComponentDamageLevel.Destroyed) && ModInit.modSettings.hostileEnvironments.Any(x => x == __instance.parent.Combat.MapMetaData.biomeDesignMask.Id))
+                {
+                    ModInit.modLog.LogMessage($"Life support destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
+                    __instance.parent.EjectPilot("LIFESUPPORTDESTROYED", 0, DeathMethod.PilotEjection, false);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Mech), "ApplyHeadStructureEffects",
+            new Type[]
+            {
+                typeof(ChassisLocations), typeof(LocationDamageLevel), typeof(LocationDamageLevel), typeof(WeaponHitInfo)
+            })]
+        [HarmonyPriority(Priority.First)]
+        public static class Mech_ApplyHeadStructureEffects
+        {
+            public static bool Prefix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
+                LocationDamageLevel newDamageLevel, WeaponHitInfo hitInfo)
+            {
+                if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
+                {
+                    ModInit.modLog.LogMessage($"Head hit, but cockpit not located in head! No injury should be sustained!");
+                    __instance.GetPilot().SetNeedsInjury(InjuryReason.NotSet);
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Vehicle), "CheckPilotStatus",
+            new Type[]
+            {
+                typeof(float), typeof(int), typeof(string)
+            })]
+        public static class Vehicle_CheckPilotStatus_Patch
+        {
+            public static void Prefix(Vehicle __instance, float gutsRoll, int stackItemID, string sourceID)
+            {
+                var p = __instance.GetPilot();
+                if (p.NeedsInjury)
+                {
+                    ModInit.modLog.LogMessage($"Injuring {__instance.Description.UIName} pilot {__instance.GetPilot().Callsign} due to crew compartment damage!");
+                    __instance.GetPilot().InjurePilot(sourceID, stackItemID, 1, DamageType.ComponentExplosion, null, null);
+                }
+            }
+        }
+
         //main patch to apply injury effects on injured pilot
         [HarmonyPatch(typeof(Pilot), "InjurePilot",
             new Type[]
@@ -278,8 +381,6 @@ namespace TisButAScratch.Patches
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
                 var internalDmgInjuryCount = p.StatCollection.GetValue<int>("internalDmgInjuryCount");
-
-
 
                 if ((ModInit.modSettings.internalDmgInjuryLocs.Contains(location) ||
                      ModInit.modSettings.internalDmgInjuryLocs.Capacity == 0) &&
