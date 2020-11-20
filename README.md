@@ -239,7 +239,35 @@ Example stat effect added to DNI cockpit given below:
 
 `lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively. Also used by `hostileEnvironmentsEject` below.
 
-`isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Similar set-up as `internalDmgStatName` for DNI/EI cockpits.
+`isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
+
+```
+{
+            "durationData": {
+                "duration": -1,
+                "stackLimit": -1
+            },
+            "targetingData": {
+                "effectTargetsCreator": true,
+                "effectTriggerType": "Passive",
+                "effectTargetType": "Creator"
+            },
+            "effectType": "StatisticEffect",
+            "Description": {
+                "Id": "Torso-Mounted",
+                "Name": "isTorsoMount",
+                "Details": "Torso mounted cockpit, no injuries on head hits.",
+                "Icon": "uixSvgIcon_equipment_Cockpit"
+            },
+            "nature": "Debuff",
+            "statisticData": {
+                "statName": "isTorsoMount",
+                "operation": "Set",
+                "modValue": "true",
+                "modType": "System.Boolean"
+            }
+        }
+```
 
 `lifeSupportSupportsLifeTM` - bool, determines whether damage and/or destruction of life-support (as defined in `lifeSupportCustomID`) causes injuries/death when torso-mounted cockpit is being used.
 
