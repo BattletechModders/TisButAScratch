@@ -44,13 +44,13 @@ namespace TisButAScratch.Patches
                 {
                     if (damageLevel == ComponentDamageLevel.Penalized)
                     {
-                        ModInit.modLog.LogMessage($"Life support damaged with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is being cooked!");
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is being cooked!");
                         __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
                         return;
                     }
                     if (damageLevel == ComponentDamageLevel.Destroyed)
                     {
-                        ModInit.modLog.LogMessage($"Life support destroyed with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is well-done!");
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is well-done!");
                         __instance.parent.GetPilot().LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
                         return;
                     }
@@ -59,7 +59,7 @@ namespace TisButAScratch.Patches
                 if (((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0) || __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
                     (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) && (damageLevel == ComponentDamageLevel.Penalized || damageLevel == ComponentDamageLevel.Destroyed))
                 {
-                    ModInit.modLog.LogMessage($"Cockpit components damaged/destroyed, pilot needs injury!");
+                    ModInit.modLog.LogMessage($"Cockpit component ({__instance.Description.UIName}) damaged/destroyed, pilot needs injury!");
                     __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
                     return;
                 }
@@ -69,8 +69,9 @@ namespace TisButAScratch.Patches
                         (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
                     (damageLevel == ComponentDamageLevel.Destroyed) && ModInit.modSettings.hostileEnvironments.Any(x => x == __instance.parent.Combat.MapMetaData.biomeDesignMask.Id))
                 {
-                    ModInit.modLog.LogMessage($"Life support destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
-                    __instance.parent.EjectPilot("LIFESUPPORTDESTROYED", 0, DeathMethod.PilotEjection, false);
+                    ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
+                    __instance.parent.EjectPilot(__instance.parent.GUID, 0, DeathMethod.PilotEjection, true);
+                    return;
                 }
             }
         }
@@ -118,12 +119,14 @@ namespace TisButAScratch.Patches
         }
 
         //main patch to apply injury effects on injured pilot
+        [HarmonyPriority(Priority.First)]
+        [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
         [HarmonyPatch(typeof(Pilot), "InjurePilot",
             new Type[]
             {
                 typeof(string), typeof(int), typeof(int), typeof(DamageType), typeof(Weapon), typeof(AbstractActor)
             })]
-        [HarmonyPriority(Priority.First)]
+        
         public static class Pilot_InjurePilot_Patch
         {
             public static void Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
