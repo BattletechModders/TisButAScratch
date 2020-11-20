@@ -83,6 +83,19 @@ D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csprojAssemblyReference.cache
+<<<<<<< Updated upstream
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomAmmoCategories.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\EPPlus.dll
+=======
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csprojAssemblyReference.cache
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CoreCompileInputs.cache
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\TisButAScratch.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\TisButAScratch.pdb
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\CustomAmmoCategories.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\EPPlus.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
+>>>>>>> Stashed changes
