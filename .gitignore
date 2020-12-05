@@ -241,3 +241,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+*.pdb
+*.dll
+.vs/TisButAScratch/v16/.suo
