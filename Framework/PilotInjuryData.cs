@@ -50,7 +50,7 @@ namespace TisButAScratch.Framework
 
 
         //serialize injurymap (dictionary) to tag and save to company
-            internal void SerializeInjuryState()
+        internal void SerializeInjuryState()
         {
             var injuryState = sim.CompanyTags.FirstOrDefault(( x) => x.StartsWith(injuryStateTag));
             GlobalVars.sim.CompanyTags.Remove(injuryState);

@@ -12,6 +12,7 @@ using BattleTech.DataObjects;
 using BattleTech.Save;
 using BattleTech.Save.Test;
 using BattleTech.UI;
+using HBS.Collections;
 using TB.ComponentModel;
 
 namespace TisButAScratch.Patches
@@ -117,20 +118,34 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                 }
                 PilotInjuryHolder.HolderInstance.SerializeInjuryState();
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
             }
 
+            public static void Postfix(SimGameState __instance)
+            {
+                if (!ModInit.modSettings.debugKeepTags)
+                {
+                    var injuryState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag))?.Substring(12);
+                    GlobalVars.sim.CompanyTags.Remove(injuryState);
+                }
+            }
 
         }
 
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]
         public static class SGS_Rehydrate_Patch
         {
+            public static void Prefix(SimGameState __instance)
+            {
+                sim?.CompanyTags.Clear(); // this will either help or hurt.  or it wont do a damn thing.
+            }
             public static void Postfix(SimGameState __instance)
             {
                 sim = __instance;
                 PilotInjuryManager.PreloadIcons();
                 var curPilots = new List<string>();
                 PilotInjuryHolder.HolderInstance.DeserializeInjuryState();
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
                 ModInit.modLog.LogMessage($"Successfully deserialized or determined deserializing unnecessary.");
 
                 if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
@@ -453,7 +468,6 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Team __instance, AbstractActor unit)
             {
-
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
                 
@@ -540,7 +554,8 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
 
 
-                        foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
+                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x =>
+                        x.injuryID_Post != ""))
                     {
                         if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
                         {
@@ -550,6 +565,7 @@ namespace TisButAScratch.Patches
                             ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} to {p.Callsign} for post-combat injury");
                         }
                     }
+
                 }
             }
         }

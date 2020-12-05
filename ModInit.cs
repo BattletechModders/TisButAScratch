@@ -70,7 +70,7 @@ namespace TisButAScratch
 
         public string isTorsoMountStatName = "isTorsoMount";
         public bool lifeSupportSupportsLifeTM = false;
-        public bool hostileEnvironmentsEject = true;
+        public bool hostileEnvironmentsEject = false;
         public List<string> hostileEnvironments = new List<string>();
 
         public bool timeHealsAllWounds = false;
@@ -84,5 +84,7 @@ namespace TisButAScratch
 
         public List<Injury> InjuryEffectsList = new List<Injury>();
         public List<Injury> InternalDmgInjuries = new List<Injury>();
+
+        public bool debugKeepTags = false;
     }
 }

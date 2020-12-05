@@ -26,10 +26,17 @@ namespace TisButAScratch.Patches
             })]
         public static class MechComponent_DamageComponent_Patch
         {
+            public static bool Prepare()
+            {
+                return (ModInit.modSettings.lifeSupportCustomID.Count != 0 &&
+                        ModInit.modSettings.crewOrCockpitCustomID.Count != 0 &&
+                        !ModInit.modSettings.hostileEnvironmentsEject);
+            }
+
+
             public static void Postfix(MechComponent __instance, WeaponHitInfo hitInfo,
                 ComponentDamageLevel damageLevel, bool applyEffects)
             {
-
                 if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
                     (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
                 {
@@ -119,8 +126,7 @@ namespace TisButAScratch.Patches
         }
 
         //main patch to apply injury effects on injured pilot
-        [HarmonyPriority(Priority.First)]
-        [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
+
         [HarmonyPatch(typeof(Pilot), "InjurePilot",
             new Type[]
             {
@@ -129,6 +135,7 @@ namespace TisButAScratch.Patches
         
         public static class Pilot_InjurePilot_Patch
         {
+            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
             public static void Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
                 DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
@@ -236,9 +243,10 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("IsIncapacitated", MethodType.Getter)]
-        [HarmonyPriority(Priority.Last)]
+       
         public static class Pilot_IsIncapacitated_Patch
         {
+            [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || 
@@ -251,13 +259,13 @@ namespace TisButAScratch.Patches
         }
 
         [HarmonyPatch(typeof(Contract), "FinalizeKilledMechWarriors", typeof(SimGameState))]
-        [HarmonyAfter(new string[] {"co.uk.cwolf.MissionControl"})]
+       
         public class ContractFinalizeKilledMechwarriorsPatch
         {
             private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
             private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
             private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
-
+            [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
             public static bool Prefix(Contract __instance)
             {
                 pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
