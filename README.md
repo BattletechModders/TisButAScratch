@@ -280,6 +280,8 @@ Example stat effect added to DNI cockpit given below:
 `InjuryEffectsList` - List<Injury>, list of all possible injuries. All injury locations need to have an injury for each value of `couldBeThermal` represented, with the exception of `Head`. Overheating will never inflict a head injury, so `Head` does not need an Injury where `couldBeThermal :true`
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
+
+`debugKeepTags` - bool, if true, serialized injury state is kept as company tag after saving game. leave false for cleaner company tags.
 	
 A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
 
