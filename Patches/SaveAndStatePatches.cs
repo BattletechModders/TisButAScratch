@@ -127,8 +127,8 @@ namespace TisButAScratch.Patches
                 {
                     if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
                     {
-                        var injuryState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag))?.Substring(12);
-                        GlobalVars.sim.CompanyTags.Remove(injuryState);
+                        var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
+                        GlobalVars.sim.CompanyTags.Remove(InjuryStateCTag);
                     }
                 }
             }

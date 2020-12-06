@@ -64,10 +64,11 @@ namespace TisButAScratch.Framework
         {
             if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
             {
-                var injuryState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag)).Substring(12);
+                var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
+                var injuryState = InjuryStateCTag.Substring(12);
                 HolderInstance.pilotInjuriesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(injuryState);
                 ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(injuryState);
+                GlobalVars.sim.CompanyTags.Remove(InjuryStateCTag);
             }
             else
             {

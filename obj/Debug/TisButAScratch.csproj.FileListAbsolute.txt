@@ -7,4 +7,3 @@ C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.cspr
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
-C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csprojAssemblyReference.cache
