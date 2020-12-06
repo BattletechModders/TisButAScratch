@@ -48,7 +48,7 @@ namespace TisButAScratch.Framework
             combatInjuriesMap = new Dictionary<string, List<string>>();
         }
 
-
+        
         //serialize injurymap (dictionary) to tag and save to company
         internal void SerializeInjuryState()
         {
