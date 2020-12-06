@@ -53,10 +53,10 @@ namespace TisButAScratch.Framework
         internal void SerializeInjuryState()
         {
             var injuryState = sim.CompanyTags.FirstOrDefault(( x) => x.StartsWith(injuryStateTag));
-            GlobalVars.sim.CompanyTags.Remove(injuryState);
-            injuryState = $"{injuryStateTag}{JsonConvert.SerializeObject(pilotInjuriesMap)}";
-            ModInit.modLog.LogMessage($"Serialized injuryState and adding to company tags");
-            GlobalVars.sim.CompanyTags.Add(injuryState);
+            sim.CompanyTags.Remove(injuryState);
+            injuryState = $"{injuryStateTag}{JsonConvert.SerializeObject(HolderInstance.pilotInjuriesMap)}";
+            ModInit.modLog.LogMessage($"Serialized injuryState and adding to company tags. State was {injuryState}");
+            sim.CompanyTags.Add(injuryState);
         }
 
         //deserialize injurymap (dictionary) from tag and save to PilotInjuryHolder.Instance
@@ -65,10 +65,10 @@ namespace TisButAScratch.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
             {
                 var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
-                var injuryState = InjuryStateCTag.Substring(12);
+                var injuryState = InjuryStateCTag.Substring(injuryStateTag.Length);
                 HolderInstance.pilotInjuriesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(injuryState);
                 ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags");
-                GlobalVars.sim.CompanyTags.Remove(InjuryStateCTag);
+                sim.CompanyTags.Remove(InjuryStateCTag);
             }
             else
             {

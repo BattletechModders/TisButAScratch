@@ -120,19 +120,6 @@ namespace TisButAScratch.Patches
                 PilotInjuryHolder.HolderInstance.SerializeInjuryState();
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
             }
-
-            public static void Postfix(SimGameState __instance)
-            {
-                if (!ModInit.modSettings.debugKeepTags)
-                {
-                    if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
-                    {
-                        var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
-                        GlobalVars.sim.CompanyTags.Remove(InjuryStateCTag);
-                    }
-                }
-            }
-
         }
 
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]
