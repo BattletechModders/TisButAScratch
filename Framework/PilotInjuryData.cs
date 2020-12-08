@@ -31,7 +31,7 @@ namespace TisButAScratch.Framework
         private static PilotInjuryHolder _instance;
         public Dictionary<string, List<string>> pilotInjuriesMap;
         public Dictionary<string, List<string>> combatInjuriesMap; //added for temprary injury storage to allow clean combat restarts
-        public int injuryStat;
+        public int injuryStat = 0;
 
         public static PilotInjuryHolder HolderInstance
         {

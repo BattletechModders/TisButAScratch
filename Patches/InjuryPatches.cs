@@ -88,9 +88,10 @@ namespace TisButAScratch.Patches
             {
                 typeof(ChassisLocations), typeof(LocationDamageLevel), typeof(LocationDamageLevel), typeof(WeaponHitInfo)
             })]
-        [HarmonyPriority(Priority.First)]
+
         public static class Mech_ApplyHeadStructureEffects
         {
+            [HarmonyPriority(Priority.First)]
             public static bool Prefix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
                 LocationDamageLevel newDamageLevel, WeaponHitInfo hitInfo)
             {
@@ -132,16 +133,17 @@ namespace TisButAScratch.Patches
             {
                 typeof(string), typeof(int), typeof(int), typeof(DamageType), typeof(Weapon), typeof(AbstractActor)
             })]
-        
         public static class Pilot_InjurePilot_Patch
         {
-            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
-            public static void Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
-                DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
+            [HarmonyPriority(Priority.First)]
+//            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
+            public static void Prefix(Pilot __instance)
             {
+                ModInit.modLog.LogMessage(
+                    $"{__instance?.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
                 PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
                 ModInit.modLog.LogMessage(
-                    $"{__instance.Callsign} has {PilotInjuryHolder.HolderInstance.injuryStat} injuries before InjurePilot; proceeding.");
+                    $"{__instance?.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
@@ -228,9 +230,10 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("CanPilot", MethodType.Getter)]
-        [HarmonyPriority(Priority.Last)]
+        
         public static class Pilot_CanPilot_Patch
         {
+            [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 __result = true;
