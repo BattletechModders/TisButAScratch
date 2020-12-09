@@ -139,11 +139,18 @@ namespace TisButAScratch.Patches
 //            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
             public static void Prefix(Pilot __instance)
             {
-                ModInit.modLog.LogMessage(
-                    $"{__instance?.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
-                PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
-                ModInit.modLog.LogMessage(
-                    $"{__instance?.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                try
+                {
+                    ModInit.modLog.LogMessage(
+                        $"{__instance?.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
+                    PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
+                    ModInit.modLog.LogMessage(
+                        $"{__instance?.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                }
+                catch (Exception ex)
+                {
+                    ModInit.modLog.LogException(ex);
+                }
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
