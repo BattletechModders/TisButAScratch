@@ -143,6 +143,13 @@ namespace TisButAScratch.Framework
             {
                 actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
                     new ShowActorInfoSequence(actor, new Text("{0}! Severity {1} Injury!", new object[] { injury.injuryName, injury.severity }), FloatieMessage.MessageNature.PilotInjury, true)));
+                if (!string.IsNullOrEmpty(injury.injuryID_Post))
+                {
+                    var txt = new Text("<color=#FF0000>Pilot is bleeding out!</color=#FF0000>");
+
+                    actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                        new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, true)));
+                }
             }
         }
 
