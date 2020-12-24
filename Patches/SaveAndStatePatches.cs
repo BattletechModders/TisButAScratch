@@ -356,6 +356,8 @@ namespace TisButAScratch.Patches
                                     }
                                 }
                             }
+                            p.ForceRefreshDef(); // added 1221
+                            __instance.RefreshInjuries(); // added 1221
                         }
                     }
                     else if (result.Scope == EventScope.Commander)
@@ -408,8 +410,9 @@ namespace TisButAScratch.Patches
                                 }
                             }
                         }
+                        commander.ForceRefreshDef(); // added 1221
+                        __instance.RefreshInjuries(); // added 1221
                     }
-                    else return;
                 }
             }
         }
@@ -536,6 +539,7 @@ namespace TisButAScratch.Patches
                         var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
                         p.pilotDef.PilotTags.RemoveRange(rmt);
                         ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
+                        continue;
                     }
 
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
