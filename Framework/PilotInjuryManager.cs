@@ -21,7 +21,7 @@ namespace TisButAScratch.Framework
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
             if (string.IsNullOrEmpty(guid))
             {
-                ModInit.modLog.LogMessage($"WTF IS GUID NULL?!");
+                ModInit.modLog.LogMessage($"WTF IS {pilot.Callsign}'s GUID NULL?!");
             }
             return guid;
         }

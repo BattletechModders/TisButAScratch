@@ -452,6 +452,7 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);
+                ModInit.modLog.LogMessage($"Initializing {p.Callsign} EffectStat `NeedsFeedbackInjury`, `BledOut`, `internalDmgInjuryCount`, `{MissionKilledStat}`, `LastInjuryId`, `{ModInit.modSettings.internalDmgStatName}`, and `{ModInit.modSettings.isTorsoMountStatName}`");
             }
         }
 
@@ -463,8 +464,7 @@ namespace TisButAScratch.Patches
             {
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
-                
-                ModInit.modLog.LogMessage($"Added {p.Callsign} MissionKilledStat");
+
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}"); //changed to sys NewGuid instead of simguid for skirmish compatibility
@@ -473,8 +473,6 @@ namespace TisButAScratch.Patches
 
                 var pKey = p.FetchGUID();
                 ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
-                //p.StatCollection.AddStatistic("isCrippled", false); //not needed, is now pilot tag (duh)
-
                 //unneeded now? 110920
             //    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
             //    {
@@ -531,6 +529,7 @@ namespace TisButAScratch.Patches
                 {
                     var p = actor.GetPilot();
                     var pKey = p.FetchGUID();
+                    if (string.IsNullOrEmpty(pKey)) continue;
 
                     if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
                     {
@@ -541,7 +540,6 @@ namespace TisButAScratch.Patches
                         ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
                         continue;
                     }
-
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
 
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
