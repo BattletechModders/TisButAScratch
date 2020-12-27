@@ -345,7 +345,7 @@ namespace TisButAScratch.Patches
 
             public static void Postfix(SimGameState __instance, ref int __result, Pilot p)
             {
-                if (p.pilotDef.Injuries == 0) //this should hopefully fix non-injury timeouts being weird due to multipliying injury cost. #hbswhy
+                if (p.Injuries == 0) //this should hopefully fix non-injury timeouts being weird due to multipliying injury cost. #hbswhy; changed from PilotDef to Pilot - 12/27
                 {
                     __result =  (p.pilotDef.TimeoutRemaining * __instance.GetDailyHealValue());
                     return;
