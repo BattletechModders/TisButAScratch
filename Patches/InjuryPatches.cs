@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Harmony;
 using BattleTech;
@@ -10,25 +11,146 @@ using static TisButAScratch.Framework.GlobalVars;
 using System.Threading.Tasks;
 using UnityEngine;
 
+using CustomComponents;
+using CustAmmoCategories;
+
 namespace TisButAScratch.Patches
 {
     class InjuryPatches
     {
+        // this should hopefully cause vehile injuries and injuries when certain components are damaged/destroyeded. also implements "forced ejections" for pilots.
+        [HarmonyPatch(typeof(MechComponent), "DamageComponent",
+            new Type[]
+            {
+                typeof(WeaponHitInfo), typeof(ComponentDamageLevel), typeof(bool)
+            })]
+        public static class MechComponent_DamageComponent_Patch
+        {
+            public static bool Prepare()
+            {
+                return (ModInit.modSettings.lifeSupportCustomID.Count != 0 &&
+                        ModInit.modSettings.crewOrCockpitCustomID.Count != 0 &&
+                        !ModInit.modSettings.hostileEnvironmentsEject);
+            }
+
+
+            public static void Postfix(MechComponent __instance, WeaponHitInfo hitInfo,
+                ComponentDamageLevel damageLevel, bool applyEffects)
+            {
+                if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
+                    (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
+                {
+                    ModInit.modLog.LogMessage($"Head hit, but cockpit components not located in head!");
+                    return;
+                }
+
+                if (ModInit.modSettings.lifeSupportSupportsLifeTM &&
+                    __instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
+                    ModInit.modSettings.lifeSupportCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)))
+                {
+                    if (damageLevel == ComponentDamageLevel.Penalized)
+                    {
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is being cooked!");
+                        __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                        return;
+                    }
+                    if (damageLevel == ComponentDamageLevel.Destroyed)
+                    {
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is well-done!");
+                        __instance.parent.GetPilot().LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
+                        return;
+                    }
+                }
+
+                if (((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0) || __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
+                    (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) && (damageLevel == ComponentDamageLevel.Penalized || damageLevel == ComponentDamageLevel.Destroyed))
+                {
+                    ModInit.modLog.LogMessage($"Cockpit component ({__instance.Description.UIName}) damaged/destroyed, pilot needs injury!");
+                    __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                    return;
+                }
+
+                if (__instance.parent is Mech && !__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) && ModInit.modSettings.hostileEnvironmentsEject &&
+                    ModInit.modSettings.lifeSupportCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
+                    (damageLevel == ComponentDamageLevel.Destroyed) && ModInit.modSettings.hostileEnvironments.Any(x => x == __instance.parent.Combat.MapMetaData.biomeDesignMask.Id))
+                {
+                    ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
+                    __instance.parent.EjectPilot(__instance.parent.GUID, 0, DeathMethod.PilotEjection, true);
+                    return;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Mech), "ApplyHeadStructureEffects",
+            new Type[]
+            {
+                typeof(ChassisLocations), typeof(LocationDamageLevel), typeof(LocationDamageLevel), typeof(WeaponHitInfo)
+            })]
+
+        public static class Mech_ApplyHeadStructureEffects
+        {
+            [HarmonyPriority(Priority.First)]
+            public static bool Prefix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
+                LocationDamageLevel newDamageLevel, WeaponHitInfo hitInfo)
+            {
+                if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
+                {
+                    ModInit.modLog.LogMessage($"Head hit, but cockpit not located in head! No injury should be sustained!");
+                    __instance.GetPilot().SetNeedsInjury(InjuryReason.NotSet);
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Vehicle), "CheckPilotStatus",
+            new Type[]
+            {
+                typeof(float), typeof(int), typeof(string)
+            })]
+        public static class Vehicle_CheckPilotStatus_Patch
+        {
+            public static void Prefix(Vehicle __instance, float gutsRoll, int stackItemID, string sourceID)
+            {
+                var p = __instance.GetPilot();
+                if (p.NeedsInjury)
+                {
+                    ModInit.modLog.LogMessage($"Injuring {__instance.Description.UIName} pilot {__instance.GetPilot().Callsign} due to crew compartment damage!");
+                    __instance.GetPilot().InjurePilot(sourceID, stackItemID, 1, DamageType.ComponentExplosion, null, null);
+                }
+            }
+        }
+
         //main patch to apply injury effects on injured pilot
+
         [HarmonyPatch(typeof(Pilot), "InjurePilot",
             new Type[]
             {
                 typeof(string), typeof(int), typeof(int), typeof(DamageType), typeof(Weapon), typeof(AbstractActor)
             })]
-        [HarmonyPriority(Priority.First)]
         public static class Pilot_InjurePilot_Patch
         {
-            public static void Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
-                DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
+            [HarmonyPriority(Priority.First)]
+//            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
+            public static void Prefix(Pilot __instance)
             {
-                PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
-                ModInit.modLog.LogMessage(
-                    $"{__instance.Callsign} has {PilotInjuryHolder.HolderInstance.injuryStat} injuries before InjurePilot; proceeding.");
+                try
+                {
+                    ModInit.modLog.LogMessage(
+                        $"{__instance?.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
+                    PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
+                    ModInit.modLog.LogMessage(
+                        $"{__instance?.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                }
+                catch (Exception ex)
+                {
+                    ModInit.modLog.LogException(ex);
+                }
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
@@ -115,24 +237,29 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("CanPilot", MethodType.Getter)]
-        [HarmonyPriority(Priority.Last)]
+        
         public static class Pilot_CanPilot_Patch
         {
+            [HarmonyPriority(Priority.First)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                __result = true;
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || (__instance.pilotDef.TimeoutRemaining > 0))
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries == __instance.Health)
                 {
                     __result = false;
+                }
+                else
+                {
+                    __result = true;
                 }
             }
         }
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("IsIncapacitated", MethodType.Getter)]
-        [HarmonyPriority(Priority.Last)]
+       
         public static class Pilot_IsIncapacitated_Patch
         {
+            [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || 
@@ -145,13 +272,13 @@ namespace TisButAScratch.Patches
         }
 
         [HarmonyPatch(typeof(Contract), "FinalizeKilledMechWarriors", typeof(SimGameState))]
-        [HarmonyAfter(new string[] {"co.uk.cwolf.MissionControl"})]
+       
         public class ContractFinalizeKilledMechwarriorsPatch
         {
             private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
             private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
             private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
-
+            [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
             public static bool Prefix(Contract __instance)
             {
                 pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
@@ -221,7 +348,7 @@ namespace TisButAScratch.Patches
 
             public static void Postfix(SimGameState __instance, ref int __result, Pilot p)
             {
-                if (p.pilotDef.Injuries == 0) //this should hopefully fix non-injury timeouts being weird due to multipliying injury cost. #hbswhy
+                if (p.Injuries == 0) //this should hopefully fix non-injury timeouts being weird due to multipliying injury cost. #hbswhy; changed from PilotDef to Pilot - 12/27
                 {
                     __result =  (p.pilotDef.TimeoutRemaining * __instance.GetDailyHealValue());
                     return;
@@ -279,8 +406,6 @@ namespace TisButAScratch.Patches
                 var pKey = p.FetchGUID();
                 var internalDmgInjuryCount = p.StatCollection.GetValue<int>("internalDmgInjuryCount");
 
-
-
                 if ((ModInit.modSettings.internalDmgInjuryLocs.Contains(location) ||
                      ModInit.modSettings.internalDmgInjuryLocs.Capacity == 0) &&
                     damage >= ModInit.modSettings.internalDmgLvlReq &&
@@ -329,6 +454,8 @@ namespace TisButAScratch.Patches
 
                     if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                         StatCollection.StatOperation.Set, true, -1, true);
+
+                    target.HandleDeath(p.FetchGUID()); // added handledeath for  bleeding out
                 }
             }
         }

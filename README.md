@@ -119,7 +119,15 @@ Injuries are defined in the settings.json, and have the following structure:
 "severityCost" : 360,
 "debilitatedCost" : 4320,
 "medtechDebilMultiplier" : 0.5,
-"injuryHealTimeMultiplier" : 5.0,	
+"injuryHealTimeMultiplier" : 5.0,
+
+"crewOrCockpitCustomID": ["Cockpit", "CrewCompartment", "LifeSupportA", "LifeSupportB", "SensorsA", "SensorsB"],
+"lifeSupportCustomID": ["LifeSupportA", "LifeSupportB"],
+"isTorsoMountStatName": "isTorsoMount",
+"lifeSupportSupportsLifeTM": true,
+"hostileEnvironmentsEject": true,
+"hostileEnvironments": ["DesignMaskBiomeLunarVacuum", "DesignMaskBiomeMartianVacuum"],
+
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
 "InternalDmgInjuries": []
@@ -226,6 +234,46 @@ Example stat effect added to DNI cockpit given below:
 `medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier = 0.5`, injury healing cost would be `2000/ (10 * .5)`
 
 `injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `debiledCost` are added after this multiplier)
+
+`crewOrCockpitCustomID` - List<string> - list of CustomId (from CustomComponents) that defines "cockpit components" which will inflict injuries on critical hits. Only for vehicles and non-head-mounted cockpits (in the case of head-mounted cockpits, injuries are inflicted by normal "head hit" system).
+
+`lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively. Also used by `hostileEnvironmentsEject` below.
+
+`isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
+
+```
+{
+            "durationData": {
+                "duration": -1,
+                "stackLimit": -1
+            },
+            "targetingData": {
+                "effectTargetsCreator": true,
+                "effectTriggerType": "Passive",
+                "effectTargetType": "Creator"
+            },
+            "effectType": "StatisticEffect",
+            "Description": {
+                "Id": "Torso-Mounted",
+                "Name": "isTorsoMount",
+                "Details": "Torso mounted cockpit, no injuries on head hits.",
+                "Icon": "uixSvgIcon_equipment_Cockpit"
+            },
+            "nature": "Debuff",
+            "statisticData": {
+                "statName": "isTorsoMount",
+                "operation": "Set",
+                "modValue": "true",
+                "modType": "System.Boolean"
+            }
+        }
+```
+
+`lifeSupportSupportsLifeTM` - bool, determines whether damage and/or destruction of life-support (as defined in `lifeSupportCustomID`) causes injuries/death when torso-mounted cockpit is being used.
+
+`hostileEnvironmentsEject` - bool, determines whether pilots with head-mounted cockpits are forced to eject when life suppport (as defined in `lifeSupportCustomID`) is destroyed in "hostile" biomes.
+
+`hostileEnvironments` - List<string>, list of biome DesignMask Ids for which ejection is forced when life support destroyed (e.g., `DesignMaskBiomeLunarVacuum`)
 
 `internalDmgInjuryLocs` - List<string>, internal damage must be in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 

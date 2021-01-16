@@ -21,7 +21,7 @@ namespace TisButAScratch.Framework
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
             if (string.IsNullOrEmpty(guid))
             {
-                ModInit.modLog.LogMessage($"WTF IS GUID NULL?!");
+                ModInit.modLog.LogMessage($"WTF IS {pilot.Callsign}'s GUID NULL?!");
             }
             return guid;
         }
@@ -143,6 +143,49 @@ namespace TisButAScratch.Framework
             {
                 actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
                     new ShowActorInfoSequence(actor, new Text("{0}! Severity {1} Injury!", new object[] { injury.injuryName, injury.severity }), FloatieMessage.MessageNature.PilotInjury, true)));
+
+//                if (!string.IsNullOrEmpty(injury.injuryID_Post))
+//                {
+//                    var txt = new Text("<color=#FF0000>Pilot is bleeding out!</color=#FF0000>");
+
+//                    actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+//                        new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, true)));
+//                }
+
+                var effects = actor.Combat.EffectManager.GetAllEffectsTargeting(actor);
+
+                if (!effects.Any(x =>
+                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                var bleeding = effects.FirstOrDefault(x =>
+                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
+                if (bleeding != null)
+                {
+
+                    var durationInfo = new int[]
+                    {
+                        bleeding.Duration.numActivationsRemaining,
+                        bleeding.Duration.numMovementsRemaining,
+                        bleeding.Duration.numPhasesRemaining,
+                        bleeding.Duration.numRoundsRemaining
+                    }.Max() - 1;
+                    var eject = "";
+                    if (durationInfo <= 0)
+                    {
+                        eject = "EJECT NOW OR DIE!";
+                    }
+
+                    var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} {1} remaining! {2}</color=#FF0000>",
+                        new object[]
+                        {
+                            durationInfo,
+                            ModInit.modSettings.BleedingOutTimerString,
+                            eject
+                        });
+
+                    actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                        new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, false)));
+
+                }
             }
         }
 

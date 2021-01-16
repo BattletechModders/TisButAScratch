@@ -12,6 +12,7 @@ using BattleTech.DataObjects;
 using BattleTech.Save;
 using BattleTech.Save.Test;
 using BattleTech.UI;
+using HBS.Collections;
 using TB.ComponentModel;
 
 namespace TisButAScratch.Patches
@@ -117,24 +118,24 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                 }
                 PilotInjuryHolder.HolderInstance.SerializeInjuryState();
-            }
-
-            public static void Postfix(SimGameState __instance)
-            {
-                var injuryState = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
-                GlobalVars.sim.CompanyTags.Remove(injuryState);
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
             }
         }
 
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]
         public static class SGS_Rehydrate_Patch
         {
+            public static void Prefix(SimGameState __instance)
+            {
+                sim?.CompanyTags.Clear(); // this will either help or hurt.  or it wont do a damn thing.
+            }
             public static void Postfix(SimGameState __instance)
             {
                 sim = __instance;
                 PilotInjuryManager.PreloadIcons();
                 var curPilots = new List<string>();
                 PilotInjuryHolder.HolderInstance.DeserializeInjuryState();
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
                 ModInit.modLog.LogMessage($"Successfully deserialized or determined deserializing unnecessary.");
 
                 if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
@@ -355,6 +356,8 @@ namespace TisButAScratch.Patches
                                     }
                                 }
                             }
+//                            p.ForceRefreshDef(); // added 1221
+//                            __instance.RefreshInjuries(); // added 1221
                         }
                     }
                     else if (result.Scope == EventScope.Commander)
@@ -407,8 +410,9 @@ namespace TisButAScratch.Patches
                                 }
                             }
                         }
+//                        commander.ForceRefreshDef(); // added 1221
+//                        __instance.RefreshInjuries(); // added 1221
                     }
-                    else return;
                 }
             }
         }
@@ -447,6 +451,8 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
+                __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);
+                ModInit.modLog.LogMessage($"Initializing {p.Callsign} EffectStat `NeedsFeedbackInjury`, `BledOut`, `internalDmgInjuryCount`, `{MissionKilledStat}`, `LastInjuryId`, `{ModInit.modSettings.internalDmgStatName}`, and `{ModInit.modSettings.isTorsoMountStatName}`");
             }
         }
 
@@ -456,11 +462,9 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Team __instance, AbstractActor unit)
             {
-
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
-                
-                ModInit.modLog.LogMessage($"Added {p.Callsign} MissionKilledStat");
+
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}"); //changed to sys NewGuid instead of simguid for skirmish compatibility
@@ -469,8 +473,6 @@ namespace TisButAScratch.Patches
 
                 var pKey = p.FetchGUID();
                 ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
-                //p.StatCollection.AddStatistic("isCrippled", false); //not needed, is now pilot tag (duh)
-
                 //unneeded now? 110920
             //    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
             //    {
@@ -527,23 +529,25 @@ namespace TisButAScratch.Patches
                 {
                     var p = actor.GetPilot();
                     var pKey = p.FetchGUID();
+                    if (string.IsNullOrEmpty(pKey)) continue;
 
-                    if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
-                    {
-                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
-                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
-                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
-                        p.pilotDef.PilotTags.RemoveRange(rmt);
-                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
-                    }
-
+//                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
+//                   {
+//                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
+//                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
+//                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
+//                        p.pilotDef.PilotTags.RemoveRange(rmt);
+//                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
+//                        continue;
+//                    }
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
 
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
                     ModInit.modLog.LogMessage($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
 
 
-                        foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID_Post != ""))
+                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x =>
+                        x.injuryID_Post != ""))
                     {
                         if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
                         {
@@ -553,6 +557,7 @@ namespace TisButAScratch.Patches
                             ModInit.modLog.LogMessage($"Added {inj.injuryID_Post} to {p.Callsign} for post-combat injury");
                         }
                     }
+
                 }
             }
         }
