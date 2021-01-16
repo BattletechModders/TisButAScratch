@@ -117,19 +117,16 @@ namespace TisButAScratch.Patches
         
         public static class TaskManagementElement_UpdateTaskInfo_Patch
         {
-            [HarmonyAfter(new string[] { "ca.jwolf.MechAffinity" })] //without whom this would not have happened
-            public static void Postfix(TaskManagementElement __instance, WorkOrderEntry ___entry, LocalizableText ___subTitleText)
+            [HarmonyPriority(Priority.Last)]
+            public static void Postfix(TaskManagementElement __instance, WorkOrderEntry ___entry, LocalizableText ___subTitleText, UIColorRefTracker ___subTitleColor)
             {
                 if (___entry.Type == WorkOrderType.MedLabHeal)
                 {
                     WorkOrderEntry_MedBayHeal medbayHealEntry = ___entry as WorkOrderEntry_MedBayHeal;
-                    if (medbayHealEntry.Pilot.pilotDef.TimeoutRemaining > 0)
-                    {
-                        ___subTitleText.SetText("UNAVAILABLE");
-                    }
-                    else
+                    if (medbayHealEntry.Pilot.Injuries != 0)
                     {
                         ___subTitleText.SetText("INJURED");
+                        ___subTitleColor.SetUIColor(UIColor.RedHalf);
                     }
                 }
             }

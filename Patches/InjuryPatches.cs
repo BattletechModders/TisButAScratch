@@ -240,13 +240,16 @@ namespace TisButAScratch.Patches
         
         public static class Pilot_CanPilot_Patch
         {
-            [HarmonyPriority(Priority.Last)]
+            [HarmonyPriority(Priority.First)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                __result = true;
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || (__instance.pilotDef.TimeoutRemaining > 0) || __instance.Injuries == __instance.Health)
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries == __instance.Health)
                 {
                     __result = false;
+                }
+                else
+                {
+                    __result = true;
                 }
             }
         }

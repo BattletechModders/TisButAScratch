@@ -48,3 +48,4 @@ C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\protobuf-net.dll
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.AudioModule.dll
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.SharedInternalsModule.dll
 C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\bin\Debug\AWSSDK.SecurityToken.dll
+C:\Users\ajkroeger\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csprojAssemblyReference.cache
