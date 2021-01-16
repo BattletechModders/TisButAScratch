@@ -244,7 +244,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(Pilot __instance, ref bool __result)
             {
                 __result = true;
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || (__instance.pilotDef.TimeoutRemaining > 0))
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || (__instance.pilotDef.TimeoutRemaining > 0) || __instance.Injuries == __instance.Health)
                 {
                     __result = false;
                 }
@@ -451,6 +451,8 @@ namespace TisButAScratch.Patches
 
                     if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                         StatCollection.StatOperation.Set, true, -1, true);
+
+                    target.HandleDeath(p.FetchGUID()); // added handledeath for  bleeding out
                 }
             }
         }

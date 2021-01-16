@@ -356,8 +356,8 @@ namespace TisButAScratch.Patches
                                     }
                                 }
                             }
-                            p.ForceRefreshDef(); // added 1221
-                            __instance.RefreshInjuries(); // added 1221
+//                            p.ForceRefreshDef(); // added 1221
+//                            __instance.RefreshInjuries(); // added 1221
                         }
                     }
                     else if (result.Scope == EventScope.Commander)
@@ -410,8 +410,8 @@ namespace TisButAScratch.Patches
                                 }
                             }
                         }
-                        commander.ForceRefreshDef(); // added 1221
-                        __instance.RefreshInjuries(); // added 1221
+//                        commander.ForceRefreshDef(); // added 1221
+//                        __instance.RefreshInjuries(); // added 1221
                     }
                 }
             }
@@ -531,15 +531,15 @@ namespace TisButAScratch.Patches
                     var pKey = p.FetchGUID();
                     if (string.IsNullOrEmpty(pKey)) continue;
 
-                    if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
-                    {
-                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
-                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
-                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
-                        p.pilotDef.PilotTags.RemoveRange(rmt);
-                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
-                        continue;
-                    }
+//                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
+//                   {
+//                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
+//                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
+//                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
+//                        p.pilotDef.PilotTags.RemoveRange(rmt);
+//                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
+//                        continue;
+//                    }
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
 
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
