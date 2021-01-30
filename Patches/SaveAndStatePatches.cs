@@ -473,12 +473,6 @@ namespace TisButAScratch.Patches
 
                 var pKey = p.FetchGUID();
                 ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
-                //unneeded now? 110920
-            //    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey) && (unit.team == null || !unit.team.IsLocalPlayer || (sim.PilotRoster.All(x => x.FetchGUID() != pKey) && !p.IsPlayerCharacter)))
-            //    {
-            //        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add($"{pKey}", new List<string>());
-            //        ModInit.modLog.LogMessage($"Adding AI Pilot {p?.Callsign} to injuryMap");
-            //    }
 
                 if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
                 {

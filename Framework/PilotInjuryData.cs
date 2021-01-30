@@ -32,6 +32,7 @@ namespace TisButAScratch.Framework
         public Dictionary<string, List<string>> pilotInjuriesMap;
         public Dictionary<string, List<string>> combatInjuriesMap; //added for temprary injury storage to allow clean combat restarts
         public int injuryStat = 0;
+        public int ejectState = 0;
 
         public static PilotInjuryHolder HolderInstance
         {
@@ -67,7 +68,7 @@ namespace TisButAScratch.Framework
                 var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
                 var injuryState = InjuryStateCTag.Substring(injuryStateTag.Length);
                 HolderInstance.pilotInjuriesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(injuryState);
-                ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags");
+                ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags. State was {injuryState}");
                 sim.CompanyTags.Remove(InjuryStateCTag);
             }
             else

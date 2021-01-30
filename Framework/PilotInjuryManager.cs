@@ -193,11 +193,24 @@ namespace TisButAScratch.Framework
         internal void rollInjury(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
             var loc = InjuryLoc.NOT_SET;
+            var pKey = pilot.FetchGUID();
+
+            if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
+            {
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
+                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to combatInjuriesMap");
+            }
+
+            if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+            {
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+            }
 
             for (int i = 0; i < dmg; i++)
             {
                 //adding locations weights for preexisting injuries
-                var pKey = pilot.FetchGUID();
+
                 //does pilot have existing injuries
                 var injuryLocs = new List<int>(Enumerable.Range(2,6));
                 if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0 || PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Count > 0)
@@ -296,6 +309,20 @@ namespace TisButAScratch.Framework
 
         internal void rollInjuryFeedback(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
+            var pKey = pilot.FetchGUID();
+
+            if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
+            {
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
+                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to combatInjuriesMap");
+            }
+
+            if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+            {
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+            }
+
             var loc = InjuryLoc.Head;
 
             for (int i = 0; i < dmg; i++)
@@ -306,7 +333,7 @@ namespace TisButAScratch.Framework
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
-                var pKey = pilot.FetchGUID();
+                
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
@@ -324,6 +351,15 @@ namespace TisButAScratch.Framework
 
         internal void rollInjurySG(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
+            var pKey = pilot.FetchGUID();
+
+
+            if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+            {
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+            }
+
             InjuryLoc loc;
 
             for (int i = 0; i < dmg; i++)
@@ -337,7 +373,6 @@ namespace TisButAScratch.Framework
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
-                var pKey = pilot.FetchGUID();
 
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(

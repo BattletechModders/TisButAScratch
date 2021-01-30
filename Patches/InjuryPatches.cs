@@ -30,7 +30,7 @@ namespace TisButAScratch.Patches
             {
                 return (ModInit.modSettings.lifeSupportCustomID.Count != 0 &&
                         ModInit.modSettings.crewOrCockpitCustomID.Count != 0 &&
-                        !ModInit.modSettings.hostileEnvironmentsEject);
+                        ModInit.modSettings.hostileEnvironmentsEject);
             }
 
 
@@ -70,15 +70,27 @@ namespace TisButAScratch.Patches
                     __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
                     return;
                 }
-
-                if (__instance.parent is Mech && !__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) && ModInit.modSettings.hostileEnvironmentsEject &&
-                    ModInit.modSettings.lifeSupportCustomID.Any
-                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
-                    (damageLevel == ComponentDamageLevel.Destroyed) && ModInit.modSettings.hostileEnvironments.Any(x => x == __instance.parent.Combat.MapMetaData.biomeDesignMask.Id))
+                
+                if (__instance.parent is Mech && PilotInjuryHolder.HolderInstance.ejectState == 0 && !__instance.parent.IsFlaggedForDeath)
                 {
-                    ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
-                    __instance.parent.EjectPilot(__instance.parent.GUID, 0, DeathMethod.PilotEjection, true);
-                    return;
+                    if (!__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
+                    {
+                        if (ModInit.modSettings.hostileEnvironmentsEject)
+                        {
+                            if (ModInit.modSettings.lifeSupportCustomID.Any
+                                (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)))
+                            {
+                                if(damageLevel == ComponentDamageLevel.Destroyed && ModInit.modSettings.hostileEnvironments.Any(x => x == __instance.parent.Combat.MapMetaData.biomeDesignMask.Id))
+                                {
+                                    PilotInjuryHolder.HolderInstance.ejectState = 1;
+                                    var mech = __instance.parent as Mech;
+                                    ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed in hostile environment! {__instance.parent.GetPilot().Callsign} ejecting!");
+                                    mech.EjectPilot(__instance.parent.GUID, 0, DeathMethod.PilotEjection, true);
+                                    PilotInjuryHolder.HolderInstance.ejectState = 0;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -179,7 +191,7 @@ namespace TisButAScratch.Patches
 
                 else
                 {
-                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign}{pKey}");
+                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign} {pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
 
                 }
@@ -300,7 +312,8 @@ namespace TisButAScratch.Patches
                              (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 
                     {
-                        return false;
+                        ModInit.modLog.LogMessage(
+                            $"{pilot.Callsign} was mission-killed, debilitated, or bled out with BleedingOutLethal = false!");
                     }
 
                     else

@@ -17,6 +17,8 @@ namespace TisButAScratch.Framework
         internal static string getPilotInjuryDesc(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
+            if (string.IsNullOrEmpty(pilotID)) return null;
+
             if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pilotID))
             {
                 var rtrn = $"\n";

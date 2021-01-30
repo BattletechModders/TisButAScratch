@@ -37,6 +37,7 @@ namespace TisButAScratch
             }
             //HarmonyInstance.DEBUG = true;
             modLog = new Logger(modDir, "TBAS", modSettings.enableLogging);
+            ModInit.modLog.LogMessage($"Initializing TisButAScratch - Version {typeof(Settings).Assembly.GetName().Version}");
             PilotInjuryManager.ManagerInstance.Initialize();
             PilotInjuryHolder.HolderInstance.Initialize();
             var harmony = HarmonyInstance.Create(HarmonyPackage);
