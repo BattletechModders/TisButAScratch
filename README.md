@@ -125,8 +125,6 @@ Injuries are defined in the settings.json, and have the following structure:
 "lifeSupportCustomID": ["LifeSupportA", "LifeSupportB"],
 "isTorsoMountStatName": "isTorsoMount",
 "lifeSupportSupportsLifeTM": true,
-"hostileEnvironmentsEject": true,
-"hostileEnvironments": ["DesignMaskBiomeLunarVacuum", "DesignMaskBiomeMartianVacuum"],
 
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
@@ -237,7 +235,7 @@ Example stat effect added to DNI cockpit given below:
 
 `crewOrCockpitCustomID` - List<string> - list of CustomId (from CustomComponents) that defines "cockpit components" which will inflict injuries on critical hits. Only for vehicles and non-head-mounted cockpits (in the case of head-mounted cockpits, injuries are inflicted by normal "head hit" system).
 
-`lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively. Also used by `hostileEnvironmentsEject` below.
+`lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
 
 `isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
 
@@ -270,10 +268,6 @@ Example stat effect added to DNI cockpit given below:
 ```
 
 `lifeSupportSupportsLifeTM` - bool, determines whether damage and/or destruction of life-support (as defined in `lifeSupportCustomID`) causes injuries/death when torso-mounted cockpit is being used.
-
-`hostileEnvironmentsEject` - bool, determines whether pilots with head-mounted cockpits are forced to eject when life suppport (as defined in `lifeSupportCustomID`) is destroyed in "hostile" biomes.
-
-`hostileEnvironments` - List<string>, list of biome DesignMask Ids for which ejection is forced when life support destroyed (e.g., `DesignMaskBiomeLunarVacuum`)
 
 `internalDmgInjuryLocs` - List<string>, internal damage must be in one of these ChassisLocations in order to inflict injuries from `enableInternalDmgInjuries`. If empty, all locations can inflict an injury.
 
