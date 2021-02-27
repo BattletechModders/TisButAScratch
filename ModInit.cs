@@ -71,8 +71,6 @@ namespace TisButAScratch
 
         public string isTorsoMountStatName = "isTorsoMount";
         public bool lifeSupportSupportsLifeTM = false;
-        public bool hostileEnvironmentsEject = false;
-        public List<string> hostileEnvironments = new List<string>();
 
         public bool timeHealsAllWounds = false;
         public int debilSeverityThreshold = -1;
