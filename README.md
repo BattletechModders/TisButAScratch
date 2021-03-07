@@ -30,6 +30,26 @@ Injuries can by checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/bleedingout.png)
 
+<b>Advanced Life Support Gear</b>: Mech gear to influence injury effects:
+```
+    "statisticData": {
+	"statName": "DisablesBleeding",
+	"operation": "Set",
+	"modValue": "true",
+	"modType": "System.Boolean"
+            }
+```
+Gear that sets `DisablesBleeding` to True will prevent the pilot from taking bleeding injuries.
+
+```
+    "statisticData": {
+	"statName": "NullifiesInjuryEffects",
+	"operation": "Set",
+	"modValue": "true",
+	"modType": "System.Boolean"
+    }
+```
+Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causing maluses in combat (and necessarily precludes taking bleeding injuries, although regular injuries will still be sustained).
 
 <b>Increased Injury Heal Time</b>: Injuries take longer to heal, defined in the settings below.
 
