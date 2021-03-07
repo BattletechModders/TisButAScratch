@@ -452,6 +452,8 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);
+                __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.DisableBleedingStat, false);
+                __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat, false);
                 ModInit.modLog.LogMessage($"Initializing {p.Callsign} EffectStat `NeedsFeedbackInjury`, `BledOut`, `internalDmgInjuryCount`, `{MissionKilledStat}`, `LastInjuryId`, `{ModInit.modSettings.internalDmgStatName}`, and `{ModInit.modSettings.isTorsoMountStatName}`");
             }
         }

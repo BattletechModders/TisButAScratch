@@ -83,5 +83,8 @@ namespace TisButAScratch
 
         public List<Injury> InjuryEffectsList = new List<Injury>();
         public List<Injury> InternalDmgInjuries = new List<Injury>();
+
+        public string DisableBleedingStat = "DisablesBleeding";
+        public string NullifiesInjuryEffectsStat = "NullifiesInjuryEffects";
     }
 }

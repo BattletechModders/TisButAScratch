@@ -122,6 +122,11 @@ namespace TisButAScratch.Framework
         protected void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
+            if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat))
+            {
+                ModInit.modLog.LogMessage($"Found advanced life-support: nullifying injury effects for {p.Callsign}");
+                return;
+            }
             var pKey = p.FetchGUID();
             ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}{pKey}");
             foreach (EffectData effectData in injury.effects)
@@ -229,6 +234,11 @@ namespace TisButAScratch.Framework
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
 
+                    if (pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
+                    {
+                        curInjuryList.RemoveAll(x => !string.IsNullOrEmpty(x.injuryID_Post));
+                        ModInit.modLog.LogMessage($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
+                    }
 
                     if (ModInit.modSettings.reInjureWeightAppliesCurrentContract)
                     {
