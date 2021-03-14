@@ -432,9 +432,10 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Effect __instance)
             {
-
+                
                 if (__instance.id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && __instance.Target is AbstractActor target)
                 {
+                    if (target.WasEjected) return;
                     var p = target.GetPilot();
                     var pKey = p.FetchGUID();
                     p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
