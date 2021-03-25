@@ -277,7 +277,7 @@ namespace TisButAScratch.Patches
                 {
                     Pilot pilot = unitResult.pilot;
                     PilotDef pilotDef = pilot.pilotDef;
-                    if (!unitResult.pilot.IsIncapacitated || unitResult.pilot.pilotDef.IsImmortal)
+                    if (!unitResult.pilot.IsIncapacitated || unitResult.pilot.pilotDef.IsImmortal || unitResult.pilot.HasEjected)
                     {
                         if (pilotDef != null)
                         {
