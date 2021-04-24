@@ -135,6 +135,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "missionKillSeverityThreshold" : 6,
 "reInjureWeightAppliesCurrentContract" : false,
 "reInjureLocWeight" : 11,
+"additiveBleedingFactor": 0.75,
 "debilSeverityThreshold" : 3,
 "severityCost" : 360,
 "debilitatedCost" : 4320,
@@ -242,6 +243,7 @@ Example stat effect added to DNI cockpit given below:
 | 28                                                                                                                                                                                                                                  | 4.833333333                            | 82.86                         |
 | 29                                                                                                                                                                                                                                  | 5                                      | 83.33                         |
 
+`additiveBleedingFactor` - float; if < 0, gets rounded to a whole number. this value is then subtracted from the timer of any preexisting bleeding injuries. if the value is between 0 and 1, then the timer of preexisting bleeding injuries is <i>multiplied</i> by this value. In all cases, the resulting "bleedout timer" will not become <1, ensuring players still have a chance to eject.
 
 `debilSeverityThreshold` - int, as discussed above defines the total `severity` of injuries in a single location required for a pilot to be `DEBILITATED`. Disabled if < 1.
 
