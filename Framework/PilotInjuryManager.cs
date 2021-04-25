@@ -322,7 +322,7 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
-                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Any());
+                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
                 ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
@@ -514,7 +514,7 @@ namespace TisButAScratch.Framework
 
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || !string.IsNullOrEmpty(x.injuryID_Post));
-                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Any());
+                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 
