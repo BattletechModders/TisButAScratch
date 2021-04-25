@@ -161,8 +161,40 @@ namespace TisButAScratch.Framework
 
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
-                var bleeding = effects.FirstOrDefault(x =>
-                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
+
+                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
+                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numMovementsRemaining > 0).ToList();
+                var byPhases = effects.OrderBy(x=>x.Duration.numPhasesRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numPhasesRemaining > 0).ToList();
+                var byRounds = effects.OrderBy(x=>x.Duration.numRoundsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numRoundsRemaining > 0).ToList();
+
+                var bleeding = new Effect();
+                if (byActivations.Any())
+                {
+                    bleeding = byActivations.First();
+                }
+                else if (byMovements.Any())
+                {
+                    bleeding = byMovements.First();
+                }
+                else if (byPhases.Any())
+                {
+                    bleeding = byPhases.First();
+                }
+                else if (byRounds.Any())
+                {
+                    bleeding = byRounds.First();
+                }
+                else
+                {
+                    bleeding = effects.FirstOrDefault(x=>
+                        x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
+                    ModInit.modLog.LogMessage($"ERROR: We used the first effect we found, which probably isn't right.");
+                }
+
                 if (bleeding != null)
                 {
 
@@ -290,6 +322,9 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
+                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Any());
+                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
+
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 
@@ -312,8 +347,107 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
 
+                if (!String.IsNullOrEmpty(chosen.injuryID_Post))
+                {
+                    var em = UnityGameInstance.BattleTechGame.Combat.EffectManager;
+                    var effects = em.GetAllEffectsTargeting(pilot.ParentActor); //targeting parent actor maybe?
+                    foreach (var effect in effects.Where(x=>x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)))
+                    {
+                        if (ModInit.modSettings.additiveBleedingFactor < 0)
+                        {
+                            if (effect.Duration.numActivationsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numActivationsRemaining +
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numActivationsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numActivationsRemaining +=
+                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
+                            }
+                            if (effect.Duration.numMovementsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numMovementsRemaining +
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numMovementsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numMovementsRemaining +=
+                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
+                            }                            
+                            if (effect.Duration.numPhasesRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numPhasesRemaining +
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numPhasesRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numPhasesRemaining +=
+                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
+                            }                            
+                            if (effect.Duration.numRoundsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numRoundsRemaining +
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numRoundsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numRoundsRemaining +=
+                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
+                            }
+                        }
+
+                        else if (ModInit.modSettings.additiveBleedingFactor < 1 && ModInit.modSettings.additiveBleedingFactor > 0)
+                        {
+                            if (effect.Duration.numActivationsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numActivationsRemaining *
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numActivationsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numActivationsRemaining = Mathf.RoundToInt(effect.Duration.numActivationsRemaining * ModInit.modSettings.additiveBleedingFactor);
+                            }
+                            if (effect.Duration.numMovementsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numMovementsRemaining *
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numMovementsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numMovementsRemaining = Mathf.RoundToInt(effect.Duration.numMovementsRemaining * ModInit.modSettings.additiveBleedingFactor);
+                            }                            
+                            if (effect.Duration.numPhasesRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numPhasesRemaining *
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numPhasesRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numPhasesRemaining = Mathf.RoundToInt(effect.Duration.numPhasesRemaining * ModInit.modSettings.additiveBleedingFactor);
+                            }                            
+                            if (effect.Duration.numRoundsRemaining > 1)
+                            {
+                                if (Mathf.RoundToInt(effect.Duration.numRoundsRemaining *
+                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
+                                {
+                                    effect.Duration.numRoundsRemaining = 1;
+                                }
+                                else
+                                    effect.Duration.numRoundsRemaining = Mathf.RoundToInt(effect.Duration.numRoundsRemaining * ModInit.modSettings.additiveBleedingFactor);
+                            }
+                        }
+                    }
+                }
+
                 applyInjuryEffects(pilot.ParentActor, chosen);
-                
             }
         }
 
@@ -379,8 +513,8 @@ namespace TisButAScratch.Framework
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
 
-                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || x.injuryID_Post != "");
-
+                injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || !string.IsNullOrEmpty(x.injuryID_Post));
+                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Any());
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 

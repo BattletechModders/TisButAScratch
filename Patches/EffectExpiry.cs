@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BattleTech.UI;
 using Localize;
+using TisButAScratch.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 using static TisButAScratch.Framework.GlobalVars;
@@ -26,8 +27,39 @@ namespace TisButAScratch.Patches
 
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
-                var bleeding = effects.FirstOrDefault(x =>
-                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
+
+                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
+                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numMovementsRemaining > 0).ToList();
+                var byPhases = effects.OrderBy(x=>x.Duration.numPhasesRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numPhasesRemaining > 0).ToList();
+                var byRounds = effects.OrderBy(x=>x.Duration.numRoundsRemaining).Where(
+                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numRoundsRemaining > 0).ToList();
+
+                var bleeding = new Effect();
+                if (byActivations.Any())
+                {
+                    bleeding = byActivations.First();
+                }
+                else if (byMovements.Any())
+                {
+                    bleeding = byMovements.First();
+                }
+                else if (byPhases.Any())
+                {
+                    bleeding = byPhases.First();
+                }
+                else if (byRounds.Any())
+                {
+                    bleeding = byRounds.First();
+                }
+                else
+                {
+                    bleeding = effects.FirstOrDefault(x=>
+                        x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
+                    ModInit.modLog.LogMessage($"ERROR: We used the first effect we found, which probably isn't right.");
+                }
 
                 if (bleeding != null)
                 {

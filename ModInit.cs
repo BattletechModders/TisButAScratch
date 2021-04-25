@@ -65,6 +65,7 @@ namespace TisButAScratch
         public int missionKillSeverityThreshold = -1;
         public bool reInjureWeightAppliesCurrentContract = false;
         public int reInjureLocWeight = 0;
+        public float additiveBleedingFactor = 0f; // if negative, subtract, if decimal multiply.
 
         public List<string> crewOrCockpitCustomID = new List<string>();
         public List<string> lifeSupportCustomID = new List<string>();

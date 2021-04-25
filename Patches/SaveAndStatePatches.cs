@@ -517,7 +517,7 @@ namespace TisButAScratch.Patches
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]
         static class Contract_CompleteContract_Patch
         {
-
+            [HarmonyAfter(new string[] { "us.tbone.TrainingMissions" })]
             static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
                 var actors = UnityGameInstance.BattleTechGame.Combat.AllActors;
@@ -554,6 +554,17 @@ namespace TisButAScratch.Patches
                         }
                     }
 
+                    if (p.StatCollection.GetValue<int>("Injuries") < PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count)
+                    {
+                        var diff = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
+                        ModInit.modLog.LogMessage($"Post-Mission Injuries ({p.StatCollection.GetValue<int>("Injuries")}) less than InjuryHolder count ({PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count})");
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Reverse();
+                        for (int i = 0; i < diff; i++)
+                        {
+                            ModInit.modLog.LogMessage($"Removing {PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey][i]} from {p.Callsign}");
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
+                        }
+                    }
                 }
             }
         }

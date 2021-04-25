@@ -297,6 +297,7 @@ namespace TisButAScratch.Patches
 
                     else
                     {
+                        
                         float num = pilot.LethalInjuries
                             ? sim.Constants.Pilot.LethalDeathChance
                             : sim.Constants.Pilot.IncapacitatedDeathChance;
