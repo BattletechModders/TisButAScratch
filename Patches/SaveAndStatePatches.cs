@@ -520,13 +520,16 @@ namespace TisButAScratch.Patches
             [HarmonyAfter(new string[] { "us.tbone.TrainingMissions" })]
             static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
-                var actors = UnityGameInstance.BattleTechGame.Combat.AllActors;
+                var sim =UnityGameInstance.BattleTechGame.Simulation;
+                var playerPilots = sim.PilotRoster;
+                playerPilots.Add(sim.Commander);
+                var actors = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x=>x.team.IsLocalPlayer);
                 foreach (var actor in actors)
                 {
                     var p = actor.GetPilot();
                     var pKey = p.FetchGUID();
                     if (string.IsNullOrEmpty(pKey)) continue;
-
+                    if (playerPilots.All(x => x.GUID != p.GUID)) continue;
 //                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
 //                   {
 //                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
@@ -566,6 +569,7 @@ namespace TisButAScratch.Patches
                         }
                     }
                 }
+                PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
             }
         }
     }
