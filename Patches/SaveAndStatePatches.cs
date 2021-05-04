@@ -521,7 +521,8 @@ namespace TisButAScratch.Patches
             static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
                 var sim =UnityGameInstance.BattleTechGame.Simulation;
-                var playerPilots = sim.PilotRoster;
+                var playerPilots = new List<Pilot>();
+                playerPilots.AddRange(sim.PilotRoster);
                 playerPilots.Add(sim.Commander);
                 var actors = UnityGameInstance.BattleTechGame.Combat.AllActors.Where(x=>x.team.IsLocalPlayer);
                 foreach (var actor in actors)
