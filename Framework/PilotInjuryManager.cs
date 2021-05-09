@@ -246,6 +246,7 @@ namespace TisButAScratch.Framework
 
             for (int i = 0; i < dmg; i++)
             {
+                Rechoose:
                 //adding locations weights for preexisting injuries
 
                 //does pilot have existing injuries
@@ -322,11 +323,17 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
-                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
-                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
+//                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
+//                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(chosen.injuryID))
+                {
+                    ModInit.modLog.LogMessage($"Pilot already has that injury, rerolling location and injuries");
+                    goto Rechoose;
+                }
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
@@ -504,19 +511,28 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
             }
 
+            
+
             InjuryLoc loc;
 
             for (int i = 0; i < dmg; i++)
             {
+                Rechoose:
                 var injuryList = new List<Injury>(PilotInjuryManager.ManagerInstance.InjuryEffectsList);
                 loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || !string.IsNullOrEmpty(x.injuryID_Post));
-                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
+ //               injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(chosen.injuryID))
+                {
+                    ModInit.modLog.LogMessage($"Pilot already has that injury, rerolling location and injuries");
+                    goto Rechoose;
+                }
 
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
