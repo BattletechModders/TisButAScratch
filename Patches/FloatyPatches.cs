@@ -8,13 +8,12 @@ using System.Reflection.Emit;
 
 namespace TisButAScratch.Patches
 {
-    class FloatyPatches
+    public class FloatyPatches
     {
         [HarmonyPatch(typeof(AbstractActor), "CheckPilotStatusFromAttack")]
 
         static class AbstractActor_CheckPilotStatusFromAttack
         {
-            static bool Prepare() => 2 < 1;
 
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
             {

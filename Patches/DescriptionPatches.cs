@@ -1,10 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using static TisButAScratch.Framework.GlobalVars;
 using BattleTech;
 using BattleTech.UI;
@@ -12,12 +6,11 @@ using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using TisButAScratch.Framework;
 using Harmony;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace TisButAScratch.Patches
 {
-    class DescriptionPatches
+    public class DescriptionPatches
     {
         [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
         
@@ -44,17 +37,17 @@ namespace TisButAScratch.Patches
                 }
 
                 Pilot pilot = __instance.Pilot;
-                string Desc = tooltip.GetText();
+                string Desc = tooltip?.GetText();
                 if (String.IsNullOrEmpty(Desc))
                 {
                     Desc = "";
                 }
 
-                Desc += "<b>Injuries:</b>";
+                Desc += "<b>Injuries:</b>\n";
                 Desc += InjuryDescriptions.getPilotInjuryDesc(pilot);
                 
                 var descDef = new BaseDescriptionDef("Injuries", pilot.Callsign, Desc, null);
-                tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
+                tooltip?.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
             }
         }
 
@@ -86,12 +79,11 @@ namespace TisButAScratch.Patches
                         Desc = "";
                     }
 
-                    Desc += "<b>Injuries:</b>";
+                    Desc += "<b>Injuries:</b>\n";
                     Desc += InjuryDescriptions.getPilotInjuryDesc(p);
 
                     var descDef = new BaseDescriptionDef("Injuries", p.Callsign, Desc, null);
                     tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descDef));
-                    return;
                 }
 
                 else
@@ -104,7 +96,7 @@ namespace TisButAScratch.Patches
                         Desc = "";
                     }
 
-                    Desc += "<b>Injuries:</b>";
+                    Desc += "<b>Injuries:</b>\n";
                     Desc += InjuryDescriptions.getPilotInjuryDesc(p);
 
                     var descDef = new BaseDescriptionDef("Injuries", p.Callsign, Desc, null);
@@ -120,15 +112,11 @@ namespace TisButAScratch.Patches
             [HarmonyPriority(Priority.Last)]
             public static void Postfix(TaskManagementElement __instance, WorkOrderEntry ___entry, LocalizableText ___subTitleText, UIColorRefTracker ___subTitleColor)
             {
-                if (___entry.Type == WorkOrderType.MedLabHeal)
-                {
-                    WorkOrderEntry_MedBayHeal medbayHealEntry = ___entry as WorkOrderEntry_MedBayHeal;
-                    if (medbayHealEntry.Pilot.Injuries != 0)
-                    {
-                        ___subTitleText.SetText("INJURED");
-                        ___subTitleColor.SetUIColor(UIColor.RedHalf);
-                    }
-                }
+                if (___entry.Type != WorkOrderType.MedLabHeal) return;
+                if (!(___entry is WorkOrderEntry_MedBayHeal medbayHealEntry) ||
+                    medbayHealEntry.Pilot.Injuries == 0) return;
+                ___subTitleText.SetText("INJURED");
+                ___subTitleColor.SetUIColor(UIColor.RedHalf);
             }
         }
     }

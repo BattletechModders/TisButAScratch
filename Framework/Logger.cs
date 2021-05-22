@@ -3,10 +3,10 @@ using System.IO;
 
 namespace TisButAScratch.Framework
 {
-    class Logger
+    internal class Logger
     {
         private static StreamWriter logStreamWriter;
-        private bool enableLogging = false;
+        private bool enableLogging;
 
         public Logger(string modDir, string fileName, bool enableLogging)
         {
@@ -32,13 +32,13 @@ namespace TisButAScratch.Framework
         }
 
 
-        public void LogError(string message)
+        public static void LogError(string message)
         {
             string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"ERROR: {ts} - {message}");
         }
 
-        public void LogException(Exception exception)
+        public static void LogException(Exception exception)
         {
             string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"CRITICAL: {ts} - {exception}");
