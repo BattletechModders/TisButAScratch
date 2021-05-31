@@ -65,6 +65,7 @@ namespace TisButAScratch.Framework
 
         internal static void ApplyClosestSimGameResult(this Pilot pilot)
         {
+            if (ModInit.modSettings.SimBleedingEffects.Count == 0 || !ModInit.modSettings.UseSimBleedingEffects) return;
             var pKey = pilot.FetchGUID();
             if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey))
             {
@@ -104,6 +105,7 @@ namespace TisButAScratch.Framework
 
         internal static void ApplyClosestBleedingEffect(this Pilot pilot)
         {
+            if (ModInit.modSettings.BleedingEffects.Count == 0 || !ModInit.modSettings.UseBleedingEffects) return;
             var bloodLevelDecimal = (float)pilot.GetBloodBank() / (float)pilot.GetBloodCapacity();
             var pKey = pilot.FetchGUID();
             if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey) && ModInit.modSettings.UseSimBleedingEffects)
