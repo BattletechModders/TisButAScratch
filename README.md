@@ -26,7 +26,11 @@ Injuries can by checked be hovering over the red "injured" indicator in pilot po
 
 <b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
-<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings). The status effect gives an indicator of many rounds, activations, etc. remain before the pilot bleeds out. End the mission or eject the pilot to avoid death/incapacitation.
+<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. ~~These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings)~~ <b>In versions 1.0.2.1 and higher, `durationData` for bleeding out has been replaced by calculations per-pilot based on Guts, Health, and other settings</b>. Pilots now have a calculated "BloodBank". If their BloodBank reaches 0 at the end of their activation, they die. BloodBank is decreased every round by the severity of the "Bleeding Out" injury, modified by `additiveBleedingFactor` for any additional "Bleeding Out" injuries after the first.
+
+In addition, escalating penalties can be defined, inflicting debuffs in-mission on pilots the longer they bleed out. Lastly, semi-persistant debuffs can optionally be inflicted on pilots the longer they bleed out, e.g. -3 Piloting for 20 days.
+
+The status effect gives an indicator of activations remain before the pilot bleeds out. End the mission or eject the pilot to avoid death/incapacitation.
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/bleedingout.png)
 
@@ -126,7 +130,6 @@ Injuries are defined in the settings.json, and have the following structure:
 "debilIncapacitates" : false,
 "BleedingOutLethal" : false,
 "BleedingOutSuffix" : "_bleedout",
-"BleedingOutTimerString" : "rounds",
 "enableInternalDmgInjuries" : true,
 "internalDmgStatName" : "InjureOnStructDmg",
 "internalDmgInjuryLimit" : 1,
@@ -135,7 +138,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "missionKillSeverityThreshold" : 6,
 "reInjureWeightAppliesCurrentContract" : false,
 "reInjureLocWeight" : 11,
-"additiveBleedingFactor": 0.75,
+
 "debilSeverityThreshold" : 3,
 "severityCost" : 360,
 "debilitatedCost" : 4320,
@@ -149,8 +152,17 @@ Injuries are defined in the settings.json, and have the following structure:
 
 "internalDmgInjuryLocs" : ["Head", "CenterTorso"],
 "InjuryEffectsList": [],
-"InternalDmgInjuries": []
- 
+"InternalDmgInjuries": [],
+
+"additiveBleedingFactor": 0.75,
+"minBloodBank": 2,
+"baseBloodBankAdd": 0,
+"UseGutsForBloodCap": true,
+"factorBloodBankMult": 1,
+"UseBleedingEffects": true,
+"BleedingEffects": [],
+"UseSimBleedingEffects": true,
+"SimBleedingEffects": []
 ```
 
 `enableLogging` - bool, enables logging.
@@ -164,8 +176,6 @@ Injuries are defined in the settings.json, and have the following structure:
 `BleedingOutLethal` - bool, determines whether <b>Bleeding Out</b> from an injury is lethal (`true`) or merely incapacitates (`false`)
 
 `BleedingOutSuffix` - string, ending string of <i>status effect Id, not the `injuryID`</i> to denote whether the injury should inflict <b>Bleeding Out</b> and incapacitate or kill the pilot on expiration (per `BleedingOutLethal`)
-
-`BleedingOutTimerString` - string, what word to use in <b>Bleeding Out</b> status tooltip; e.g., if durationData for the injuryeffect uses `ticksOnActivations`, you may want to set this string to `"activations"`, as the tooltip would say "Unit is bleeding out, 4 `activations` remaining!".
 
 `internalDmgStatName` - name of bool statistic being used in gear to determine whether internal structure damage results in injuries.
 Example stat effect added to DNI cockpit given below: 
@@ -243,8 +253,6 @@ Example stat effect added to DNI cockpit given below:
 | 28                                                                                                                                                                                                                                  | 4.833333333                            | 82.86                         |
 | 29                                                                                                                                                                                                                                  | 5                                      | 83.33                         |
 
-`additiveBleedingFactor` - float; if < 0, gets rounded to a whole number. this value is then subtracted from the timer of any preexisting bleeding injuries. if the value is between 0 and 1, then the timer of preexisting bleeding injuries is <i>multiplied</i> by this value. In all cases, the resulting "bleedout timer" will not become <1, ensuring players still have a chance to eject.
-
 `debilSeverityThreshold` - int, as discussed above defines the total `severity` of injuries in a single location required for a pilot to be `DEBILITATED`. Disabled if < 1.
 
 `severityCost` - int, increases healing time required as a factor of severity
@@ -296,6 +304,18 @@ Example stat effect added to DNI cockpit given below:
 `InjuryEffectsList` - List<Injury>, list of all possible injuries. All injury locations need to have an injury for each value of `couldBeThermal` represented, with the exception of `Head`. Overheating will never inflict a head injury, so `Head` does not need an Injury where `couldBeThermal :true`
 
 `InternalDmgInjuries` - List<Injury>, list of all possible injuries from internal structure damage.
+
+`additiveBleedingFactor` - float; if < 0, gets rounded to a whole number. this value is then subtracted from the timer of any preexisting bleeding injuries. if the value is between 0 and 1, then the timer of preexisting bleeding injuries is <i>multiplied</i> by this value. In all cases, the resulting "bleedout timer" will not become <1, ensuring players still have a chance to eject.
+
+`minBloodBank` - int, defines a minimum "BloodBank" for pilots regardless of Guts/Health calculations.
+
+`baseBloodBankAdd` - int, defines a baseline addition to "BloodBank" on top of Guts/Health calculations.
+
+`UseGutsForBloodCap` - bool, if True - Guts level is used in BloodBank calculation. if False, Health is used in BloodBank calculation.
+
+`factorBloodBankMult` - float, multiplier for BloodBank calculation; if `UseGutsForBloodCap = True`, final BloodBank formula is `(Guts * factorBloodBankMult) + baseBloodBankAdd`. If `UseGutsForBloodCap = False`, final BloodBank formula is `(Health * factorBloodBankMult) + baseBloodBankAdd`
+
+
 	
 A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
 
