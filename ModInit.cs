@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Harmony;
 using System.Reflection;
 using BattleTech;
-using static TisButAScratch.Framework.GlobalVars;
 using TisButAScratch.Framework;
 
 namespace TisButAScratch
@@ -13,7 +12,7 @@ namespace TisButAScratch
     public static class ModInit
     {
         internal static Logger modLog;
-        internal static string modDir;
+        private static string modDir;
 
 
         internal static Settings modSettings;
@@ -21,6 +20,7 @@ namespace TisButAScratch
         public static void Init(string directory, string settingsJSON)
         {
             modDir = directory;
+            modLog = new Logger(modDir, "TBAS", true);
             try
             {
                 using (StreamReader reader = new StreamReader($"{modDir}/settings.json"))
@@ -30,13 +30,12 @@ namespace TisButAScratch
                 }
                 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Logger.LogException(ex);
                 ModInit.modSettings = new Settings();
             }
             //HarmonyInstance.DEBUG = true;
-            modLog = new Logger(modDir, "TBAS", modSettings.enableLogging);
             ModInit.modLog.LogMessage($"Initializing TisButAScratch - Version {typeof(Settings).Assembly.GetName().Version}");
             PilotInjuryManager.ManagerInstance.Initialize();
             PilotInjuryHolder.HolderInstance.Initialize();
@@ -56,7 +55,6 @@ namespace TisButAScratch
 
         public bool BleedingOutLethal = false;
         public string BleedingOutSuffix = "_bleedout";
-        public string BleedingOutTimerString = "activations";
 
         public bool enableInternalDmgInjuries = false;
         public string internalDmgStatName = "InjureOnStructDmg";
@@ -65,7 +63,6 @@ namespace TisButAScratch
         public int missionKillSeverityThreshold = -1;
         public bool reInjureWeightAppliesCurrentContract = false;
         public int reInjureLocWeight = 0;
-        public float additiveBleedingFactor = 0f; // if negative, subtract, if decimal multiply.
 
         public List<string> crewOrCockpitCustomID = new List<string>();
         public List<string> lifeSupportCustomID = new List<string>();
@@ -87,5 +84,16 @@ namespace TisButAScratch
 
         public string DisableBleedingStat = "DisablesBleeding";
         public string NullifiesInjuryEffectsStat = "NullifiesInjuryEffects";
+
+        public float additiveBleedingFactor = 0f; // if negative, subtract, if decimal multiply.
+        public int minBloodBank = 1;
+        public int baseBloodBankAdd = 0;
+        public float factorBloodBankMult = 1.5f;
+        public bool UseGutsForBloodBank = true; // if false, uses Health
+
+        public bool UseBleedingEffects = true;
+        public List<BleedingEffect> BleedingEffects = new List<BleedingEffect>();
+        public bool UseSimBleedingEffects = true;
+        public List<SimBleedingEffect> SimBleedingEffects = new List<SimBleedingEffect>();
     }
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BattleTech;
-using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,14 +21,35 @@ namespace TisButAScratch.Framework
         public List<EffectData> effects = new List<EffectData>();
         public List<JObject> effectDataJO = new List<JObject>();
     }
+
+    public class BleedingEffect
+    {
+        public string bleedingEffectID = "";
+        public string bleedingName = "";
+        public int bleedingEffectLvl = 0;
+
+        [JsonIgnore]
+        public List<EffectData> effects = new List<EffectData>();
+        public List<JObject> effectDataJO = new List<JObject>();
+    }
+
+    public class SimBleedingEffect
+    {
+        public string simBleedingEffectID = "";
+        public int bleedingEffectLvl = 0;
+
+        [JsonIgnore]
+        public List<SimGameEventResult> simResult = new List<SimGameEventResult>();
+        public List<JObject> simResultJO = new List<JObject>();
+    }
     
     public class PilotInjuryHolder
     {
         private static PilotInjuryHolder _instance;
         public Dictionary<string, List<string>> pilotInjuriesMap;
         public Dictionary<string, List<string>> combatInjuriesMap; //added for temprary injury storage to allow clean combat restarts
-        public int injuryStat = 0;
-        public int ejectState = 0;
+        public Dictionary<string, float> bloodStatForSimGame; //added for temprary injury storage to allow clean combat restarts
+        public int injuryStat;
 
         public static PilotInjuryHolder HolderInstance
         {
@@ -47,6 +64,7 @@ namespace TisButAScratch.Framework
         {
             pilotInjuriesMap = new Dictionary<string, List<string>>();
             combatInjuriesMap = new Dictionary<string, List<string>>();
+            bloodStatForSimGame = new Dictionary<string, float>();
         }
 
         
@@ -66,7 +84,7 @@ namespace TisButAScratch.Framework
             if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
             {
                 var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
-                var injuryState = InjuryStateCTag.Substring(injuryStateTag.Length);
+                var injuryState = InjuryStateCTag?.Substring(injuryStateTag.Length);
                 HolderInstance.pilotInjuriesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(injuryState);
                 ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags. State was {injuryState}");
                 sim.CompanyTags.Remove(InjuryStateCTag);

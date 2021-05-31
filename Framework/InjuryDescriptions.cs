@@ -1,34 +1,30 @@
-﻿using System;
-using BattleTech;
-using Harmony;
-using System.Collections.Generic;
+﻿using BattleTech;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static TisButAScratch.Framework.GlobalVars;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BattleTech.UI;
-using BattleTech.UI.TMProWrapper;
 
 namespace TisButAScratch.Framework
 {
-    class InjuryDescriptions
+    public static class InjuryDescriptions
     {
         internal static string getPilotInjuryDesc(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
             if (string.IsNullOrEmpty(pilotID)) return null;
 
+            var rtrn = "";
             if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pilotID))
             {
-                var rtrn = $"\n";
                 if (ModInit.modSettings.debilSeverityThreshold > 0)
                 {
-                    rtrn += $"<color=#FF0000>Debilitating Severity Threshold Per-Location: {ModInit.modSettings.debilSeverityThreshold}</color=#FF0000>\n\n";
+                    rtrn +=
+                        $"<color=#FF0000>Debilitating Severity Threshold Per-Location: {ModInit.modSettings.debilSeverityThreshold}</color=#FF0000>\n\n";
                 }
+
                 foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
                 {
-                    foreach (Injury injury in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
+                    foreach (Injury injury in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x =>
+                        x.injuryID == id))
                     {
                         var description = $"Severity {injury.severity}: {injury.injuryName}: {injury.description}";
                         rtrn += description + "\n\n";
@@ -39,22 +35,46 @@ namespace TisButAScratch.Framework
                 {
                     foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pilotID])
                     {
-                        foreach (Injury feedbackinjury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
+                        foreach (Injury feedbackinjury in PilotInjuryManager.ManagerInstance.InternalDmgInjuries.Where(
+                            x => x.injuryID == id))
                         {
-                            var description = $"Severity {feedbackinjury.severity}: {feedbackinjury.injuryName}: {feedbackinjury.description}";
+                            var description =
+                                $"Severity {feedbackinjury.severity}: {feedbackinjury.injuryName}: {feedbackinjury.description}";
                             rtrn += description + "\n\n";
                         }
                     }
                 }
-                
+
 
                 if (pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
                 {
-                    rtrn += DEBIL.description;
+                    rtrn += DEBIL.description + "\n\n";
                 }
-                return rtrn;
             }
-            return null;
+
+            if (ModInit.modSettings.UseSimBleedingEffects)
+            {
+                foreach (var tempResult in sim.TemporaryResultTracker.Where(x =>
+                    x.TargetPilot == pilot && x.Stats != null))
+                {
+                    var statDesc = "";
+                    foreach (var tag in tempResult.AddedTags)
+                    {
+                        var matches = TBAS_SimBleedStatMod.Matches(tag);
+                        if (matches.Count <= 0) continue;
+                        var statType = matches[0].Groups["type"].Value;
+                        var statMod = matches[0].Groups["value"].Value;
+//                        var statOp = matches[0].Groups["operation"].Value;
+                        statDesc += $"{statMod} {statType}, ";
+                    }
+
+                    statDesc += $" for {tempResult.ResultDuration - tempResult.DaysElapsed} days when in combat.";
+                    rtrn += statDesc + "\n\n";
+                }
+            }
+
+            return rtrn;
         }
+
     }
 }

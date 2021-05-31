@@ -2,21 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using Harmony;
 using BattleTech;
 using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
-using System.Threading.Tasks;
 using UnityEngine;
 
 using CustomComponents;
-using CustAmmoCategories;
+using Logger = TisButAScratch.Framework.Logger;
 
 namespace TisButAScratch.Patches
 {
-    class InjuryPatches
+    public class InjuryPatches
     {
         // this should hopefully cause vehile injuries and injuries when certain components are damaged/destroyeded. also implements "forced ejections" for pilots.
         [HarmonyPatch(typeof(MechComponent), "DamageComponent",
@@ -132,15 +129,19 @@ namespace TisButAScratch.Patches
             {
                 try
                 {
-                    ModInit.modLog.LogMessage(
-                        $"{__instance?.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
-                    PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
-                    ModInit.modLog.LogMessage(
-                        $"{__instance?.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                    if (__instance != null)
+                    {
+                        ModInit.modLog.LogMessage(
+                            $"{__instance.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
+                        PilotInjuryHolder.HolderInstance.injuryStat =
+                            __instance.StatCollection.GetValue<int>("Injuries");
+                        ModInit.modLog.LogMessage(
+                            $"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    ModInit.modLog.LogException(ex);
+                    Logger.LogException(ex);
                 }
             }
 
@@ -153,7 +154,7 @@ namespace TisButAScratch.Patches
                     __instance.StatCollection.GetValue<int>("Injuries"))
                 {
                     ModInit.modLog.LogMessage(
-                        $"{__instance.Callsign}{pKey} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
+                        $"{__instance.Callsign}_{pKey} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
                     return;
                 }
 
@@ -162,7 +163,7 @@ namespace TisButAScratch.Patches
                     __instance.StatCollection.GetValue<bool>("NeedsFeedbackInjury"))
                 {
                     ModInit.modLog.LogMessage(
-                        $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}{pKey}");
+                        $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}_{pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjuryFeedback(__instance, dmg, damageType);
 
                     return;
@@ -208,15 +209,15 @@ namespace TisButAScratch.Patches
                             if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
                                 __instance.pilotDef.PilotTags.Add(DEBILITATEDTAG);
-                                ModInit.modLog.LogMessage($"{__instance.Callsign}{pKey} has been debilitated!");
+                                ModInit.modLog.LogMessage($"{__instance.Callsign}_{pKey} has been debilitated!");
 
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
                                     injuryLoc.Key == InjuryLoc.Torso))
                                 {
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
-                                        StatCollection.StatOperation.Set, true, -1, true);
+                                        StatCollection.StatOperation.Set, true);
                                     ModInit.modLog.LogMessage(
-                                        $"{__instance.Callsign}{pKey} has debilitated Torso or Head; lethal injury!");
+                                        $"{__instance.Callsign}_{pKey} has debilitated Torso or Head; lethal injury!");
                                 }
                             }
                         }
@@ -283,6 +284,12 @@ namespace TisButAScratch.Patches
                         {
                             pilotDef.SetRecentInjuryDamageType(DamageType.NOT_SET);
                         }
+
+                        if (pilot.IsPlayerCharacter)
+                        {
+                            pilot.StatCollection.ModifyStat<bool>(pilot.FetchGUID(), 0, "LethalInjury", StatCollection.StatOperation.Set, false, -1, true);
+                        }
+                        
                     }
 
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
@@ -302,7 +309,7 @@ namespace TisButAScratch.Patches
                             ? sim.Constants.Pilot.LethalDeathChance
                             : sim.Constants.Pilot.IncapacitatedDeathChance;
                         num = Mathf.Max(0f, num - sim.Constants.Pilot.GutsDeathReduction * (float) pilot.Guts);
-                        float num2 = sim.NetworkRandom.Float(0f, 1f);
+                        float num2 = sim.NetworkRandom.Float();
                         string s = string.Format(
                             "Pilot {0} needs to roll above {1} to survive. They roll {2} resulting in {3}", new object[]
                             {
@@ -408,48 +415,21 @@ namespace TisButAScratch.Patches
 
                 {
                     ModInit.modLog.LogMessage(
-                        $"{p.Callsign}{pKey} has {internalDmgInjuryCount} preexisting feedback injuries!");
+                        $"{p.Callsign}_{pKey} has {internalDmgInjuryCount} preexisting feedback injuries!");
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
-                        StatCollection.StatOperation.Set, true, -1, true);
+                        StatCollection.StatOperation.Set, true);
 
                     ModInit.modLog.LogMessage(
-                        $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign}{pKey} from structure damage!");
+                        $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign}_{pKey} from structure damage!");
 
                     p.InjurePilot(p.FetchGUID(), -1, 1, DamageType.ComponentExplosion, null, null);
 
                     p.StatCollection.ModifyStat<int>(p.FetchGUID(), 0, "internalDmgInjuryCount",
-                        StatCollection.StatOperation.Int_Add, 1, -1, true);
+                        StatCollection.StatOperation.Int_Add, 1);
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
-                        StatCollection.StatOperation.Set, false, -1, true);
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Effect))]
-        [HarmonyPatch("OnEffectExpiration")]
-        public static class Effect_OnEffectExpiration_Patch
-        {
-            public static void Postfix(Effect __instance)
-            {
-                
-                if (__instance.id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && __instance.Target is AbstractActor target)
-                {
-                    if (target.WasEjected) return;
-                    var p = target.GetPilot();
-                    var pKey = p.FetchGUID();
-                    p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
-                        StatCollection.StatOperation.Set, true, -1, true);
-                    ModInit.modLog.LogMessage(
-                        $"{p.Callsign}{pKey} has bled out!");
-
-                    target.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), true);
-
-                    if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
-                        StatCollection.StatOperation.Set, true, -1, true);
-
-                    target.HandleDeath(p.FetchGUID()); // added handledeath for  bleeding out
+                        StatCollection.StatOperation.Set, false);
                 }
             }
         }

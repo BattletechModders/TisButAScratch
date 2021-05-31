@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using BattleTech;
-using BattleTech.Data;
-using System.Threading.Tasks;
-
 using fastJSON;
 using Newtonsoft.Json.Linq;
 
@@ -13,6 +8,10 @@ namespace TisButAScratch.Framework
 {
     public class GlobalVars
     {
+        internal static Regex TBAS_SimBleedStatMod =
+            new Regex("^TBAS_SimBleed__(?<type>.*?)__(?<value>.*?)$",//    __(?<operation>.*?)$",
+                RegexOptions.Compiled); //shamelessly stolen from BlueWinds
+
         internal static SimGameState sim;
         internal const string aiPilotFlag = "AI_TEMP_";
         internal const string iGUID = "iGUID_";

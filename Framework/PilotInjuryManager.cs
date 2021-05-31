@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
-using System.Threading.Tasks;
 using SVGImporter;
 using BattleTech;
+using FluffyUnderware.DevTools.Extensions;
+using HBS.Collections;
+using HBS.Util;
 using Localize;
-using static TisButAScratch.Framework.GlobalVars;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static TisButAScratch.Framework.GlobalVars;
 
 
 namespace TisButAScratch.Framework
@@ -25,6 +27,138 @@ namespace TisButAScratch.Framework
             }
             return guid;
         }
+
+        internal static int CalcBloodBank(this Pilot pilot)
+        {
+            var factor = pilot.Health;
+            if (ModInit.modSettings.UseGutsForBloodBank)
+            {
+                factor = pilot.Guts;
+            }
+            return Math.Max(ModInit.modSettings.minBloodBank, Mathf.RoundToInt((factor * ModInit.modSettings.factorBloodBankMult) +
+                                                                               ModInit.modSettings.baseBloodBankAdd));
+        }
+        internal static int GetBloodCapacity(this Pilot pilot)
+        {
+            return pilot.StatCollection.GetValue<int>("BloodCapacity");
+        }
+
+        internal static int GetBloodBank(this Pilot pilot)
+        {
+            return pilot.StatCollection.GetValue<int>("BloodBank");
+        }
+
+        internal static void SetBloodBank(this Pilot pilot, int bank)
+        {
+            pilot.StatCollection.Set<int>("BloodBank", bank);
+        }
+
+        internal static float GetBleedingRate(this Pilot pilot)
+        {
+            return pilot.StatCollection.GetValue<float>("BleedingRate");
+        }
+
+        internal static void SetBleedingRate(this Pilot pilot, float rate)
+        {
+            pilot.StatCollection.Set<float>("BleedingRate", rate);
+        }
+
+        internal static void ApplyClosestSimGameResult(this Pilot pilot)
+        {
+            var pKey = pilot.FetchGUID();
+            if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey))
+            {
+                ModInit.modLog.LogMessage($"Something very wrong here!");
+                PilotInjuryHolder.HolderInstance.bloodStatForSimGame.Add(pKey, 1);
+            }
+            var bloodLevelForSim = PilotInjuryHolder.HolderInstance.bloodStatForSimGame[pKey];
+
+            var bleedingEffectTotal = PilotInjuryManager.ManagerInstance.SimBleedingEffectList.Count + 1;
+
+            
+            var simBleedLvl = 0;
+            foreach (var simEffect in PilotInjuryManager.ManagerInstance.SimBleedingEffectList)
+            {
+                var simBleedingEffectDecimal = 1 - simEffect.bleedingEffectLvl / (float) bleedingEffectTotal;
+                ModInit.modLog.LogMessage($"{simEffect.simBleedingEffectID} needs blood level <= {simBleedingEffectDecimal} to apply.");
+                if (!(bloodLevelForSim <= simBleedingEffectDecimal)) continue;
+                simBleedLvl = simEffect.bleedingEffectLvl;
+                ModInit.modLog.LogMessage($"Calculated SimBleedEffectLvl {simBleedLvl}.");
+                break;
+            }
+            var tempList = new List<SimBleedingEffect>(PilotInjuryManager.ManagerInstance.SimBleedingEffectList.Where(x=>x.bleedingEffectLvl == simBleedLvl));
+
+            var idx = UnityEngine.Random.Range(0, tempList.Count);
+
+            var chosenBleedingResult = tempList[idx];
+
+            ModInit.modLog.LogMessage($"{chosenBleedingResult.simBleedingEffectID} chosen for pilot {pilot.Description.Callsign}_{pKey}");
+
+            var objects = new List<object> {pilot};
+            foreach (var result in chosenBleedingResult.simResult)
+            {
+                SimGameState.ApplySimGameEventResult(result, objects);
+            }
+        }
+
+
+        internal static void ApplyClosestBleedingEffect(this Pilot pilot)
+        {
+            var bloodLevelDecimal = (float)pilot.GetBloodBank() / (float)pilot.GetBloodCapacity();
+            var pKey = pilot.FetchGUID();
+            if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey) && ModInit.modSettings.UseSimBleedingEffects)
+            {
+                PilotInjuryHolder.HolderInstance.bloodStatForSimGame.Add(pKey, bloodLevelDecimal);
+            }
+            else if (ModInit.modSettings.UseSimBleedingEffects)
+            {
+                PilotInjuryHolder.HolderInstance.bloodStatForSimGame[pKey] = bloodLevelDecimal;
+            }
+            ModInit.modLog.LogMessage($"Calculated {pKey}'s bloodLevel fraction: {bloodLevelDecimal}!");
+            var bleedingEffectTotal = PilotInjuryManager.ManagerInstance.BleedingEffectsList.Count + 1;
+
+            var bleedLvl = 0;
+            foreach (var bleedEffect in PilotInjuryManager.ManagerInstance.BleedingEffectsList)
+            {
+                var bleedingEffectDecimal = 1 - bleedEffect.bleedingEffectLvl / (float) bleedingEffectTotal;
+                ModInit.modLog.LogMessage($"{bleedEffect.bleedingName} needs blood level <= {bleedingEffectDecimal} to apply.");
+                if (!(bloodLevelDecimal <=
+                      bleedingEffectDecimal)) continue;
+                bleedLvl = bleedEffect.bleedingEffectLvl;
+                ModInit.modLog.LogMessage($"Calculated bleedEffectLvl {bleedLvl}.");
+                break;
+            }
+            var tempList = new List<BleedingEffect>(PilotInjuryManager.ManagerInstance.BleedingEffectsList.Where(x=>x.bleedingEffectLvl == bleedLvl));
+            if (tempList.Count == 0) return;
+
+            var idx = UnityEngine.Random.Range(0, tempList.Count);
+
+            var chosenBleedingEffect = tempList[idx];
+
+            ModInit.modLog.LogMessage($"{chosenBleedingEffect.bleedingName} chosen for pilot {pilot.Description.Callsign}_{pKey}");
+
+            var effectsList =
+                UnityGameInstance.BattleTechGame.Combat.EffectManager.GetAllEffectsTargeting(pilot.ParentActor);
+
+            foreach (EffectData effectData in chosenBleedingEffect.effects)
+            {
+                if (effectsList.Any(x => x.EffectData.Description.Id == effectData.Description.Id))
+                {
+                    ModInit.modLog.LogMessage($"{pilot.Description.Callsign}_{pKey} already has bleeding effect {effectData.Description.Name}, skipping.");
+                    continue;
+                }
+                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {pilot.Description.Callsign}_{pKey}");
+
+                if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
+                    effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                {
+                    string id = ($"BleedingEffect_{pilot.Description.Callsign}_{effectData.Description.Id}");
+
+                    ModInit.modLog.LogMessage($"Applying {id}");
+                    pilot.ParentActor.Combat.EffectManager.CreateEffect(effectData, id, -1, pilot.ParentActor, pilot.ParentActor, default(WeaponHitInfo), 1);
+                }
+            }
+        }
     }
 
     public class PilotInjuryManager
@@ -32,6 +166,8 @@ namespace TisButAScratch.Framework
         private static PilotInjuryManager _instance;
         public List<Injury> InjuryEffectsList;
         public List<Injury> InternalDmgInjuries;
+        public List<BleedingEffect> BleedingEffectsList;
+        public List<SimBleedingEffect> SimBleedingEffectList;
 
         public static PilotInjuryManager ManagerInstance
         {
@@ -42,9 +178,59 @@ namespace TisButAScratch.Framework
             }
         }
 
-        
+        internal SimGameEventResult processSimBleedingSettings(JObject jObject)
+        {
+            var simResult = new SimGameEventResult();
+
+            simResult.Scope = jObject["Scope"].ToObject<EventScope>();
+            simResult.Requirements = jObject["Requirements"].ToObject<RequirementDef>();
+            simResult.AddedTags = new TagSet();
+            simResult.AddedTags.FromJSON(jObject["AddedTags"].ToString());
+            simResult.RemovedTags = new TagSet();
+            simResult.RemovedTags.FromJSON(jObject["RemovedTags"].ToString());
+            
+            simResult.Stats = jObject["Stats"].ToObject<SimGameStat[]>();
+            simResult.Actions = jObject["Actions"].ToObject<SimGameResultAction[]>();
+            simResult.ForceEvents = jObject["ForceEvents"].ToObject<SimGameForcedEvent[]>();
+            simResult.TemporaryResult = jObject["TemporaryResult"].ToObject<bool>();
+            simResult.ResultDuration = jObject["ResultDuration"].ToObject<int>();
+
+            return simResult;
+        }
+
         internal void Initialize()
         {
+            SimBleedingEffectList = new List<SimBleedingEffect>();
+            foreach (var simBleedingEffect in ModInit.modSettings.SimBleedingEffects) 
+            {
+                ModInit.modLog.LogMessage($"Adding effects for {simBleedingEffect.simBleedingEffectID}!");
+                foreach (var jObject in simBleedingEffect.simResultJO)
+                {
+                    var simResult = processSimBleedingSettings(jObject);
+                    ModInit.modLog.LogMessage($"TEMPORARY: {simResult.Scope}\n{simResult.Requirements}\n{simResult.AddedTags}\n{simResult.RemovedTags}\n{simResult.Stats} AND {JsonConvert.SerializeObject(simResult)}!");
+
+                    simBleedingEffect.simResult.Add(simResult);
+                }
+                SimBleedingEffectList.Add(simBleedingEffect);
+            }
+
+            SimBleedingEffectList = SimBleedingEffectList.OrderByDescending(x => x.bleedingEffectLvl).ToList();
+
+            BleedingEffectsList = new List<BleedingEffect>();
+            foreach (var bleedingEffect in ModInit.modSettings.BleedingEffects) 
+            {
+                ModInit.modLog.LogMessage($"Adding effects for {bleedingEffect.bleedingName}!");
+                foreach (var jObject in bleedingEffect.effectDataJO)
+                {
+                    var effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    bleedingEffect.effects.Add(effectData);
+                }
+                BleedingEffectsList.Add(bleedingEffect);
+            }
+
+            BleedingEffectsList = BleedingEffectsList.OrderByDescending(x => x.bleedingEffectLvl).ToList();
+
             InjuryEffectsList = new List<Injury>();
             foreach (var injuryEffect in ModInit.modSettings.InjuryEffectsList) 
             {
@@ -57,6 +243,8 @@ namespace TisButAScratch.Framework
                 }
                 InjuryEffectsList.Add(injuryEffect);
             }
+
+
 
             if (ModInit.modSettings.enableInternalDmgInjuries)
             {
@@ -79,6 +267,15 @@ namespace TisButAScratch.Framework
         {
             var dm = UnityGameInstance.BattleTechGame.DataManager;
             var loadRequest = dm.CreateLoadRequest();
+
+            foreach (var bleedingEffect in PilotInjuryManager.ManagerInstance.BleedingEffectsList)
+            {
+                foreach (var effectData in bleedingEffect.effects)
+                {
+                    loadRequest.AddLoadRequest<SVGAsset>(BattleTechResourceType.SVGAsset, effectData.Description.Icon, null);
+                }
+            }
+
             foreach (var injury in PilotInjuryManager.ManagerInstance.InjuryEffectsList)
             {
                 foreach (var effectData in injury.effects)
@@ -104,22 +301,49 @@ namespace TisButAScratch.Framework
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
+
+            foreach (var tag in p.pilotDef.PilotTags.Where(x=>x.StartsWith("TBAS_SimBleed")))
+            {
+                var matches = TBAS_SimBleedStatMod.Matches(tag);
+                if (matches.Count <= 0) continue;
+                var statType = matches[0].Groups["type"].Value;
+                var statMod = matches[0].Groups["value"].Value;
+                int.TryParse(statMod, out var resultINT);
+                if (resultINT != 0)
+                {
+                    p?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, statType,
+                        StatCollection.StatOperation.Int_Add, resultINT);
+                    ModInit.modLog.LogMessage($"Pilot {pKey} gets {resultINT} {statType} due to bleeding previously.");
+                }
+                else
+                {
+                    float.TryParse(statMod, out var resultFLT);
+                    if (resultFLT != 0)
+                    {
+                        p?.StatCollection.ModifyStat<float>("TBAS_Injuries", 0, statType,
+                            StatCollection.StatOperation.Float_Add, resultFLT);
+                        ModInit.modLog.LogMessage($"Pilot {pKey} gets {resultFLT} {statType} due to bleeding previously.");
+                    }
+                }
+            }
+
+
             foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
             {
                 foreach (Injury injury in ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}{pKey}");
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
                 }
                 foreach (Injury injury in ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}{pKey}");
+                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
                 }
             }
         }
 
-        protected void applyInjuryEffects(AbstractActor actor, Injury injury)
+        private void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
             if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat))
@@ -128,10 +352,10 @@ namespace TisButAScratch.Framework
                 return;
             }
             var pKey = p.FetchGUID();
-            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}{pKey}");
+            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}_{pKey}");
             foreach (EffectData effectData in injury.effects)
             {
-                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}{pKey}");
+                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}_{pKey}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
@@ -139,8 +363,7 @@ namespace TisButAScratch.Framework
                     string id = ($"InjuryEffect_{p.Description.Callsign}_{effectData.Description.Id}");
 
                     ModInit.modLog.LogMessage($"Applying {id}");
-                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1,
-                        false);
+                    actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1);
                 }
             }
             //added to display floaties? need totest
@@ -162,74 +385,30 @@ namespace TisButAScratch.Framework
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
 
-                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
-                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
-                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
-                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numMovementsRemaining > 0).ToList();
-                var byPhases = effects.OrderBy(x=>x.Duration.numPhasesRemaining).Where(
-                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numPhasesRemaining > 0).ToList();
-                var byRounds = effects.OrderBy(x=>x.Duration.numRoundsRemaining).Where(
-                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numRoundsRemaining > 0).ToList();
-
-                var bleeding = new Effect();
-                if (byActivations.Any())
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
+                var eject = "";
+                if (durationInfo <= 0)
                 {
-                    bleeding = byActivations.First();
-                }
-                else if (byMovements.Any())
-                {
-                    bleeding = byMovements.First();
-                }
-                else if (byPhases.Any())
-                {
-                    bleeding = byPhases.First();
-                }
-                else if (byRounds.Any())
-                {
-                    bleeding = byRounds.First();
-                }
-                else
-                {
-                    bleeding = effects.FirstOrDefault(x=>
-                        x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
-                    ModInit.modLog.LogMessage($"ERROR: We used the first effect we found, which probably isn't right.");
+                    eject = "EJECT NOW OR DIE!";
                 }
 
-                if (bleeding != null)
-                {
-
-                    var durationInfo = new int[]
+                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>",
+                    new object[]
                     {
-                        bleeding.Duration.numActivationsRemaining,
-                        bleeding.Duration.numMovementsRemaining,
-                        bleeding.Duration.numPhasesRemaining,
-                        bleeding.Duration.numRoundsRemaining
-                    }.Max() - 1;
-                    var eject = "";
-                    if (durationInfo <= 0)
-                    {
-                        eject = "EJECT NOW OR DIE!";
-                    }
+                        durationInfo,
+                        eject
+                    });
 
-                    var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} {1} remaining! {2}</color=#FF0000>",
-                        new object[]
-                        {
-                            durationInfo,
-                            ModInit.modSettings.BleedingOutTimerString,
-                            eject
-                        });
+                actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                    new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, false)));
 
-                    actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
-                        new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, false)));
-
-                }
             }
         }
 
 
         internal void rollInjury(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
-            var loc = InjuryLoc.NOT_SET;
+            InjuryLoc loc;
             var pKey = pilot.FetchGUID();
 
             if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
@@ -267,7 +446,7 @@ namespace TisButAScratch.Framework
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
                     }
 
-                    if (pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
+                    if (pilot != null && pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
                     {
                         curInjuryList.RemoveAll(x => !string.IsNullOrEmpty(x.injuryID_Post));
                         ModInit.modLog.LogMessage($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
@@ -287,7 +466,7 @@ namespace TisButAScratch.Framework
 
                     else
                     {
-                        foreach (var inj in curInjuryList.Where(x => !pilot.StatCollection.GetValue<List<string>>("LastInjuryId").Contains(x.injuryID)))
+                        foreach (var inj in curInjuryList.Where(x => pilot != null && !pilot.StatCollection.GetValue<List<string>>("LastInjuryId").Contains(x.injuryID)))
                         {
                             for (int t = 0; t < ModInit.modSettings.reInjureLocWeight; t++)
                             {
@@ -314,7 +493,7 @@ namespace TisButAScratch.Framework
 
                 else if (damageType == DamageType.Knockdown || damageType == DamageType.KnockdownSelf)
                 {
-                    injuryList.RemoveAll(x => x.couldBeThermal == true || x.severity >= 100);
+                    injuryList.RemoveAll(x => x.couldBeThermal || x.severity >= 100);
                 }
                 else
                 {
@@ -339,17 +518,17 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
-                var newList = pilot.StatCollection.GetValue<List<string>>("LastInjuryId");
-                newList.Add(chosen.injuryID);
+                var newList = pilot?.StatCollection.GetValue<List<string>>("LastInjuryId");
+                newList?.Add(chosen.injuryID);
 
-                pilot.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",
-                    StatCollection.StatOperation.Set, newList, -1, true);
+                pilot?.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",
+                    StatCollection.StatOperation.Set, newList);
 
                 ModInit.modLog.LogMessage(
                     $"Setting {chosen.injuryName} to {pilot?.Callsign}'s LastInjuryId stat. PilotID: {pKey}");
 
-                pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
-                    StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);
+                pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
+                    StatCollection.StatOperation.Int_Add, chosen.severity);
 
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
@@ -357,104 +536,36 @@ namespace TisButAScratch.Framework
                 if (!String.IsNullOrEmpty(chosen.injuryID_Post))
                 {
                     var em = UnityGameInstance.BattleTechGame.Combat.EffectManager;
-                    var effects = em.GetAllEffectsTargeting(pilot.ParentActor); //targeting parent actor maybe?
-                    foreach (var effect in effects.Where(x=>x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)))
+                    var effects = em.GetAllEffectsTargeting(pilot?.ParentActor); //targeting parent actor maybe?
+                    if (pilot.GetBleedingRate() == 0f)
                     {
-                        if (ModInit.modSettings.additiveBleedingFactor < 0)
+                        pilot.SetBleedingRate(chosen.severity);
+                    }
+                    else
+                    {
+                        foreach (var unused in effects.Where(x =>
+                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)))
                         {
-                            if (effect.Duration.numActivationsRemaining > 1)
+                            if (ModInit.modSettings.additiveBleedingFactor < 0)
                             {
-                                if (Mathf.RoundToInt(effect.Duration.numActivationsRemaining +
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numActivationsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numActivationsRemaining +=
-                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
+                                var currentRate = pilot.GetBleedingRate();
+                                pilot.SetBleedingRate(currentRate + ModInit.modSettings.additiveBleedingFactor);
                             }
-                            if (effect.Duration.numMovementsRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numMovementsRemaining +
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numMovementsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numMovementsRemaining +=
-                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
-                            }                            
-                            if (effect.Duration.numPhasesRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numPhasesRemaining +
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numPhasesRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numPhasesRemaining +=
-                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
-                            }                            
-                            if (effect.Duration.numRoundsRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numRoundsRemaining +
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numRoundsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numRoundsRemaining +=
-                                        Mathf.RoundToInt(ModInit.modSettings.additiveBleedingFactor);
-                            }
-                        }
 
-                        else if (ModInit.modSettings.additiveBleedingFactor < 1 && ModInit.modSettings.additiveBleedingFactor > 0)
-                        {
-                            if (effect.Duration.numActivationsRemaining > 1)
+                            else if (ModInit.modSettings.additiveBleedingFactor > 1)
                             {
-                                if (Mathf.RoundToInt(effect.Duration.numActivationsRemaining *
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numActivationsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numActivationsRemaining = Mathf.RoundToInt(effect.Duration.numActivationsRemaining * ModInit.modSettings.additiveBleedingFactor);
-                            }
-                            if (effect.Duration.numMovementsRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numMovementsRemaining *
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numMovementsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numMovementsRemaining = Mathf.RoundToInt(effect.Duration.numMovementsRemaining * ModInit.modSettings.additiveBleedingFactor);
-                            }                            
-                            if (effect.Duration.numPhasesRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numPhasesRemaining *
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numPhasesRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numPhasesRemaining = Mathf.RoundToInt(effect.Duration.numPhasesRemaining * ModInit.modSettings.additiveBleedingFactor);
-                            }                            
-                            if (effect.Duration.numRoundsRemaining > 1)
-                            {
-                                if (Mathf.RoundToInt(effect.Duration.numRoundsRemaining *
-                                                     ModInit.modSettings.additiveBleedingFactor) < 1)
-                                {
-                                    effect.Duration.numRoundsRemaining = 1;
-                                }
-                                else
-                                    effect.Duration.numRoundsRemaining = Mathf.RoundToInt(effect.Duration.numRoundsRemaining * ModInit.modSettings.additiveBleedingFactor);
+                                var currentRate = pilot.GetBleedingRate();
+                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor);
                             }
                         }
                     }
-                }
 
-                applyInjuryEffects(pilot.ParentActor, chosen);
+                    if (pilot.GetBleedingRate() > 0f)
+                    {
+                        pilot.ApplyClosestBleedingEffect();
+                    }
+                }
+                applyInjuryEffects(pilot?.ParentActor, chosen);
             }
         }
 
@@ -490,12 +601,12 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
-                pilot.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
-                    StatCollection.StatOperation.Int_Add, chosen.severity, -1, true);
+                pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
+                    StatCollection.StatOperation.Int_Add, chosen.severity);
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
 
-                applyInjuryEffects(pilot.ParentActor, chosen);
+                applyInjuryEffects(pilot?.ParentActor, chosen);
 
             }
         }
