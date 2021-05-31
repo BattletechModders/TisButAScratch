@@ -157,7 +157,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "additiveBleedingFactor": 0.75,
 "minBloodBank": 2,
 "baseBloodBankAdd": 0,
-"UseGutsForBloodCap": true,
+"UseGutsForBloodBank": true,
 "factorBloodBankMult": 1,
 "UseBleedingEffects": true,
 "BleedingEffects": [],
@@ -311,11 +311,90 @@ Example stat effect added to DNI cockpit given below:
 
 `baseBloodBankAdd` - int, defines a baseline addition to "BloodBank" on top of Guts/Health calculations.
 
-`UseGutsForBloodCap` - bool, if True - Guts level is used in BloodBank calculation. if False, Health is used in BloodBank calculation.
+`UseGutsForBloodBank` - bool, if True - Guts level is used in BloodBank calculation. if False, Health is used in BloodBank calculation.
 
 `factorBloodBankMult` - float, multiplier for BloodBank calculation; if `UseGutsForBloodCap = True`, final BloodBank formula is `(Guts * factorBloodBankMult) + baseBloodBankAdd`. If `UseGutsForBloodCap = False`, final BloodBank formula is `(Health * factorBloodBankMult) + baseBloodBankAdd`
 
+`UseBleedingEffects` - bool, if True enables escalating bleeding effects applied in the current contract (defined in `BleedingEffects` below).
 
+`BleedingEffects` - List<BleedingEffect> - list of bleeding effects to be applied to pilots as they bleed out. In the BleedingEffect, the field `bleedingEffectLvl` defines the point at which that bleeding effect is applied, by converting the level to a % of the total number of bleeding effects defined in the settings + 1. If a pilot's % of their BloodBank goes below that thtreshold, the effect is applied.
+	
+For example, if 4 BleedingEffects are defined in settings, a BleedingEffect with `bleedingEffectLvl: 1` would equate to a BloodBank % threshold of 0.8 (or 80%). If a pilot has BloodBank of 6 out of a starting BloodBank of 8, the effect would be applied (Pilot BloodBank 75% <= 80%). If more than one BleedingEffect is defined with the same `bleedingEffectLvl`, one of the effects will be chosen at random to apply.
+	
+Bleeding effects have the following structure:
+
+```
+{
+	"bleedingEffectID": "BleedingShock",
+	"bleedingName": "Shock",
+	"bleedingEffectLvl": 1,
+	"description": "This pilot has suffered minor blood loss and has reduced accuracy.",
+	"effectDataJO": [
+		{
+			"durationData": {},
+			"targetingData": {
+				"effectTriggerType": "Passive",
+				"effectTargetType": "Creator",
+				"showInStatusPanel": true
+			},
+			"effectType": "StatisticEffect",
+			"Description": {
+				"Id": "BleedShock",
+				"Name": "Blood Loss: Shock",
+				"Details": "This pilot has suffered minor blood loss and has gone into minor shock, reducing accuracy.",
+				"Icon": "crackedskull"
+			},
+			"nature": "Buff",
+			"statisticData": {
+				"modType": "System.Single",
+				"modValue": "5.0",
+				"operation": "Float_Add",
+				"statName": "AccuracyModifier",
+				"targetAmmoCategory": "NotSet",
+				"targetCollection": "Weapon",
+				"targetWeaponCategory": "NotSet",
+				"targetWeaponSubType": "NotSet",
+				"targetWeaponType": "NotSet"
+			}
+		}
+	]
+}
+```	
+
+`UseSimBleedingEffects` - bool, if True enables escalating bleeding effects that are applied on subsequent contracts for a specified period of time (defined in `SimBleedingEffects` below).
+
+`SimBleedingEffects` - List<SimBleedingEffect> - list of bleeding effects to be applied to pilots during subsequent contract. SimBleedingEffects have the following structure:
+	
+```
+{
+	"simBleedingEffectID": "BleedGutsLvl1",
+	"bleedingEffectLvl": 1,
+	"simResultJO": [
+		{
+			"Scope": "MechWarrior",
+			"Requirements": null,
+			"AddedTags": {
+				"tagSetSourceFile": "",
+				"items": [
+					"TBAS_SimBleed__Guts__-1"
+				]
+			},
+			"RemovedTags": {
+				"tagSetSourceFile": "",
+				"items": []
+			},
+			"Stats": [],
+			"Actions": [],
+			"ForceEvents": null,
+			"TemporaryResult": true,
+			"ResultDuration": 10
+		}
+	]
+},
+```
+Similar to `BleedingEffects`, SimBleedingEffects use `bleedingEffectLvl` to define if/when the effects are to be applied to a pilot that is/has been bleeding out, int the same manner. The remainder of the structure is identical to a `SimGameEventResult` that gives the pilot a specific temporary tag. The format of the tag (when present) is then parsed at the start of combat to generate certain effects. These tags are of the basic structure `TBAS_SimBleed__StatName__Amount`. In the above example, a Pilots' Guts statistic would be reduced by 1 at the start of the contract. Temporarily reducing skills directly in SimGame would efffectively allow players to purchase additional levels of the skill at discounted XP costs, which is why we are parsing a temporary tag instead; the tags are processed at contract start rather than directly through the `SimGameEventResult` to prevent "easy" leveling up. Of course the downside is that these stat mods are limited to statistics present on Pilots rather than AbstractActors (e.g. skill stats, but not things like `AccuracyModifier`), and the only available operation on the stat is Adding or Subtracting (if Amount is negative).
+	
+	
 	
 A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
 
