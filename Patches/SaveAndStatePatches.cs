@@ -15,7 +15,6 @@ namespace TisButAScratch.Patches
     {
 
         [HarmonyPatch(typeof(SGCharacterCreationCareerBackgroundSelectionPanel), "Done")]
-
         public static class SGCharacterCreationCareerBackgroundSelectionPanel_Done_Patch
         {
             public static void Postfix(SGCharacterCreationCareerBackgroundSelectionPanel __instance)
@@ -467,13 +466,14 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(AbstractActor __instance)
             {
+
+                //rearragne ; calc bloodcap after effects initialized?
+
                 var p = __instance.GetPilot();
                 p.StatCollection.AddStatistic<bool>("NeedsFeedbackInjury", false);
                 p.StatCollection.AddStatistic<bool>("BledOut", false);
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
-                p.StatCollection.AddStatistic<int>("BloodBank", p.CalcBloodBank());
-                p.StatCollection.AddStatistic<int>("BloodCapacity", p.CalcBloodBank());
                 p.StatCollection.AddStatistic<float>("BleedingRate", 0f);
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
@@ -528,6 +528,10 @@ namespace TisButAScratch.Patches
                         "Injuries",
                         StatCollection.StatOperation.Set, PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count);
                 }
+
+                p.StatCollection.AddStatistic<int>("BloodBank", p.CalcBloodBank());
+                p.StatCollection.AddStatistic<int>("BloodCapacity", p.CalcBloodBank());
+                ModInit.modLog.LogMessage($"{p.Callsign} calculated BloodBank and BloodCapacity: {p.CalcBloodBank()}");
             }
         }
 
@@ -572,6 +576,7 @@ namespace TisButAScratch.Patches
 //                        continue;
 //                    }
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
+
 
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                         .AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);

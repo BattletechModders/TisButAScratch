@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static TisButAScratch.Framework.GlobalVars;
 
 namespace TisButAScratch.Framework
@@ -57,17 +58,23 @@ namespace TisButAScratch.Framework
                     x.TargetPilot == pilot && x.Stats != null))
                 {
                     var statDesc = "";
-                    foreach (var stat in tempResult.Stats)
+                    foreach (var tag in tempResult.AddedTags)
                     {
-                        statDesc += $"{stat.value} {stat.name}, ";
+                        var matches = TBAS_SimBleedStatMod.Matches(tag);
+                        if (matches.Count <= 0) continue;
+                        var statType = matches[0].Groups["type"].Value;
+                        var statMod = matches[0].Groups["value"].Value;
+//                        var statOp = matches[0].Groups["operation"].Value;
+                        statDesc += $"{statMod} {statType}, ";
                     }
 
-                    statDesc += $" for {tempResult.ResultDuration - tempResult.DaysElapsed} days.";
+                    statDesc += $" for {tempResult.ResultDuration - tempResult.DaysElapsed} days when in combat.";
                     rtrn += statDesc + "\n\n";
                 }
             }
 
             return rtrn;
         }
+
     }
 }

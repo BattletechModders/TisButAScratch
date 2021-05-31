@@ -120,11 +120,10 @@ namespace TisButAScratch.Patches
                     eject = "EJECT NOW OR DIE!";
                 }
 
-                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} {1} remaining! {2}</color=#FF0000>",
+                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>",
                     new object[]
                     {
                         durationInfo,
-                        ModInit.modSettings.BleedingOutTimerString,
                         eject
                     });
 
@@ -185,10 +184,9 @@ namespace TisButAScratch.Patches
                             {
                                 eject = "EJECT NOW OR DIE!";
                             }
-                            var txt = new Text("\n<color=#FF0000>Pilot is bleeding out! {0} {1} remaining! {2}</color=#FF0000>", new object[]
+                            var txt = new Text("\n<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>", new object[]
                             {
                                 durationInfo,
-                                ModInit.modSettings.BleedingOutTimerString,
                                 eject
                             });
 

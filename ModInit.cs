@@ -55,7 +55,6 @@ namespace TisButAScratch
 
         public bool BleedingOutLethal = false;
         public string BleedingOutSuffix = "_bleedout";
-        public string BleedingOutTimerString = "activations";
 
         public bool enableInternalDmgInjuries = false;
         public string internalDmgStatName = "InjureOnStructDmg";
@@ -89,9 +88,9 @@ namespace TisButAScratch
         public float additiveBleedingFactor = 0f; // if negative, subtract, if decimal multiply.
         public int minBloodBank = 1;
         public int baseBloodBankAdd = 0;
-        public float healthBloodBankMult = 1.5f;
+        public float factorBloodBankMult = 1.5f;
+        public bool UseGutsForBloodBank = true; // if false, uses Health
 
-        public bool UseGutsForBloodCap = true; // if false, uses Health
         public bool UseBleedingEffects = true;
         public List<BleedingEffect> BleedingEffects = new List<BleedingEffect>();
         public bool UseSimBleedingEffects = true;

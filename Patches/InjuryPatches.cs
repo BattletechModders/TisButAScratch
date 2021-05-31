@@ -284,6 +284,12 @@ namespace TisButAScratch.Patches
                         {
                             pilotDef.SetRecentInjuryDamageType(DamageType.NOT_SET);
                         }
+
+                        if (pilot.IsPlayerCharacter)
+                        {
+                            pilot.StatCollection.ModifyStat<bool>(pilot.FetchGUID(), 0, "LethalInjury", StatCollection.StatOperation.Set, false, -1, true);
+                        }
+                        
                     }
 
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
