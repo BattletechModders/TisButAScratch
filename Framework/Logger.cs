@@ -26,7 +26,7 @@ namespace TisButAScratch.Framework
         {
             if (enableLogging)
             {
-                string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                string ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
                 logStreamWriter.WriteLine($"INFO: {ts} - {message}");
             }
         }
@@ -34,13 +34,13 @@ namespace TisButAScratch.Framework
 
         public static void LogError(string message)
         {
-            string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            string ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"ERROR: {ts} - {message}");
         }
 
         public static void LogException(Exception exception)
         {
-            string ts = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+            string ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStreamWriter.WriteLine($"CRITICAL: {ts} - {exception}");
         }
     }

@@ -18,7 +18,9 @@ namespace TisButAScratch.Patches
         {
             public static void Prefix(AbstractActor __instance)
             {
+ //               if (__instance == null) return;
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
+                if (effects.Count == 0) return;
 
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
@@ -70,7 +72,8 @@ namespace TisButAScratch.Patches
 
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
-
+                ModInit.modLog.LogMessage(
+                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display");
 //                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
 //                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
 //                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
@@ -120,7 +123,7 @@ namespace TisButAScratch.Patches
                     eject = "EJECT NOW OR DIE!";
                 }
 
-                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>",
+                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {1}</color=#FF0000>",
                     new object[]
                     {
                         durationInfo,
@@ -159,19 +162,17 @@ namespace TisButAScratch.Patches
                 
                 //CombatHUD chud = (CombatHUD) Traverse.Create(__instance).("HUD").GetValue();
                 // var em = chud.Combat.EffectManager;
-                var actor = theInstance.DisplayedCombatant as AbstractActor;
+                if (!(theInstance.DisplayedCombatant is AbstractActor actor)) return;
                 if (!effect.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)) return;
                 // var effectsList = em.GetAllEffectsCreatedBy(__instance.DisplayedCombatant.GUID);
                 var effectsList = em.GetAllEffectsTargeting(actor);
 
-                if (effectsList.Count > 0)
-                {
-                    var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
-                    if (tgtEffect != null)
-                    {
-                        if (actor != null)
-                        {
-                            var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
+                if (effectsList.Count <= 0) return;
+                ModInit.modLog.LogMessage(
+                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display");
+                var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
+                if (tgtEffect == null) return;
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
 //                        var durationInfo = new int[]
 //                        {
 //                            tgtEffect.Duration.numActivationsRemaining,
@@ -179,21 +180,18 @@ namespace TisButAScratch.Patches
 //                            tgtEffect.Duration.numPhasesRemaining,
 //                            tgtEffect.Duration.numRoundsRemaining
 //                        }.Max() - 1;
-                            var eject = "";
-                            if (durationInfo <= 0)
-                            {
-                                eject = "EJECT NOW OR DIE!";
-                            }
-                            var txt = new Text("\n<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>", new object[]
-                            {
-                                durationInfo,
-                                eject
-                            });
-
-                            __result.AppendLine(txt);
-                        }
-                    }
+                var eject = "";
+                if (durationInfo <= 0)
+                {
+                    eject = "EJECT NOW OR DIE!";
                 }
+                var txt = new Text("\n<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {1}</color=#FF0000>", new object[]
+                {
+                    durationInfo,
+                    eject
+                });
+
+                __result.AppendLine(txt);
             }
         }
     }

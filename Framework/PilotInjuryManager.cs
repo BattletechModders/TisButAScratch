@@ -394,7 +394,7 @@ namespace TisButAScratch.Framework
                     eject = "EJECT NOW OR DIE!";
                 }
 
-                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {2}</color=#FF0000>",
+                var txt = new Text("<color=#FF0000>Pilot is bleeding out! {0} activations remaining! {1}</color=#FF0000>",
                     new object[]
                     {
                         durationInfo,
