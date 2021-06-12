@@ -1,5 +1,7 @@
 # TisButAScratch
 
+#### Requires CustomComponents and CustomAmmoCategories
+
 This mod overhauls the Battletech injury system, and lets modders apply different stat effects based on injuries a pilot receives. When a pilot receives an injury, a roll is made to determine both the location of the injury and the injury itself. Injuries are specific to a location; Valid `injuryLoc`s are `Head`, `ArmL`, `ArmR`, `Torso`, `LegL` and `LegR`. This mod is fully save-game compatible, and pilots with existing injuries will roll random injury effects on the first time the mod is loaded.
 
 ## Features included:
