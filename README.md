@@ -6,7 +6,8 @@ This mod overhauls the Battletech injury system, and lets modders apply differen
 
 ## Features included:
 
-<b>Injured Piloting</b>: Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
+### <b>Injured Piloting</b>:
+Pilots with injuries are (mostly) allowed to drop on contracts; however, they suffer the penalties their injuries entail. In addition, they are at greater risk of being `DEBILITATED` (see below).
 
 Injuries can by checked be hovering over the red "injured" indicator in pilot portraits, both in the barracks roster list and the lance selection panel, or by hovering over the "injured" status bar in the pilot details panel of the barracks. e.g.:
 
@@ -18,7 +19,8 @@ Injuries can by checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/barracksstatus.png)
 
-<b>Debilitating Injuries</b>: if an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags). A setting is provided that allows `DEBILITATED` to heal given enough time. An example event is included wherein the player can choose to pay for a "prosthesis" which removes `DEBILITATED`, allowing the pilot to be used in contracts, although they will still suffer the effects of the initial injury until that injury heals.
+### <b>Debilitating Injuries</b>:
+If an injury severity in a single location exceeds a given threshold, a pilot may become `DEBILITATED` which incapacitates them for the current mission. Pilots that are `DEBILITATED` are unable to drop on contracts, even after their injuries have healed. `DEBILITATED` is a pilot tag, and can therefore be removed by events (or other actions that alter tags). A setting is provided that allows `DEBILITATED` to heal given enough time. An example event is included wherein the player can choose to pay for a "prosthesis" which removes `DEBILITATED`, allowing the pilot to be used in contracts, although they will still suffer the effects of the initial injury until that injury heals.
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/debil.png)
 
@@ -26,9 +28,11 @@ Injuries can by checked be hovering over the red "injured" indicator in pilot po
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/severity.png)
 
-<b>Mission Killed Injuries</b>: If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
+### <b>Mission Killed Injuries</b>:
+If the total severity of injuries <i>regardless of location</i> exceeds a given threshold, a pilot can be Mission Killed, which incapacitates them for the current mission but does <i>not</i> prevent them from deploying on subsequent contracts. Think of it like "overcome by pain".
 
-<b>Bleeding Out Injuries</b>: Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. ~~These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings)~~ <b>In versions 1.0.2.1 and higher, `durationData` for bleeding out has been replaced by calculations per-pilot based on Guts, Health, and other settings</b>. Pilots now have a calculated "BloodBank". If their BloodBank reaches 0 at the end of their activation, they die. BloodBank is decreased every round by the severity of the "Bleeding Out" injury, modified by `additiveBleedingFactor` for any additional "Bleeding Out" injuries after the first.
+### <b>Bleeding Out Injuries</b>:
+Certain injuries can be defined that inflict an informal <b>Bleeding Out</b> status. ~~These injuries have `durationData` defined that, when expired, render the pilot incapacitated and/or lethally injured (depending on settings)~~ <b>In versions 1.0.2.1 and higher, `durationData` for bleeding out has been replaced by calculations per-pilot based on Guts, Health, and other settings</b>. Pilots now have a calculated "BloodBank". If their BloodBank reaches 0 at the end of their activation, they die. BloodBank is decreased every round by the severity of the "Bleeding Out" injury, modified by `additiveBleedingFactor` for any additional "Bleeding Out" injuries after the first.
 
 In addition, escalating penalties can be defined, inflicting debuffs in-mission on pilots the longer they bleed out. Lastly, semi-persistant debuffs can optionally be inflicted on pilots the longer they bleed out, e.g. -3 Piloting for 20 days.
 
@@ -36,7 +40,8 @@ The status effect gives an indicator of activations remain before the pilot blee
 
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/bleedingout.png)
 
-<b>Advanced Life Support Gear</b>: Mech gear to influence injury effects:
+### <b>Advanced Life Support Gear</b>:
+Mech gear to influence injury effects:
 ```
     "statisticData": {
 	"statName": "DisablesBleeding",
@@ -57,7 +62,8 @@ Gear that sets `DisablesBleeding` to True will prevent the pilot from taking ble
 ```
 Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causing maluses in combat (and necessarily precludes taking bleeding injuries, although regular injuries will still be sustained).
 
-<b>Increased Injury Heal Time</b>: Injuries take longer to heal, defined in the settings below.
+### <b>Increased Injury Heal Time</b>:
+Injuries take longer to heal, defined in the settings below.
 
 Injuries are defined in the settings.json, and have the following structure:
 ```
