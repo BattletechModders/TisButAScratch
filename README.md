@@ -65,6 +65,10 @@ Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causi
 ### <b>Increased Injury Heal Time</b>:
 Injuries take longer to heal, defined in the settings below.
 
+In vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
+
+`([{SimGameConstants.BaseInjuryDamageCost / pilothealth] * injuryHealTimeMultiplier} + [severity * severityCost] + [debilitatedCost / {medtechDebilMultiplier * #medtech}]) / (SimGameConstants.DailyHealValue +  [SimGameConstants.MedTechSkillMod * #medtech])`
+
 Injuries are defined in the settings.json, and have the following structure:
 ```
 "InjuryEffectsList": [
@@ -401,9 +405,3 @@ Bleeding effects have the following structure:
 },
 ```
 Similar to `BleedingEffects`, SimBleedingEffects use `bleedingEffectLvl` to define if/when the effects are to be applied to a pilot that is/has been bleeding out, int the same manner. The remainder of the structure is identical to a `SimGameEventResult` that gives the pilot a specific temporary tag. The format of the tag (when present) is then parsed at the start of combat to generate certain effects. These tags are of the basic structure `TBAS_SimBleed__StatName__Amount`. In the above example, a Pilots' Guts statistic would be reduced by 1 at the start of the contract. Temporarily reducing skills directly in SimGame would efffectively allow players to purchase additional levels of the skill at discounted XP costs, which is why we are parsing a temporary tag instead; the tags are processed at contract start rather than directly through the `SimGameEventResult` to prevent "easy" leveling up. Of course the downside is that these stat mods are limited to statistics present on Pilots rather than AbstractActors (e.g. skill stats, but not things like `AccuracyModifier`), and the only available operation on the stat is Adding or Subtracting (if Amount is negative).
-	
-	
-	
-A note on injury healing time: in vanilla, healing time is a function of the # of injuries, whether a pilot was incapactiated or had a "lethal injury", and pilot health. All things being equal, a pilot with health 3 heals slower than a pilot with health 4. This behavior is not changed. The formula for injury healing cost follows, with vanilla settings prefixed by `SimGameConstants`:
-
-`([{SimGameConstants.BaseInjuryDamageCost / pilothealth] * injuryHealTimeMultiplier} + [severity * severityCost] + [debilitatedCost / {medtechDebilMultiplier * #medtech}]) / (SimGameConstants.DailyHealValue +  [SimGameConstants.MedTechSkillMod * #medtech])`
