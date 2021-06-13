@@ -175,7 +175,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 `enableLogging` - bool, enables logging.
 
-`enableLethalTorsoHead` - bool, if `true`, CRIPPLED Torso or Head is lethal.
+`enableLethalTorsoHead` - bool, if `true`, debilitated Torso or Head is lethal.
 
 `debilIncapacitates` - bool, if 'true', becoming debilitated will immediately incapacitate pilots during missions
 
