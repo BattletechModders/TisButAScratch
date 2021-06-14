@@ -427,7 +427,6 @@ namespace TisButAScratch.Framework
 
             for (int i = 0; i < dmg; i++)
             {
-                Rechoose:
                 //adding locations weights for preexisting injuries
 
                 //does pilot have existing injuries
@@ -509,12 +508,6 @@ namespace TisButAScratch.Framework
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
-
-                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(chosen.injuryID))
-                {
-                    ModInit.modLog.LogMessage($"Pilot already has that injury, rerolling location and injuries");
-                    goto Rechoose;
-                }
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
@@ -630,7 +623,6 @@ namespace TisButAScratch.Framework
 
             for (int i = 0; i < dmg; i++)
             {
-                Rechoose:
                 var injuryList = new List<Injury>(PilotInjuryManager.ManagerInstance.InjuryEffectsList);
                 loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
                     ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
@@ -640,12 +632,6 @@ namespace TisButAScratch.Framework
  //               injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
-
-                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(chosen.injuryID))
-                {
-                    ModInit.modLog.LogMessage($"Pilot already has that injury, rerolling location and injuries");
-                    goto Rechoose;
-                }
 
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
                 ModInit.modLog.LogMessage(
