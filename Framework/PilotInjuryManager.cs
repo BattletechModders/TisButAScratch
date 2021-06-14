@@ -617,8 +617,6 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
             }
 
-            
-
             InjuryLoc loc;
 
             for (int i = 0; i < dmg; i++)
