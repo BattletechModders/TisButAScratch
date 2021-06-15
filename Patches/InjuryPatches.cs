@@ -152,7 +152,7 @@ namespace TisButAScratch.Patches
                     return true;
                 }
 
-                if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) && (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || damageType == DamageType.AmmoExplosion) || damageType == DamageType.AmmoExplosion)
+                if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) && (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || damageType == DamageType.AmmoExplosion) || damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion)
                 {
                     ModInit.modLog.LogMessage($"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
                     return false;
