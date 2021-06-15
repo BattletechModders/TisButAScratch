@@ -75,10 +75,10 @@ namespace TisButAScratch
         public int severityCost = 360;
         public int debilitatedCost = 1080;
         public float medtechDebilMultiplier = 0.75f;
+
+        public string pilotPainShunt = "pilot_PainShunt";
         public float injuryHealTimeMultiplier = 0f;
-
         public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();
-
         public List<Injury> InjuryEffectsList = new List<Injury>();
         public List<Injury> InternalDmgInjuries = new List<Injury>();
 

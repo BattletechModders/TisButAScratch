@@ -8,6 +8,17 @@ namespace TisButAScratch.Framework
 {
     public class GlobalVars
     {
+        public static bool rollDie(int diecount, int sides, int success, out int sum)
+        {
+            sum = 0;
+            for (int i = 0; i < diecount; i++)
+            {
+                var currentRoll = UnityEngine.Random.Range(1, sides + 1);
+                sum += currentRoll;
+            }
+            return sum > success;
+        }
+
         internal static Regex TBAS_SimBleedStatMod =
             new Regex("^TBAS_SimBleed__(?<type>.*?)__(?<value>.*?)$",//    __(?<operation>.*?)$",
                 RegexOptions.Compiled); //shamelessly stolen from BlueWinds

@@ -33,6 +33,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(MechComponent __instance, WeaponHitInfo hitInfo,
                 ComponentDamageLevel damageLevel, bool applyEffects)
             {
+                var pilot = __instance.parent.GetPilot();
                 if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
                     (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
                 {
@@ -45,16 +46,21 @@ namespace TisButAScratch.Patches
                     ModInit.modSettings.lifeSupportCustomID.Any
                         (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)))
                 {
+                    if (pilot.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt))
+                    {
+                        ModInit.modLog.LogMessage($"Pilot {pilot.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from life support damage.");
+                        return;
+                    }
                     if (damageLevel == ComponentDamageLevel.Penalized)
                     {
-                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is being cooked!");
-                        __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {pilot.Callsign} is being cooked!");
+                        pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                         return;
                     }
                     if (damageLevel == ComponentDamageLevel.Destroyed)
                     {
-                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {__instance.parent.GetPilot().Callsign} is well-done!");
-                        __instance.parent.GetPilot().LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
+                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {pilot.Callsign} is well-done!");
+                        pilot.LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
                         return;
                     }
                 }
@@ -66,7 +72,7 @@ namespace TisButAScratch.Patches
                 {
                     ModInit.modLog.LogMessage(
                         $"Cockpit component ({__instance.Description.UIName}) damaged/destroyed, pilot needs injury!");
-                    __instance.parent.GetPilot().SetNeedsInjury(InjuryReason.ComponentExplosion);
+                    pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                 }
             }
         }
@@ -125,7 +131,8 @@ namespace TisButAScratch.Patches
         {
             [HarmonyPriority(Priority.First)]
 //            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
-            public static void Prefix(Pilot __instance)
+
+            public static bool Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
                 try
                 {
@@ -142,7 +149,16 @@ namespace TisButAScratch.Patches
                 catch (Exception ex)
                 {
                     Logger.LogException(ex);
+                    return true;
                 }
+
+                if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) && (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || damageType == DamageType.AmmoExplosion) || damageType == DamageType.AmmoExplosion)
+                {
+                    ModInit.modLog.LogMessage($"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
+                    return false;
+                }
+
+                return true;
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
@@ -402,9 +418,18 @@ namespace TisButAScratch.Patches
 
             public static void Postfix(Mech __instance, ChassisLocations location, float damage)
             {
+
+
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
                 var internalDmgInjuryCount = p.StatCollection.GetValue<int>("internalDmgInjuryCount");
+
+                if (p.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt))
+                {
+                    ModInit.modLog.LogMessage(
+                        $"{p.Callsign}_{pKey} has {ModInit.modSettings.pilotPainShunt}, ignoring feedback!");
+                    return;
+                }
 
                 if ((ModInit.modSettings.internalDmgInjuryLocs.Contains(location) ||
                      ModInit.modSettings.internalDmgInjuryLocs.Capacity == 0) &&
