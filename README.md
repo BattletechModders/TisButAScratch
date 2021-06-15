@@ -62,6 +62,9 @@ Gear that sets `DisablesBleeding` to True will prevent the pilot from taking ble
 ```
 Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causing maluses in combat (and necessarily precludes taking bleeding injuries, although regular injuries will still be sustained).
 
+### <b>Pain Shunt</b>:
+Pilots with a specific tag will ignore injuries from overheating, component/ammo explosions, or neural feedback from DNI/EI cockpits.
+
 ### <b>Increased Injury Heal Time</b>:
 Injuries take longer to heal, defined in the settings below.
 
@@ -143,6 +146,7 @@ Injuries are defined in the settings.json, and have the following structure:
 "BleedingOutLethal" : false,
 "BleedingOutSuffix" : "_bleedout",
 "enableInternalDmgInjuries" : true,
+"pilotPainShunt": "pilot_PainShunt",
 "internalDmgStatName" : "InjureOnStructDmg",
 "internalDmgInjuryLimit" : 1,
 "internalDmgLvlReq" : 20,
@@ -184,6 +188,8 @@ Injuries are defined in the settings.json, and have the following structure:
 `debilIncapacitates` - bool, if 'true', becoming debilitated will immediately incapacitate pilots during missions
 
 `enableInternalDmgInjuries` - bool, if `true`, enables a feature that injures pilots when they recieve structure damage if certain equipment is mounted (i.e DNI or EI cockpits).
+
+`pilotPainShunt` - string, pilot tag that denotes pilot has a "Pain Shunt", rendering them immune to injuries from ammo/component explosions, overheating, and neural feedback.
 
 `BleedingOutLethal` - bool, determines whether <b>Bleeding Out</b> from an injury is lethal (`true`) or merely incapacitates (`false`)
 
