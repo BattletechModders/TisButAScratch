@@ -77,6 +77,9 @@ namespace TisButAScratch
         public float medtechDebilMultiplier = 0.75f;
 
         public string pilotPainShunt = "pilot_PainShunt";
+
+        public List<PilotingReq> pilotingReqs = new List<PilotingReq>();
+
         public float injuryHealTimeMultiplier = 0f;
         public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();
         public List<Injury> InjuryEffectsList = new List<Injury>();

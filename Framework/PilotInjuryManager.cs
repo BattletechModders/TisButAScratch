@@ -5,7 +5,9 @@ using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using SVGImporter;
 using BattleTech;
+using BattleTech.UI;
 using FluffyUnderware.DevTools.Extensions;
+using HBS;
 using HBS.Collections;
 using HBS.Util;
 using Localize;
@@ -18,6 +20,48 @@ namespace TisButAScratch.Framework
 {
     public static class PilotExtensions
     {
+        internal static bool TagReqsAreMet(this Pilot pilot, IMechLabDraggableItem item, LanceLoadoutSlot slot)
+        {
+            if (item.ItemType == MechLabDraggableItemType.Mech)
+            {
+                if (!(item is LanceLoadoutMechItem lanceLoadoutMechItem)) return true;
+                foreach (var component in lanceLoadoutMechItem.MechDef.Inventory)
+                {
+                    if (!component.Def.ComponentTags.Any(x =>
+                        ModInit.modSettings.pilotingReqs.Any(y=>y.ComponentTag == x))) continue;
+                    {
+                        var match = ModInit.modSettings.pilotingReqs.FirstOrDefault(x =>
+                            component.Def.ComponentTags.Contains(x.ComponentTag));
+                        if (!pilot.pilotDef.PilotTags.Contains(match.PilotTag))
+                        {
+                            GenericPopupBuilder.Create($"Cannot Add {item.MechDef.Name}", Strings.T($"{item.MechDef.Name} contains {component.Def.Description.Name}, which requires {pilot.Callsign} to have {match.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            if (item.ItemType == MechLabDraggableItemType.Pilot)
+            {
+                if (slot.SelectedMech == null) return true;
+                foreach (var component in slot.SelectedMech.MechDef.Inventory)
+                {
+                    if (!component.Def.ComponentTags.Any(x =>
+                        ModInit.modSettings.pilotingReqs.Any(y=>y.ComponentTag == x))) continue;
+                    {
+                        var match = ModInit.modSettings.pilotingReqs.FirstOrDefault(x =>
+                            component.Def.ComponentTags.Contains(x.ComponentTag));
+                        if (!pilot.pilotDef.PilotTags.Contains(match.PilotTag))
+                        {
+                            GenericPopupBuilder.Create($"Cannot Add {pilot.Callsign}", Strings.T($"{slot.SelectedMech.MechDef.Name} contains {component.Def.Description.Name}, which requires {pilot.Callsign} to have {match.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
         internal static string FetchGUID(this Pilot pilot)
         {
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));

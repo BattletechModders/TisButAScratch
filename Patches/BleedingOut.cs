@@ -140,7 +140,6 @@ namespace TisButAScratch.Patches
         private static CombatHUDStatusPanel theInstance;
 
         [HarmonyPatch(typeof(CombatHUDStatusPanel), "ShowEffectStatuses")]
-        [HarmonyBefore(new string[] { "us.frostraptor.LowVisibility" })]
         public static class CombatHUDStatusPanel_ShowEffectStatuses
         {
             public static void Prefix(CombatHUDStatusPanel __instance, AbstractActor actor,

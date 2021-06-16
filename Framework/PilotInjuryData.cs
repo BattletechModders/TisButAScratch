@@ -7,6 +7,12 @@ using Newtonsoft.Json.Linq;
 
 namespace TisButAScratch.Framework
 {
+    public class PilotingReq
+    {
+        public string ComponentTag = "";
+        public string PilotTag = "";
+        public string PilotTagDisplay = "";
+    }
     public class Injury
     {
         public string injuryID = "";

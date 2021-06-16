@@ -8,12 +8,13 @@ using static TisButAScratch.Framework.GlobalVars;
 using BattleTech.Save;
 using BattleTech.Save.Test;
 using BattleTech.UI;
+using HBS;
+using Localize;
 
 namespace TisButAScratch.Patches
 {
     public class SaveAndStatePatches
     {
-
         [HarmonyPatch(typeof(SGCharacterCreationCareerBackgroundSelectionPanel), "Done")]
         public static class SGCharacterCreationCareerBackgroundSelectionPanel_Done_Patch
         {
@@ -317,7 +318,6 @@ namespace TisButAScratch.Patches
 
         [HarmonyPatch(typeof(SimGameState), "ApplySimGameEventResult",
             new Type[] {typeof(SimGameEventResult), typeof(List<object>), typeof(SimGameEventTracker)})]
-        [HarmonyPriority(Priority.Last)]
         public static class SGS_ApplySimGameEventResult
         {
             public static void Postfix(SimGameState __instance, SimGameEventResult result, List<object> objects,
@@ -620,7 +620,7 @@ namespace TisButAScratch.Patches
 
 
         [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
-        [HarmonyPriority(Priority.Low)]
+        
         public static class ResolveCompleteContract_Patch
         {
             public static bool Prepare() => ModInit.modSettings.UseSimBleedingEffects;
@@ -642,5 +642,55 @@ namespace TisButAScratch.Patches
             }
         }
 
+        [HarmonyPatch(typeof(LanceLoadoutSlot), "OnAddItem")]
+        public static class LanceLoadoutSlot_OnAddItem
+        {
+            public static bool Prepare() => ModInit.modSettings.pilotingReqs.Count > 0;
+
+            [HarmonyBefore(new string[] {"io.mission.customunits"})]
+            [HarmonyPriority(Priority.First)]
+            public static void Postfix(LanceLoadoutSlot __instance, IMechLabDraggableItem item, bool validate,
+                ref bool __result, LanceConfiguratorPanel ___LC, ref Mech ___selectedMech, ref Pilot ___selectedPilot)
+            {
+                if (___LC == null) return;
+                if (__instance.SelectedPilot != null && item.ItemType == MechLabDraggableItemType.Mech)
+                {
+                    if (__instance.SelectedPilot.Pilot.TagReqsAreMet(item, __instance)) 
+                    {
+                        __result = true;
+                        ___LC.ValidateLance();
+                        return;
+                    }
+                    ___LC.ReturnItem(item);
+                    ___selectedMech = null;
+                    __result = false;
+                    ___LC.ValidateLance();
+                    return;
+                }
+                else if (__instance.SelectedMech != null && item.ItemType == MechLabDraggableItemType.Pilot)
+                {
+                    if (!(item is SGBarracksRosterSlot slot))
+                    {
+                        __result = true;
+                        ___LC.ValidateLance();
+                        return;
+                    }
+
+                    if (slot.Pilot.TagReqsAreMet(item, __instance))
+                    {
+                        __result = true;
+                        ___LC.ValidateLance();
+                        return;
+                    }
+                    ___LC.ReturnItem(item);
+                    ___selectedPilot = null;
+                    __result = false;
+                    ___LC.ValidateLance();
+                    return;
+                }
+                __result = true;
+                return;
+            }
+        }
     }
 }

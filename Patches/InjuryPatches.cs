@@ -130,7 +130,6 @@ namespace TisButAScratch.Patches
         public static class Pilot_InjurePilot_Patch
         {
             [HarmonyPriority(Priority.First)]
-//            [HarmonyBefore(new string[] { "us.frostraptor.SkillBasedInit", "us.frostraptor.IRTweaks" })]
 
             public static bool Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
