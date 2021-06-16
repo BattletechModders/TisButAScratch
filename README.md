@@ -65,6 +65,9 @@ Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causi
 ### <b>Pain Shunt</b>:
 Pilots with a specific tag will ignore injuries from overheating, component/ammo explosions, or neural feedback from DNI/EI cockpits.
 
+### <b>Piloting Requirements</b>:
+Units with certain component tags can require pilots have certain pilot tags in order to pilot those units. Intended to prevent just any old grunt from using a DNI/EI cockpit (pilot would need the "implant" tag), but could also be used to require "ECM Training" for a pilot to use a mech with advanced ECM gear, etc.
+
 ### <b>Increased Injury Heal Time</b>:
 Injuries take longer to heal, defined in the settings below.
 
@@ -147,6 +150,14 @@ Injuries are defined in the settings.json, and have the following structure:
 "BleedingOutSuffix" : "_bleedout",
 "enableInternalDmgInjuries" : true,
 "pilotPainShunt": "pilot_PainShunt",
+"pilotingReqs": [
+	{
+		"ComponentTag": "PilotNeedsSpecialTag",
+		"PilotTag": "commander_player",
+		"PilotTagDisplay": "Level 5 Fancy Pants"
+	}
+],
+
 "internalDmgStatName" : "InjureOnStructDmg",
 "internalDmgInjuryLimit" : 1,
 "internalDmgLvlReq" : 20,
@@ -190,6 +201,12 @@ Injuries are defined in the settings.json, and have the following structure:
 `enableInternalDmgInjuries` - bool, if `true`, enables a feature that injures pilots when they recieve structure damage if certain equipment is mounted (i.e DNI or EI cockpits).
 
 `pilotPainShunt` - string, pilot tag that denotes pilot has a "Pain Shunt", rendering them immune to injuries from ammo/component explosions, overheating, and neural feedback.
+
+`pilotingReqs` - List of PilotingReqs which contain the following fields:
+
+	`ComponentTag` - the tag on the component
+	`PilotTag` - the tag a pilot must have in order to use a mech/vehicle with the above component mounted
+	`PilotTagDisplay` - Human-legible display name for PilotTag (so players know what the pilot is missing when the popup happens)
 
 `BleedingOutLethal` - bool, determines whether <b>Bleeding Out</b> from an injury is lethal (`true`) or merely incapacitates (`false`)
 
