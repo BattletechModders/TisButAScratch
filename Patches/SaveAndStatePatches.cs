@@ -475,6 +475,7 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
                 p.StatCollection.AddStatistic<float>("BleedingRate", 0f);
+                p.StatCollection.AddStatistic<float>("BleedingRateMulti", 1f);
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);

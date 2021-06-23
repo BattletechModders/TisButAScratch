@@ -107,6 +107,11 @@ namespace TisButAScratch.Framework
             pilot.StatCollection.Set<float>("BleedingRate", rate);
         }
 
+        internal static float GetBleedingRateMulti(this Pilot pilot)
+        {
+            return pilot.StatCollection.GetValue<float>("BleedingRateMulti");
+        }
+
         internal static void ApplyClosestSimGameResult(this Pilot pilot)
         {
             if (ModInit.modSettings.SimBleedingEffects.Count == 0 || !ModInit.modSettings.UseSimBleedingEffects) return;
@@ -578,7 +583,7 @@ namespace TisButAScratch.Framework
                     var effects = em.GetAllEffectsTargeting(pilot?.ParentActor); //targeting parent actor maybe?
                     if (pilot.GetBleedingRate() == 0f)
                     {
-                        pilot.SetBleedingRate(chosen.severity);
+                        pilot.SetBleedingRate(chosen.severity * pilot.GetBleedingRateMulti());
                     }
                     else
                     {
@@ -588,13 +593,13 @@ namespace TisButAScratch.Framework
                             if (ModInit.modSettings.additiveBleedingFactor < 0)
                             {
                                 var currentRate = pilot.GetBleedingRate();
-                                pilot.SetBleedingRate(currentRate + ModInit.modSettings.additiveBleedingFactor);
+                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor) * pilot.GetBleedingRateMulti());
                             }
 
-                            else if (ModInit.modSettings.additiveBleedingFactor > 1)
+                            else if (ModInit.modSettings.additiveBleedingFactor < 1 && ModInit.modSettings.additiveBleedingFactor > 0)
                             {
                                 var currentRate = pilot.GetBleedingRate();
-                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor);
+                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor * pilot.GetBleedingRateMulti());
                             }
                         }
                     }

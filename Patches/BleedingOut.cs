@@ -18,7 +18,7 @@ namespace TisButAScratch.Patches
         {
             public static void Prefix(AbstractActor __instance)
             {
- //               if (__instance == null) return;
+                if (__instance == null) return;
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
                 if (effects.Count == 0) return;
 
@@ -72,8 +72,7 @@ namespace TisButAScratch.Patches
 
                 if (!effects.Any(x =>
                     x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
-                ModInit.modLog.LogMessage(
-                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display");
+                
 //                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
 //                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
 //                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
@@ -117,6 +116,8 @@ namespace TisButAScratch.Patches
 //                        bleeding.Duration.numPhasesRemaining,
 //                        bleeding.Duration.numRoundsRemaining
 //                    }.Max() - 1;
+                ModInit.modLog.LogMessage(
+                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var eject = "";
                 if (durationInfo <= 0)
                 {
