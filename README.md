@@ -43,23 +43,34 @@ The status effect gives an indicator of activations remain before the pilot blee
 ### <b>Advanced Life Support Gear</b>:
 Mech gear to influence injury effects:
 ```
-    "statisticData": {
-	"statName": "DisablesBleeding",
-	"operation": "Set",
-	"modValue": "true",
-	"modType": "System.Boolean"
-            }
+	"statisticData": {
+		"statName": "DisablesBleeding",
+		"operation": "Set",
+		"modValue": "true",
+		"modType": "System.Boolean"
+	}
 ```
 Gear that sets `DisablesBleeding` to True will prevent the pilot from taking bleeding injuries.
 
 ```
-    "statisticData": {
-	"statName": "NullifiesInjuryEffects",
-	"operation": "Set",
-	"modValue": "true",
-	"modType": "System.Boolean"
-    }
+	"statisticData": {
+		"statName": "NullifiesInjuryEffects",
+		"operation": "Set",
+		"modValue": "true",
+		"modType": "System.Boolean"
+	}
 ```
+Gear that alters `BleedingRateMulti` will decrease (if < 1) or increase (if >1) the rate at which pilots bleed out, e.g.:
+```
+	"statisticData": {
+		"statName": "BleedingRateMulti",
+		"operation": "Float_Multiply",
+		"modValue": "0.25",
+		"modType": "System.Single"
+		"targetCollection": "Pilot"
+	}
+```
+
 Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causing maluses in combat (and necessarily precludes taking bleeding injuries, although regular injuries will still be sustained).
 
 ### <b>Pain Shunt</b>:
