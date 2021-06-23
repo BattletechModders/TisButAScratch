@@ -530,8 +530,8 @@ namespace TisButAScratch.Patches
                         StatCollection.StatOperation.Set, PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count);
                 }
 
-                p.StatCollection.AddStatistic<int>("BloodBank", p.CalcBloodBank());
-                p.StatCollection.AddStatistic<int>("BloodCapacity", p.CalcBloodBank());
+                p.StatCollection.AddStatistic<float>("BloodBank", p.CalcBloodBank());
+                p.StatCollection.AddStatistic<float>("BloodCapacity", p.CalcBloodBank());
                 ModInit.modLog.LogMessage($"{p.Callsign} calculated BloodBank and BloodCapacity: {p.CalcBloodBank()}");
             }
         }

@@ -22,8 +22,20 @@ namespace TisButAScratch.Patches
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
                 if (effects.Count == 0) return;
 
-                if (!effects.Any(x =>
-                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                foreach (var effect in effects)
+                {
+                    if (effect.EffectData?.Description?.Id == null)
+                    {
+                        ModInit.modLog.LogMessage(
+                            $"Effect {effect.EffectData} had null description");
+                        continue;
+                    }
+                    {
+                        if (!effects.Any(x =>
+                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                    }
+                }
+
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
                 var bleedRate = p.GetBleedingRate();
@@ -32,7 +44,7 @@ namespace TisButAScratch.Patches
                 var bloodBank = p.GetBloodBank();
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey}: Current bloodBank at {bloodBank}!");
-                var newbloodBank = Mathf.RoundToInt(bloodBank - bleedRate);
+                var newbloodBank = bloodBank - bleedRate;
                p.SetBloodBank(newbloodBank);
                ModInit.modLog.LogMessage(
                    $"{p.Callsign}_{pKey}: BloodBank set to {p.GetBloodBank()}");
@@ -70,9 +82,20 @@ namespace TisButAScratch.Patches
             {
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(actor);
 
-                if (!effects.Any(x =>
-                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
-                
+                foreach (var effect in effects)
+                {
+                    if (effect.EffectData?.Description?.Id == null)
+                    {
+                        ModInit.modLog.LogMessage(
+                            $"Effect {effect.EffectData} had null description");
+                        continue;
+                    }
+                    {
+                        if (!effects.Any(x =>
+                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                    }
+                }
+
 //                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
 //                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
 //                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
@@ -163,6 +186,13 @@ namespace TisButAScratch.Patches
                 //CombatHUD chud = (CombatHUD) Traverse.Create(__instance).("HUD").GetValue();
                 // var em = chud.Combat.EffectManager;
                 if (!(theInstance.DisplayedCombatant is AbstractActor actor)) return;
+                if (effect?.Description?.Id == null)
+                {
+                    ModInit.modLog.LogMessage(
+                        $"Effect {effect} had null description");
+                    return;
+                }
+
                 if (!effect.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)) return;
                 // var effectsList = em.GetAllEffectsCreatedBy(__instance.DisplayedCombatant.GUID);
                 var effectsList = em.GetAllEffectsTargeting(actor);

@@ -72,29 +72,29 @@ namespace TisButAScratch.Framework
             return guid;
         }
 
-        internal static int CalcBloodBank(this Pilot pilot)
+        internal static float CalcBloodBank(this Pilot pilot)
         {
             var factor = pilot.Health;
             if (ModInit.modSettings.UseGutsForBloodBank)
             {
                 factor = pilot.Guts;
             }
-            return Math.Max(ModInit.modSettings.minBloodBank, Mathf.RoundToInt((factor * ModInit.modSettings.factorBloodBankMult) +
-                                                                               ModInit.modSettings.baseBloodBankAdd));
+            return Math.Max(ModInit.modSettings.minBloodBank, (factor * ModInit.modSettings.factorBloodBankMult) +
+                                                                               ModInit.modSettings.baseBloodBankAdd);
         }
-        internal static int GetBloodCapacity(this Pilot pilot)
+        internal static float GetBloodCapacity(this Pilot pilot)
         {
-            return pilot.StatCollection.GetValue<int>("BloodCapacity");
-        }
-
-        internal static int GetBloodBank(this Pilot pilot)
-        {
-            return pilot.StatCollection.GetValue<int>("BloodBank");
+            return pilot.StatCollection.GetValue<float>("BloodCapacity");
         }
 
-        internal static void SetBloodBank(this Pilot pilot, int bank)
+        internal static float GetBloodBank(this Pilot pilot)
         {
-            pilot.StatCollection.Set<int>("BloodBank", bank);
+            return pilot.StatCollection.GetValue<float>("BloodBank");
+        }
+
+        internal static void SetBloodBank(this Pilot pilot, float bank)
+        {
+            pilot.StatCollection.Set<float>("BloodBank", bank);
         }
 
         internal static float GetBleedingRate(this Pilot pilot)
@@ -155,7 +155,7 @@ namespace TisButAScratch.Framework
         internal static void ApplyClosestBleedingEffect(this Pilot pilot)
         {
             if (ModInit.modSettings.BleedingEffects.Count == 0 || !ModInit.modSettings.UseBleedingEffects) return;
-            var bloodLevelDecimal = (float)pilot.GetBloodBank() / (float)pilot.GetBloodCapacity();
+            var bloodLevelDecimal = pilot.GetBloodBank() / pilot.GetBloodCapacity();
             var pKey = pilot.FetchGUID();
             if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey) && ModInit.modSettings.UseSimBleedingEffects)
             {
@@ -193,7 +193,7 @@ namespace TisButAScratch.Framework
 
             foreach (EffectData effectData in chosenBleedingEffect.effects)
             {
-                if (effectsList.Any(x => x.EffectData.Description.Id == effectData.Description.Id))
+                if (effectsList.Any(x => x.EffectData?.Description?.Id == effectData?.Description?.Id))
                 {
                     ModInit.modLog.LogMessage($"{pilot.Description.Callsign}_{pKey} already has bleeding effect {effectData.Description.Name}, skipping.");
                     continue;
@@ -203,7 +203,7 @@ namespace TisButAScratch.Framework
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
-                    string id = ($"BleedingEffect_{pilot.Description.Callsign}_{effectData.Description.Id}");
+                    var id = ($"BleedingEffect_{pilot.Description.Callsign}_{effectData.Description.Id}");
 
                     ModInit.modLog.LogMessage($"Applying {id}");
                     pilot.ParentActor.Combat.EffectManager.CreateEffect(effectData, id, -1, pilot.ParentActor, pilot.ParentActor, default(WeaponHitInfo), 1);
@@ -431,10 +431,8 @@ namespace TisButAScratch.Framework
 //                        new ShowActorInfoSequence(actor, txt, FloatieMessage.MessageNature.PilotInjury, true)));
 //                }
 
-                var effects = actor.Combat.EffectManager.GetAllEffectsTargeting(actor);
-
-                if (!effects.Any(x =>
-                    x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                if (!injury.effects.Any(x =>
+                    x.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
 
                 var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
                 var eject = "";
@@ -581,25 +579,44 @@ namespace TisButAScratch.Framework
                 {
                     var em = UnityGameInstance.BattleTechGame.Combat.EffectManager;
                     var effects = em.GetAllEffectsTargeting(pilot?.ParentActor); //targeting parent actor maybe?
-                    if (pilot.GetBleedingRate() == 0f)
+                    var currentRate = pilot.GetBleedingRate();
+                    if (currentRate == 0f)
                     {
                         pilot.SetBleedingRate(chosen.severity * pilot.GetBleedingRateMulti());
+                        ModInit.modLog.LogMessage($"{pilot?.Callsign}'s Bleeding Rate was 0, now {currentRate}");
                     }
                     else
                     {
-                        foreach (var unused in effects.Where(x =>
-                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)))
+                        foreach (var effect in effects)
                         {
+                            if (effect?.EffectData?.Description?.Id == null)
+                            {
+                                ModInit.modLog.LogMessage($"Effect {effect} had null description");
+                                continue;
+                            }
+                            if (!effect.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))
+                                continue;
                             if (ModInit.modSettings.additiveBleedingFactor < 0)
                             {
-                                var currentRate = pilot.GetBleedingRate();
-                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor) * pilot.GetBleedingRateMulti());
+                                ModInit.modLog.LogMessage(
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
+                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor) *
+                                                      pilot.GetBleedingRateMulti());
+                                currentRate = pilot.GetBleedingRate();
+                                ModInit.modLog.LogMessage(
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after.");
                             }
 
-                            else if (ModInit.modSettings.additiveBleedingFactor < 1 && ModInit.modSettings.additiveBleedingFactor > 0)
+                            else if (ModInit.modSettings.additiveBleedingFactor < 1 &&
+                                     ModInit.modSettings.additiveBleedingFactor > 0)
                             {
-                                var currentRate = pilot.GetBleedingRate();
-                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor * pilot.GetBleedingRateMulti());
+                                ModInit.modLog.LogMessage(
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
+                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor *
+                                                      pilot.GetBleedingRateMulti());
+                                currentRate = pilot.GetBleedingRate();
+                                ModInit.modLog.LogMessage(
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after.");
                             }
                         }
                     }

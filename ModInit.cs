@@ -89,8 +89,8 @@ namespace TisButAScratch
         public string NullifiesInjuryEffectsStat = "NullifiesInjuryEffects";
 
         public float additiveBleedingFactor = 0f; // if negative, subtract, if decimal multiply.
-        public int minBloodBank = 1;
-        public int baseBloodBankAdd = 0;
+        public float minBloodBank = 1;
+        public float baseBloodBankAdd = 0;
         public float factorBloodBankMult = 1.5f;
         public bool UseGutsForBloodBank = true; // if false, uses Health
 
