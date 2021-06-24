@@ -27,7 +27,7 @@ namespace TisButAScratch.Patches
                     if (effect.EffectData?.Description?.Id == null)
                     {
                         ModInit.modLog.LogMessage(
-                            $"Effect {effect.EffectData} had null description");
+                            $"Effect {effect?.EffectData} had null description");
                         continue;
                     }
                     {
@@ -38,16 +38,16 @@ namespace TisButAScratch.Patches
 
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
-                var bleedRate = p.GetBleedingRate();
+                var bleedRate = p.GetBleedingRate() * p.GetBleedingRateMulti();
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation!");
                 var bloodBank = p.GetBloodBank();
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey}: Current bloodBank at {bloodBank}!");
                 var newbloodBank = bloodBank - bleedRate;
-               p.SetBloodBank(newbloodBank);
-               ModInit.modLog.LogMessage(
-                   $"{p.Callsign}_{pKey}: BloodBank set to {p.GetBloodBank()}");
+                p.SetBloodBank(newbloodBank);
+                ModInit.modLog.LogMessage(
+                    $"{p.Callsign}_{pKey}: BloodBank set to {p.GetBloodBank()}");
 
                 if (newbloodBank <= 0)
                 {
@@ -131,7 +131,7 @@ namespace TisButAScratch.Patches
 
 //                if (bleeding != null)
 //                {
-                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
+                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
 //                    var durationInfo = new int[]
 //                    {
 //                        bleeding.Duration.numActivationsRemaining,
@@ -202,7 +202,7 @@ namespace TisButAScratch.Patches
                     $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
                 if (tgtEffect == null) return;
-                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
 //                        var durationInfo = new int[]
 //                        {
 //                            tgtEffect.Duration.numActivationsRemaining,

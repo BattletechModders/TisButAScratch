@@ -434,7 +434,7 @@ namespace TisButAScratch.Framework
                 if (!injury.effects.Any(x =>
                     x.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
 
-                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / actor.GetPilot().GetBleedingRate() - 1); 
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
                 var eject = "";
                 if (durationInfo <= 0)
                 {
@@ -582,8 +582,8 @@ namespace TisButAScratch.Framework
                     var currentRate = pilot.GetBleedingRate();
                     if (currentRate == 0f)
                     {
-                        pilot.SetBleedingRate(chosen.severity * pilot.GetBleedingRateMulti());
-                        ModInit.modLog.LogMessage($"{pilot?.Callsign}'s Bleeding Rate was 0, now {currentRate}");
+                        pilot.SetBleedingRate(chosen.severity);
+                        ModInit.modLog.LogMessage($"{pilot?.Callsign}'s Bleeding Rate was 0, now {currentRate}, {pilot.GetBleedingRateMulti() }is multi");
                     }
                     else
                     {
@@ -600,11 +600,10 @@ namespace TisButAScratch.Framework
                             {
                                 ModInit.modLog.LogMessage(
                                     $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
-                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor) *
-                                                      pilot.GetBleedingRateMulti());
-                                currentRate = pilot.GetBleedingRate();
+                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor));
+                                currentRate = pilot.GetBleedingRate() * pilot.GetBleedingRateMulti();
                                 ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after.");
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after multi.");
                             }
 
                             else if (ModInit.modSettings.additiveBleedingFactor < 1 &&
@@ -612,16 +611,15 @@ namespace TisButAScratch.Framework
                             {
                                 ModInit.modLog.LogMessage(
                                     $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
-                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor *
-                                                      pilot.GetBleedingRateMulti());
-                                currentRate = pilot.GetBleedingRate();
+                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor);
+                                currentRate = pilot.GetBleedingRate() * pilot.GetBleedingRateMulti();
                                 ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after.");
+                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after multi.");
                             }
                         }
                     }
 
-                    if (pilot.GetBleedingRate() > 0f)
+                    if (pilot.GetBleedingRate() * pilot.GetBleedingRateMulti() > 0f)
                     {
                         pilot.ApplyClosestBleedingEffect();
                     }
