@@ -67,7 +67,15 @@ namespace TisButAScratch.Framework
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
             if (string.IsNullOrEmpty(guid))
             {
-                ModInit.modLog.LogMessage($"WTF IS {pilot.Callsign}'s GUID NULL?!");
+                pilot.pilotDef.PilotTags.Add($"{iGUID}{pilot.pilotDef.Description.Id}{Guid.NewGuid()}");
+                guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
+                ModInit.modLog.LogMessage($"WTF IS {pilot.Callsign}'s GUID NULL?!, making a new GUID I guess.");
+                if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(guid))
+                {
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(guid, new List<string>());
+                    ModInit.modLog.LogMessage($"{pilot.Callsign} was also not in pilotInjuriesMap. Adding them.");
+                }
+                return guid;
             }
             return guid;
         }
