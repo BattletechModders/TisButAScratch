@@ -20,7 +20,42 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(SGCharacterCreationCareerBackgroundSelectionPanel __instance)
             {
-                
+                PilotInjuryManager.PreloadIcons();
+                sim = UnityGameInstance.BattleTechGame.Simulation;
+//                var curPilots = new List<string>();
+
+                if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
+                {
+                    //sim.Commander.pilotDef.PilotTags.Add($"{iGUID}{sim.Commander.Description.Id}{sim.GenerateSimGameUID()}");
+                    sim.Commander.pilotDef.PilotTags.Add($"{iGUID}{sim.Commander.Description.Id}{Guid.NewGuid()}");
+                }
+
+                var pKey = sim.Commander.FetchGUID();
+//                curPilots.Add(pKey);
+                if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                {
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                    ModInit.modLog.LogMessage($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
+                }
+
+
+                foreach (Pilot p in sim.PilotRoster)
+                {
+
+                    if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
+                    {
+                        // p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{sim.GenerateSimGameUID()}");
+                        p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{Guid.NewGuid()}");
+                    }
+
+                    pKey = p.FetchGUID();
+//                    curPilots.Add(pKey);
+                    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
+                    }
+                }
             }
         }
 
@@ -308,7 +343,7 @@ namespace TisButAScratch.Patches
                 {
                     var obj = objects[i];
                     if (result.Scope == EventScope.MechWarrior || result.Scope == EventScope.SecondaryMechWarrior ||
-                        result.Scope == EventScope.TertiaryMechWarrior)
+                        result.Scope == EventScope.TertiaryMechWarrior || result.Scope == EventScope.Commander)
                     {
                         var p = (Pilot) obj;
                         var pKey = p.FetchGUID();
