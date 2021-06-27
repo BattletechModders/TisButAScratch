@@ -217,6 +217,14 @@ namespace TisButAScratch.Patches
                             $"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                     }
                 }
+                else if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
+                         sim.Commander.StatCollection.GetValue<int>("Injuries"))
+                {
+                    var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
+                    sim.Commander.StatCollection.ModifyStat<int>(sim.Commander.FetchGUID(), 0, "Injuries",
+                        StatCollection.StatOperation.Int_Add, dmg);
+                    ModInit.modLog.LogMessage($"Commander is missing {dmg} vanilla injuries, adding to stat.");
+                }
 
 
 
@@ -294,6 +302,14 @@ namespace TisButAScratch.Patches
                             }
                         }
                     }
+                    else if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
+                             p.StatCollection.GetValue<int>("Injuries"))
+                    {
+                        var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
+                        p.StatCollection.ModifyStat<int>(sim.Commander.FetchGUID(), 0, "Injuries",
+                            StatCollection.StatOperation.Int_Add, dmg);
+                        ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} vanilla injuries, adding to stat.");
+                    }
                 }
 
                 var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => !curPilots.Contains(x));
@@ -327,7 +343,7 @@ namespace TisButAScratch.Patches
                 {
                     var obj = objects[i];
                     if (result.Scope == EventScope.MechWarrior || result.Scope == EventScope.SecondaryMechWarrior ||
-                        result.Scope == EventScope.TertiaryMechWarrior)
+                        result.Scope == EventScope.TertiaryMechWarrior || result.Scope == EventScope.Commander)
                     {
                         var p = (Pilot) obj;
                         var pKey = p.FetchGUID();
@@ -338,8 +354,7 @@ namespace TisButAScratch.Patches
                                       PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
                             ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
                             PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
-                            if (ModInit.modSettings.debilSeverityThreshold > 0
-                            ) //now trying to add up "severity" threshold for crippled injury
+                            if (ModInit.modSettings.debilSeverityThreshold > 0) //now trying to add up "severity" threshold for crippled injury
                             {
 
                                 var injuryList = new List<Injury>();

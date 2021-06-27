@@ -395,7 +395,7 @@ namespace TisButAScratch.Patches
             public static void Postfix(Pilot __instance)
             {
                 var pKey = __instance.FetchGUID();
-                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Clear();
+                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
                 if (ModInit.modSettings.timeHealsAllWounds)
                 {
                     __instance.pilotDef.PilotTags.Remove(DEBILITATEDTAG);

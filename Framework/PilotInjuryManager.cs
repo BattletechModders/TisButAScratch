@@ -434,7 +434,7 @@ namespace TisButAScratch.Framework
                 if (!injury.effects.Any(x =>
                     x.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
 
-                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())) - 1; 
                 var eject = "";
                 if (durationInfo <= 0)
                 {
@@ -575,7 +575,7 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
 
-                if (!String.IsNullOrEmpty(chosen.injuryID_Post))
+                if (!string.IsNullOrEmpty(chosen.injuryID_Post))
                 {
                     var em = UnityGameInstance.BattleTechGame.Combat.EffectManager;
                     var effects = em.GetAllEffectsTargeting(pilot?.ParentActor); //targeting parent actor maybe?
@@ -587,36 +587,48 @@ namespace TisButAScratch.Framework
                     }
                     else
                     {
+                        var continuator = false;
                         foreach (var effect in effects)
                         {
-                            if (effect?.EffectData?.Description?.Id == null)
-                            {
-                                ModInit.modLog.LogMessage($"Effect {effect} had null description");
-                                continue;
-                            }
-                            if (!effect.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))
-                                continue;
-                            if (ModInit.modSettings.additiveBleedingFactor < 0)
+                            if (effect.EffectData?.Description?.Id == null)
                             {
                                 ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
-                                pilot.SetBleedingRate((currentRate + ModInit.modSettings.additiveBleedingFactor));
-                                currentRate = pilot.GetBleedingRate() * pilot.GetBleedingRateMulti();
-                                ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after multi.");
+                                    $"Effect {effect?.EffectData} had null description");
+                                continue;
                             }
 
-                            else if (ModInit.modSettings.additiveBleedingFactor < 1 &&
-                                     ModInit.modSettings.additiveBleedingFactor > 0)
+                            if (effect.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))
                             {
-                                ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
-                                pilot.SetBleedingRate(currentRate * ModInit.modSettings.additiveBleedingFactor);
-                                currentRate = pilot.GetBleedingRate() * pilot.GetBleedingRateMulti();
-                                ModInit.modLog.LogMessage(
-                                    $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} after multi.");
+                                continuator = true;
+                                break;
                             }
                         }
+                        if (!continuator) return;
+
+                        var addToRate = 0f;
+                        if (ModInit.modSettings.additiveBleedingFactor < 0)
+                        {
+                            ModInit.modLog.LogMessage(
+                                $"{pilot?.Callsign}'s Bleeding Rate {currentRate} before.");
+                            addToRate = Math.Abs(ModInit.modSettings.additiveBleedingFactor);
+                            currentRate += addToRate;
+                            ModInit.modLog.LogMessage(
+                                $"{pilot?.Callsign}'s Bleeding Rate have {addToRate} added to {currentRate}.");
+                        }
+
+                        else if (ModInit.modSettings.additiveBleedingFactor < 1 &&
+                                 ModInit.modSettings.additiveBleedingFactor > 0)
+                        {
+                            ModInit.modLog.LogMessage(
+                                $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
+                            addToRate = currentRate * ModInit.modSettings.additiveBleedingFactor;
+                            currentRate += addToRate;
+                            ModInit.modLog.LogMessage(
+                                $"{pilot?.Callsign}'s Bleeding Rate have {addToRate} added to {currentRate}.");
+                        }
+                        pilot.SetBleedingRate(currentRate);
+                        ModInit.modLog.LogMessage(
+                            $"{pilot?.Callsign}'s Bleeding Rate set to {currentRate}.");
                     }
 
                     if (pilot.GetBleedingRate() * pilot.GetBleedingRateMulti() > 0f)

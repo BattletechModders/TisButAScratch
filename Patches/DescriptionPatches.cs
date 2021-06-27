@@ -24,19 +24,30 @@ namespace TisButAScratch.Patches
                     return;
                 }
 
- //               if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null) return;
-                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) return;
+                var displayAnyway = false;
+                Pilot pilot = __instance.Pilot;
+                var pKey = pilot.FetchGUID();
+
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                {
+                    if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0)
+                    {
+                        displayAnyway = true;
+                    }
+                }
+ 
+                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
 
                 var tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
 
-                if (tooltip == null && __instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
+                if (tooltip == null && (__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || displayAnyway))
                 {
                     ___incapacitatedObj.gameObject.SetActive(true);
-                       tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
+                    tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
                     tooltip.gameObject.SetActive(true);
                 }
 
-                Pilot pilot = __instance.Pilot;
+
                 string Desc = tooltip?.GetText();
                 if (String.IsNullOrEmpty(Desc))
                 {
@@ -60,10 +71,23 @@ namespace TisButAScratch.Patches
             public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, GameObject ___injureBackground,
                 GameObject ___timeoutBackground)
             {
-//                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null) return; //this was original, worked with injuries but not crippled
+                var displayAnyway = false;
+
+                var pKey = p.FetchGUID();
+                if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                {
+                    if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0)
+                    {
+                        displayAnyway = true;
+                    }
+                }
 
                 if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
-                    !p.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) return;
+                    !p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
+                if (displayAnyway && !___injureBackground.activeSelf)
+                {
+                    ___injureBackground.SetActive(true);
+                }
 
                 if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !___injureBackground.activeSelf)
                 {

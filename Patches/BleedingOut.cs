@@ -21,7 +21,7 @@ namespace TisButAScratch.Patches
                 if (__instance == null) return;
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
                 if (effects.Count == 0) return;
-
+                var continuator = false;
                 foreach (var effect in effects)
                 {
                     if (effect.EffectData?.Description?.Id == null)
@@ -30,12 +30,14 @@ namespace TisButAScratch.Patches
                             $"Effect {effect?.EffectData} had null description");
                         continue;
                     }
+
+                    if (effect.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))
                     {
-                        if (!effects.Any(x =>
-                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                        continuator = true;
+                        break;
                     }
                 }
-
+                if (!continuator) return;
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
                 var bleedRate = p.GetBleedingRate() * p.GetBleedingRateMulti();
@@ -81,64 +83,26 @@ namespace TisButAScratch.Patches
             public static void Postfix(CombatHUD __instance, AbstractActor actor)
             {
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(actor);
-
+                var continuator = false;
                 foreach (var effect in effects)
                 {
                     if (effect.EffectData?.Description?.Id == null)
                     {
                         ModInit.modLog.LogMessage(
-                            $"Effect {effect.EffectData} had null description");
+                            $"Effect {effect?.EffectData} had null description");
                         continue;
                     }
+
+                    if (effect.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))
                     {
-                        if (!effects.Any(x =>
-                            x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
+                        continuator = true;
+                        break;
                     }
                 }
+                if (!continuator) return;
 
-//                var byActivations = effects.OrderBy(x=>x.Duration.numActivationsRemaining).Where(
-//                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numActivationsRemaining > 0).ToList();
-//                var byMovements = effects.OrderBy(x=>x.Duration.numMovementsRemaining).Where(
-//                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numMovementsRemaining > 0).ToList();
-//                var byPhases = effects.OrderBy(x=>x.Duration.numPhasesRemaining).Where(
-//                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numPhasesRemaining > 0).ToList();
-//                var byRounds = effects.OrderBy(x=>x.Duration.numRoundsRemaining).Where(
-//                    x => x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix) && x.Duration.numRoundsRemaining > 0).ToList();
+                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())) - 1; 
 
-//                var bleeding = new Effect();
-//                if (byActivations.Any())
-//                {
-//                    bleeding = byActivations.First();
-//                }
-//                else if (byMovements.Any())
-//                {
-//                    bleeding = byMovements.First();
-//                }
-//                else if (byPhases.Any())
-//                {
-//                    bleeding = byPhases.First();
-//                }
-//                else if (byRounds.Any())
-//                {
-//                    bleeding = byRounds.First();
-//                }
-//                else
-//                {
-//                    bleeding = effects.FirstOrDefault(x=>
-//                        x.EffectData.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix));
-//                    ModInit.modLog.LogMessage($"ERROR: We used the first effect we found, which probably isn't right.");
-//                }
-
-//                if (bleeding != null)
-//                {
-                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
-//                    var durationInfo = new int[]
-//                    {
-//                        bleeding.Duration.numActivationsRemaining,
-//                        bleeding.Duration.numMovementsRemaining,
-//                        bleeding.Duration.numPhasesRemaining,
-//                        bleeding.Duration.numRoundsRemaining
-//                    }.Max() - 1;
                 ModInit.modLog.LogMessage(
                     $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var eject = "";
@@ -198,18 +162,11 @@ namespace TisButAScratch.Patches
                 var effectsList = em.GetAllEffectsTargeting(actor);
 
                 if (effectsList.Count <= 0) return;
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())) - 1; 
                 ModInit.modLog.LogMessage(
-                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display");
+                    $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
                 if (tgtEffect == null) return;
-                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) - 1); 
-//                        var durationInfo = new int[]
-//                        {
-//                            tgtEffect.Duration.numActivationsRemaining,
-//                            tgtEffect.Duration.numMovementsRemaining,
-//                            tgtEffect.Duration.numPhasesRemaining,
-//                            tgtEffect.Duration.numRoundsRemaining
-//                        }.Max() - 1;
                 var eject = "";
                 if (durationInfo <= 0)
                 {
