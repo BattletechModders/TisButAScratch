@@ -343,17 +343,21 @@ namespace TisButAScratch.Patches
                 {
                     var GainedInjury = result.HasActionType(SimGameResultAction.ActionType.MechWarrior_AddInjury) || result.HasActionType(SimGameResultAction.ActionType.MechWarrior_AddInjuries);
                     var LostInjury = result.HasActionType(SimGameResultAction.ActionType.MechWarrior_SubtractInjury) || result.HasActionType(SimGameResultAction.ActionType.MechWarrior_SubtractInjuries);
-
-                    foreach (var stat in result.Stats)
+                    if (!GainedInjury && !LostInjury && result.Stats == null) continue;
+                    if (result.Stats != null)
                     {
-                        switch (stat.name)
+                        foreach (var stat in result.Stats)
                         {
-                            case "Injuries" when stat.ToInt() > 0:
-                                GainedInjury = true;
-                                break;
-                            case "Injuries" when stat.ToInt() < 0:
-                                LostInjury = true;
-                                break;
+                            if (stat.typeString != "System.Int32") continue;
+                            switch (stat.name)
+                            {
+                                case "Injuries" when stat.ToInt() > 0:
+                                    GainedInjury = true;
+                                    break;
+                                case "Injuries" when stat.ToInt() < 0:
+                                    LostInjury = true;
+                                    break;
+                            }
                         }
                     }
 
@@ -369,8 +373,7 @@ namespace TisButAScratch.Patches
                             if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
                                 p.StatCollection.GetValue<int>("Injuries"))
                             {
-                                var dmg = p.StatCollection.GetValue<int>("Injuries") -
-                                          PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
+                                var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
                                 ModInit.modLog.LogMessage($"{p.Callsign} has {dmg} extra injuries. Removing.");
                                 for (int j = 0; j < dmg; j++)
                                 {
@@ -439,8 +442,7 @@ namespace TisButAScratch.Patches
                             if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
                                 commander.StatCollection.GetValue<int>("Injuries"))
                             {
-                                var dmg = commander.StatCollection.GetValue<int>("Injuries") -
-                                          PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
+                                var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - commander.StatCollection.GetValue<int>("Injuries");
                                 ModInit.modLog.LogMessage($"{commander.Callsign} has {dmg} extra injuries. Removing.");
                                 for (int j = 0; j < dmg; j++)
                                 {
