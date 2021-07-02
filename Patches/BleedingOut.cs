@@ -19,6 +19,10 @@ namespace TisButAScratch.Patches
             public static void Prefix(AbstractActor __instance)
             {
                 if (__instance == null) return;
+                var p = __instance.GetPilot();
+                var pKey = p.FetchGUID();
+                ModInit.modLog.LogMessage(
+                    $"Actor {p.Callsign} {pKey} ending turn.");
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
                 if (effects.Count == 0) return;
                 var continuator = false;
@@ -38,8 +42,8 @@ namespace TisButAScratch.Patches
                     }
                 }
                 if (!continuator) return;
-                var p = __instance.GetPilot();
-                var pKey = p.FetchGUID();
+                
+
                 var bleedRate = p.GetBleedingRate() * p.GetBleedingRateMulti();
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation!");
@@ -101,7 +105,7 @@ namespace TisButAScratch.Patches
                 }
                 if (!continuator) return;
 
-                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())) - 1; 
+                    var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())); 
 
                 ModInit.modLog.LogMessage(
                     $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
@@ -162,7 +166,7 @@ namespace TisButAScratch.Patches
                 var effectsList = em.GetAllEffectsTargeting(actor);
 
                 if (effectsList.Count <= 0) return;
-                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())) - 1; 
+                var durationInfo = Mathf.FloorToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti())); 
                 ModInit.modLog.LogMessage(
                     $"Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
