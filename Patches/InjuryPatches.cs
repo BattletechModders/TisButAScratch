@@ -41,6 +41,29 @@ namespace TisButAScratch.Patches
                     return;
                 }
 
+                if ((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0 ||
+                     __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
+                    (damageLevel == ComponentDamageLevel.Penalized))
+                {
+                    ModInit.modLog.LogMessage(
+                        $"Cockpit component ({__instance.Description.UIName}) damaged, pilot needs injury!");
+                    pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
+                    return;
+                }
+
+                if ((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0 ||
+                     __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
+                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
+                    (damageLevel == ComponentDamageLevel.Destroyed))
+                {
+                    ModInit.modLog.LogMessage(
+                        $"Cockpit component ({__instance.Description.UIName}) destroyed, pilot needs injury!");
+                    pilot.MaxInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, DamageType.ComponentExplosion, null, __instance.parent.Combat.FindActorByGUID(hitInfo.attackerId));
+                    return;
+                }
+
+
                 if (ModInit.modSettings.lifeSupportSupportsLifeTM &&
                     __instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
                     ModInit.modSettings.lifeSupportCustomID.Any
@@ -63,16 +86,6 @@ namespace TisButAScratch.Patches
                         pilot.LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
                         return;
                     }
-                }
-
-                if (((__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) == 0) ||
-                     __instance.parent is Vehicle) && ModInit.modSettings.crewOrCockpitCustomID.Any
-                        (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
-                    (damageLevel == ComponentDamageLevel.Penalized || damageLevel == ComponentDamageLevel.Destroyed))
-                {
-                    ModInit.modLog.LogMessage(
-                        $"Cockpit component ({__instance.Description.UIName}) damaged/destroyed, pilot needs injury!");
-                    pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                 }
             }
         }
