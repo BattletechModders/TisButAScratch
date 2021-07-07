@@ -86,6 +86,13 @@ In vanilla, healing time is a function of the # of injuries, whether a pilot was
 
 `([{SimGameConstants.BaseInjuryDamageCost / pilothealth] * injuryHealTimeMultiplier} + [severity * severityCost] + [debilitatedCost / {medtechDebilMultiplier * #medtech}]) / (SimGameConstants.DailyHealValue +  [SimGameConstants.MedTechSkillMod * #medtech])`
 
+### Vehicle Pilot Injuries:
+
+The setting `crewOrCockpitCustomID` defines components that when damaged/destroyed automatically injure pilots, including vehicle pilots.
+
+The setting `injureVehiclePilotOnDestroy` controls vehicle pilot injury behavior when vehicles are destroyed. Possible values are "MAX", "HIGH", "SINGLE", "OFF". MAX functions the same as a CT destruction for mechs (max injuries = pilot <i>usually</i> dies.) "HIGH" is effectively MAX - 1; pilot will be severely injured but not dead. "SINGLE" inflicts a single injury on Vehicle destruction. "OFF" means no guaranteed injury on vehicle destruction (does not disable injuries from `crewOrCockpitCustomID` however).
+
+
 Injuries are defined in the settings.json, and have the following structure:
 ```
 "InjuryEffectsList": [
@@ -311,8 +318,10 @@ Example stat effect added to DNI cockpit given below:
 
 `crewOrCockpitCustomID` - List<string> - list of CustomId (from CustomComponents) that defines "cockpit components" which will inflict injuries on critical hits. Only for vehicles and non-head-mounted cockpits (in the case of head-mounted cockpits, injuries are inflicted by normal "head hit" system).
 
-`lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
+`injureVehiclePilotOnDestroy` - string.  Controls vehicle pilot injury behavior when vehicles are destroyed. Possible values are "MAX", "HIGH", "SINGLE", "OFF". MAX functions the same as a CT destruction for mechs (max injuries = pilot <i>usually</i> dies.) "HIGH" is effectively MAX - 1; pilot will be severely injured but not dead. "SINGLE" inflicts a single injury on Vehicle destruction. "OFF" means no guaranteed injury on vehicle destruction (does not disable injuries from `crewOrCockpitCustomID` however).
 
+`lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
+	
 `isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
 
 ```
