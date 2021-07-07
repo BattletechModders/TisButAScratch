@@ -172,7 +172,7 @@ namespace TisButAScratch.Patches
                 {
                     var dmg = sim.Commander.StatCollection.GetValue<int>("Injuries") -
                               PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                    ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
+                    ModInit.modLog.LogMessage($"Commander is missing {dmg} TBAS injuries. Rerolling.");
                     PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
                     if (ModInit.modSettings.debilSeverityThreshold > 0
                     ) //now trying to add up "severity" threshold for crippled injury
@@ -220,13 +220,22 @@ namespace TisButAScratch.Patches
                 else if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
                          sim.Commander.StatCollection.GetValue<int>("Injuries"))
                 {
-                    var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
-                    sim.Commander.StatCollection.ModifyStat<int>(sim.Commander.FetchGUID(), 0, "Injuries",
-                        StatCollection.StatOperation.Int_Add, dmg);
-                    ModInit.modLog.LogMessage($"Commander is missing {dmg} vanilla injuries, adding to stat.");
+                    if (sim.Commander.StatCollection.GetValue<int>("Injuries") < 1)
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
+                        ModInit.modLog.LogMessage($"Commander had no vanilla injuries, clearing TBAS injuries.");
+                    }
+                    else
+                    {
+                        var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
+                        for (int i = 0; i < dmg; i++)
+                        {
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
+                            ModInit.modLog.LogMessage($"Commander is missing {dmg} vanilla injuries, removing TBAS injury at {i}.");
+                        }
+                    }
+                    
                 }
-
-
 
                 foreach (Pilot p in sim.PilotRoster)
                 {
@@ -263,7 +272,7 @@ namespace TisButAScratch.Patches
                     {
                         var dmg = p.StatCollection.GetValue<int>("Injuries") -
                                   PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                        ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
+                        ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} TBAS injuries. Rerolling.");
                         PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
                         if (ModInit.modSettings.debilSeverityThreshold > 0
                         ) //now trying to add up "severity" threshold for crippled injury
@@ -289,12 +298,12 @@ namespace TisButAScratch.Patches
 
                                 if (t > ModInit.modSettings.debilSeverityThreshold)
                                 {
-                                    sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                    p.pilotDef.PilotTags.Add(DEBILITATEDTAG);
                                     if (ModInit.modSettings.enableLethalTorsoHead &&
                                         (injuryLoc.Key == InjuryLoc.Head ||
                                          injuryLoc.Key == InjuryLoc.Torso))
                                     {
-                                        sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
+                                        p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
                                             "LethalInjury",
                                             StatCollection.StatOperation.Set, true);
                                     }
@@ -305,10 +314,20 @@ namespace TisButAScratch.Patches
                     else if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
                              p.StatCollection.GetValue<int>("Injuries"))
                     {
-                        var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
-                        p.StatCollection.ModifyStat<int>(sim.Commander.FetchGUID(), 0, "Injuries",
-                            StatCollection.StatOperation.Int_Add, dmg);
-                        ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} vanilla injuries, adding to stat.");
+                        if (p.StatCollection.GetValue<int>("Injuries") < 1)
+                        {
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
+                            ModInit.modLog.LogMessage($"Pilot {p.Callsign} had no vanilla injuries, clearing TBAS injuries.");
+                        }
+                        else
+                        {
+                            var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
+                            for (int i = 0; i < dmg; i++)
+                            {
+                                PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
+                                ModInit.modLog.LogMessage($"Pilot {p.Callsign}  is missing {dmg} vanilla injuries, removing TBAS injury at {i}.");
+                            }
+                        }
                     }
                 }
 
@@ -319,16 +338,6 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage(
                         $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
                 }
-
-
-//                foreach (var pilot in new List<Pilot>(sim.PilotRoster))
-//                {
-//                    if (pilot.GUID == sim.Commander.GUID)
-//                    {
-//                        sim.PilotRoster.Remove(pilot);
-//                        ModInit.modLog.LogMessage($"Removed a commander from pilotRoster");
-//                    }
-//                }
             }
         }
 

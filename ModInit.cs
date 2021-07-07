@@ -64,6 +64,7 @@ namespace TisButAScratch
         public bool reInjureWeightAppliesCurrentContract = false;
         public int reInjureLocWeight = 0;
 
+        public string injureVehiclePilotOnDestroy = "MAX"; // will check for "MAX", "HIGH", "SINGLE", "OFF". HIGH = MaxInjuries-1 (pilot f'd up, but not dead.)
         public List<string> crewOrCockpitCustomID = new List<string>();
         public List<string> lifeSupportCustomID = new List<string>();
 

@@ -15,6 +15,38 @@ namespace TisButAScratch.Patches
 {
     public class InjuryPatches
     {
+        [HarmonyPatch(typeof(Vehicle), "DamageLocation")]
+        public static class Vehicle_DamageLocation
+        {
+            public static bool Prepare() => ModInit.modSettings.injureVehiclePilotOnDestroy != "OFF";
+            public static void Prefix(Vehicle __instance, WeaponHitInfo hitInfo, int originalHitLoc, VehicleChassisLocations vLoc, Weapon weapon, float totalArmorDamage, float directStructureDamage, AttackImpactQuality impactQuality)
+            {
+                if (__instance.GetCurrentStructure(vLoc) <= 0f)
+                {
+                    var pilot = __instance.GetPilot();
+                    if (ModInit.modSettings.injureVehiclePilotOnDestroy == "MAX")
+                    {
+                        ModInit.modLog.LogMessage($"Vehicle location destroyed, MaxInjure {pilot.Callsign} {pilot.FetchGUID()} due to injureVehiclePilotOnDestroy = MAX");
+                        pilot.MaxInjurePilot(__instance.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID,
+                            DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
+                    }
+                    else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "HIGH")
+                    {
+                        var dmg = pilot.Health - 1;
+                        ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
+                        pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, dmg,
+                            DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
+                    }
+                    else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "SINGLE")
+                    {
+                        ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
+                        pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, 1,
+                            DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
+                    }
+                }
+            }
+        }
+
         // this should hopefully cause vehile injuries and injuries when certain components are damaged/destroyeded. also implements "forced ejections" for pilots.
         [HarmonyPatch(typeof(MechComponent), "DamageComponent",
             new Type[]
@@ -28,7 +60,6 @@ namespace TisButAScratch.Patches
                 return (ModInit.modSettings.lifeSupportCustomID.Count != 0 &&
                         ModInit.modSettings.crewOrCockpitCustomID.Count != 0);
             }
-
 
             public static void Postfix(MechComponent __instance, WeaponHitInfo hitInfo,
                 ComponentDamageLevel damageLevel, bool applyEffects)
@@ -60,6 +91,8 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage(
                         $"Cockpit component ({__instance.Description.UIName}) destroyed, pilot needs injury!");
                     pilot.MaxInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, DamageType.ComponentExplosion, null, __instance.parent.Combat.FindActorByGUID(hitInfo.attackerId));
+                    __instance.parent.FlagForDeath("Injuries", DeathMethod.CockpitDestroyed, DamageType.HeadShot, 1, 1, hitInfo.attackerId, true);
+                    __instance.parent.HandleDeath(hitInfo.attackerId);
                     return;
                 }
 
