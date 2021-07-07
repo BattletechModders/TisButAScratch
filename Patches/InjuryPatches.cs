@@ -91,7 +91,7 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage(
                         $"Cockpit component ({__instance.Description.UIName}) destroyed, pilot needs injury!");
                     pilot.MaxInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, DamageType.ComponentExplosion, null, __instance.parent.Combat.FindActorByGUID(hitInfo.attackerId));
-                    __instance.parent.FlagForDeath("Injuries", DeathMethod.CockpitDestroyed, DamageType.HeadShot, 1, 1, hitInfo.attackerId, true);
+                    __instance.parent.FlagForDeath("Injuries", DeathMethod.CenterTorsoDestruction, DamageType.HeadShot, 1, 1, hitInfo.attackerId, true);
                     __instance.parent.HandleDeath(hitInfo.attackerId);
                     return;
                 }
