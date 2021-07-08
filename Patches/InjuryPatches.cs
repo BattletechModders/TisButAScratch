@@ -21,8 +21,14 @@ namespace TisButAScratch.Patches
             public static bool Prepare() => ModInit.modSettings.injureVehiclePilotOnDestroy != "OFF";
             public static void Prefix(Vehicle __instance, WeaponHitInfo hitInfo, int originalHitLoc, VehicleChassisLocations vLoc, Weapon weapon, float totalArmorDamage, float directStructureDamage, AttackImpactQuality impactQuality)
             {
-                if (__instance.GetCurrentStructure(vLoc) <= 0f)
+                var currentStructure = __instance.GetCurrentStructure(vLoc);
+                if (currentStructure <= 0f) return;
+
+                var incomingStructureDamage = directStructureDamage + totalArmorDamage - __instance.GetCurrentArmor(vLoc);
+
+                if (currentStructure - incomingStructureDamage <= 0f)
                 {
+                    ModInit.modLog.LogMessage($"Vehicle location will be destroyed; currentStructure at location {currentStructure}, will take {incomingStructureDamage} damage");
                     var pilot = __instance.GetPilot();
                     if (ModInit.modSettings.injureVehiclePilotOnDestroy == "MAX")
                     {
