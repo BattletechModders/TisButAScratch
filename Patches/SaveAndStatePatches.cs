@@ -576,9 +576,10 @@ namespace TisButAScratch.Patches
 
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
-                    p.pilotDef.PilotTags.Add(
-                        $"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}"); //changed to sys NewGuid instead of simguid for skirmish compatibility
-                    ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag");
+                    var newPKey = $"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}";
+                    p.pilotDef.PilotTags.Add(newPKey); //changed to sys NewGuid instead of simguid for skirmish compatibility
+                    
+                    ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag: {newPKey}");
                 }
 
                 var pKey = p.FetchGUID();
@@ -587,13 +588,13 @@ namespace TisButAScratch.Patches
                 if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Name} missing, added to combatInjuriesMap");
+                    ModInit.modLog.LogMessage($"{p.Callsign} missing, added to combatInjuriesMap");
                 }
 
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Name} missing, added to pilotInjuriesMap");
+                    ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
                 }
 
                 PilotInjuryManager.ManagerInstance.GatherAndApplyInjuries(unit);
@@ -610,6 +611,7 @@ namespace TisButAScratch.Patches
                 }
 
                 p.StatCollection.Set("LethalInjury", false);
+                p.StatCollection.Set("HasEjected", false);
 
                 p.StatCollection.AddStatistic<float>("BloodBank", p.CalcBloodBank());
                 p.StatCollection.AddStatistic<float>("BloodCapacity", p.CalcBloodBank());

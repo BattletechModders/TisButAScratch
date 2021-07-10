@@ -473,13 +473,13 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to combatInjuriesMap");
+                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to combatInjuriesMap");
             }
 
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             for (int i = 0; i < dmg; i++)
@@ -657,13 +657,13 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to combatInjuriesMap");
+                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to combatInjuriesMap");
             }
 
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             var loc = InjuryLoc.Head;
@@ -700,7 +700,7 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Name} missing, added to pilotInjuriesMap");
+                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             InjuryLoc loc;
