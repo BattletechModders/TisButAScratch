@@ -442,7 +442,13 @@ namespace TisButAScratch.Framework
                 if (!injury.effects.Any(x =>
                     x.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix))) return;
 
-                var durationInfo = Mathf.CeilToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) -1); 
+                var baseRate = p.GetBleedingRate();
+                var multi = p.GetBleedingRateMulti();
+                var bleedRate = baseRate * multi;
+                ModInit.modLog.LogMessage(
+                    $"applyInjuryEffects: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
+                var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) - 1);
+
                 ModInit.modLog.LogMessage(
                     $"At ApplyInjuryEffects: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var eject = "";

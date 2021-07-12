@@ -42,11 +42,12 @@ namespace TisButAScratch.Patches
                     }
                 }
                 if (!continuator) return;
-                
 
-                var bleedRate = p.GetBleedingRate() * p.GetBleedingRateMulti();
+                var baseRate = p.GetBleedingRate();
+                var multi = p.GetBleedingRateMulti();
+                var bleedRate = baseRate * multi;
                 ModInit.modLog.LogMessage(
-                    $"{p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation!");
+                    $"OnActivationEnd: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var bloodBank = p.GetBloodBank();
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey}: Current bloodBank at {bloodBank}!");
@@ -104,11 +105,18 @@ namespace TisButAScratch.Patches
                     }
                 }
                 if (!continuator) return;
-
-                    var durationInfo = Mathf.CeilToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) -1); 
+                var p = actor.GetPilot();
+                var pKey = p.FetchGUID();
+                var baseRate = p.GetBleedingRate();
+                var multi = p.GetBleedingRateMulti();
+                var bleedRate = baseRate * multi;
+                ModInit.modLog.LogMessage(
+                    $"OnActorSelected: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
+                var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) -1); 
 
                 ModInit.modLog.LogMessage(
                     $"At OnActorSelected: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
+
                 var eject = "";
                 if (durationInfo <= 0)
                 {
@@ -166,7 +174,16 @@ namespace TisButAScratch.Patches
                 var effectsList = em.GetAllEffectsTargeting(actor);
 
                 if (effectsList.Count <= 0) return;
-                var durationInfo = Mathf.CeilToInt(actor.GetPilot().GetBloodBank() / (actor.GetPilot().GetBleedingRate() * actor.GetPilot().GetBleedingRateMulti()) -1); 
+
+                var p = actor.GetPilot();
+                var pKey = p.FetchGUID();
+                var baseRate = p.GetBleedingRate();
+                var multi = p.GetBleedingRateMulti();
+                var bleedRate = baseRate * multi;
+                ModInit.modLog.LogMessage(
+                    $"ProcessDetailString: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
+                var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) - 1);
+
                 ModInit.modLog.LogMessage(
                     $"At ProcessDetailString: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
