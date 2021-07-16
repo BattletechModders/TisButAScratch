@@ -168,8 +168,7 @@ namespace TisButAScratch.Patches
                 {
                     ModInit.modLog.LogMessage(
                         $"Cockpit component ({__instance.Description.UIName}) damaged, pilot needs injury!");
-//                    pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
-
+                    pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                     pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, 1, DamageType.Combat, null, pilot.ParentActor.Combat.FindActorByGUID(hitInfo.attackerId));
                     if (!pilot.IsIncapacitated)
                     {
