@@ -34,6 +34,7 @@ namespace TisButAScratch.Patches
                     if (ModInit.modSettings.injureVehiclePilotOnDestroy == "MAX")
                     {
                         ModInit.modLog.LogMessage($"Vehicle location destroyed, MaxInjure {pilot.Callsign} {pilot.FetchGUID()} due to injureVehiclePilotOnDestroy = MAX");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.MaxInjurePilot(__instance.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID,
                             DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
                         if (pilot.IsIncapacitated)
@@ -48,6 +49,7 @@ namespace TisButAScratch.Patches
                     {
                         var dmg = pilot.Health - 1;
                         ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, dmg,
                             DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
                         if (!pilot.IsIncapacitated)
@@ -90,6 +92,7 @@ namespace TisButAScratch.Patches
                     else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "SINGLE")
                     {
                         ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, 1,
                             DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
                         if (!pilot.IsIncapacitated)
