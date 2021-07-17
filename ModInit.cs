@@ -60,7 +60,7 @@ namespace TisButAScratch
         public string internalDmgStatName = "InjureOnStructDmg";
         public int internalDmgInjuryLimit = -1;
         public float internalDmgLvlReq = 0f;
-        public int missionKillSeverityThreshold = -1;
+        public int missionKillSeverityThreshold = 20;
         public bool reInjureWeightAppliesCurrentContract = false;
         public int reInjureLocWeight = 0;
 

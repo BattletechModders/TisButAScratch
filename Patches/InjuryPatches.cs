@@ -403,8 +403,7 @@ namespace TisButAScratch.Patches
 
                 }
 
-                if ((ModInit.modSettings.debilSeverityThreshold > 0 ||
-                     ModInit.modSettings.missionKillSeverityThreshold > 0) &&
+                if ((ModInit.modSettings.debilSeverityThreshold > 0) &&
                     (damageType != DamageType.Unknown && damageType != DamageType.NOT_SET)
                 ) //now trying to add up "severity" threshold for crippled injury or mission kill for pain
                 {
@@ -483,7 +482,7 @@ namespace TisButAScratch.Patches
             {
                 if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || 
                     __instance.StatCollection.GetValue<bool>("BledOut") ||
-                    (__instance.StatCollection.GetValue<int>(MissionKilledStat) >= ModInit.modSettings.missionKillSeverityThreshold && ModInit.modSettings.missionKillSeverityThreshold > 0))
+                    (__instance.StatCollection.GetValue<int>(MissionKilledStat) >= __instance.StatCollection.GetValue<int>("MissionKilledThreshold") && __instance.StatCollection.GetValue<int>("MissionKilledThreshold") > 0))
                 {
                     __result = true;
                 }
@@ -520,7 +519,7 @@ namespace TisButAScratch.Patches
                     }
 
                     else if ((unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
-                              ModInit.modSettings.missionKillSeverityThreshold ||
+                              pilot.StatCollection.GetValue<int>("MissionKilledThreshold") ||
                               unitResult.pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) &&
                              (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 

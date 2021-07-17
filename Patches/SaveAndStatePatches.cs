@@ -553,6 +553,7 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<bool>("BledOut", false);
                 p.StatCollection.AddStatistic<int>("internalDmgInjuryCount", 0);
                 p.StatCollection.AddStatistic<int>(MissionKilledStat, 0);
+                p.StatCollection.AddStatistic<int>("MissionKilledThreshold", ModInit.modSettings.missionKillSeverityThreshold);
                 p.StatCollection.AddStatistic<float>("BleedingRate", 0f);
                 p.StatCollection.AddStatistic<float>("BleedingRateMulti", 1f);
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());

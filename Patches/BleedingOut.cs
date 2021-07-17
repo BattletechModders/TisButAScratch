@@ -6,6 +6,7 @@ using BattleTech.UI;
 using TisButAScratch.Framework;
 using UnityEngine;
 using Text = Localize.Text;
+using static TisButAScratch.Framework.GlobalVars;
 
 namespace TisButAScratch.Patches
 {
@@ -87,6 +88,24 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(CombatHUD __instance, AbstractActor actor)
             {
+                var p = actor.GetPilot();
+                var pKey = p.FetchGUID();
+                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                {
+                    var mknum = p.StatCollection.GetValue<int>(MissionKilledStat);
+                    var missionKill = new Text("<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                        new object[]
+                        {
+                            mknum,
+                            p.StatCollection.GetValue<int>("MissionKilledThreshold")
+                });
+                    
+
+                    actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                        new ShowActorInfoSequence(actor, missionKill, FloatieMessage.MessageNature.PilotInjury, false)));
+                }
+
+
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(actor);
                 var continuator = false;
                 foreach (var effect in effects)
@@ -105,8 +124,7 @@ namespace TisButAScratch.Patches
                     }
                 }
                 if (!continuator) return;
-                var p = actor.GetPilot();
-                var pKey = p.FetchGUID();
+                
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
@@ -168,6 +186,20 @@ namespace TisButAScratch.Patches
                         $"Effect {effect} had null description");
                     return;
                 }
+                var p = actor.GetPilot();
+
+                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0 && PilotInjuryManager.ManagerInstance.InjuryEffectIDs.Contains(effect.Description.Id))
+                {
+                    var mknum = p.StatCollection.GetValue<int>(MissionKilledStat);
+                    var missionKill = new Text(
+                        "\n<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                        new object[]
+                        {
+                            mknum,
+                            p.StatCollection.GetValue<int>("MissionKilledThreshold")
+                        });
+                    __result.AppendLine(missionKill);
+                }
 
                 if (!effect.Description.Id.EndsWith(ModInit.modSettings.BleedingOutSuffix)) return;
                 // var effectsList = em.GetAllEffectsCreatedBy(__instance.DisplayedCombatant.GUID);
@@ -175,7 +207,6 @@ namespace TisButAScratch.Patches
 
                 if (effectsList.Count <= 0) return;
 
-                var p = actor.GetPilot();
                 var pKey = p.FetchGUID();
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
@@ -198,7 +229,6 @@ namespace TisButAScratch.Patches
                     durationInfo,
                     eject
                 });
-
                 __result.AppendLine(txt);
             }
         }

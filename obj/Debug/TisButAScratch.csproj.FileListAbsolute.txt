@@ -112,3 +112,6 @@ D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
+D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomAmmoCategories.dll
+D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
+D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\EPPlus.dll

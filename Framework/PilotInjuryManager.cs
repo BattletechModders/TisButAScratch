@@ -227,6 +227,7 @@ namespace TisButAScratch.Framework
         public List<Injury> InternalDmgInjuries;
         public List<BleedingEffect> BleedingEffectsList;
         public List<SimBleedingEffect> SimBleedingEffectList;
+        public List<string> InjuryEffectIDs;
 
         public static PilotInjuryManager ManagerInstance
         {
@@ -291,6 +292,7 @@ namespace TisButAScratch.Framework
             BleedingEffectsList = BleedingEffectsList.OrderByDescending(x => x.bleedingEffectLvl).ToList();
 
             InjuryEffectsList = new List<Injury>();
+            InjuryEffectIDs = new List<string>();
             foreach (var injuryEffect in ModInit.modSettings.InjuryEffectsList) 
             {
                 ModInit.modLog.LogMessage($"Adding effects for {injuryEffect.injuryName}!");
@@ -299,8 +301,10 @@ namespace TisButAScratch.Framework
                     var effectData = new EffectData();
                     effectData.FromJSON(jObject.ToString());
                     injuryEffect.effects.Add(effectData);
+                    InjuryEffectIDs.Add(effectData.Description.Id);
                 }
                 InjuryEffectsList.Add(injuryEffect);
+                
             }
 
 
@@ -588,8 +592,23 @@ namespace TisButAScratch.Framework
                 pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity);
 
+                var mkillStat = pilot?.StatCollection.GetValue<int>(MissionKilledStat);
                 ModInit.modLog.LogMessage(
-                    $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
+                    $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat. Total is now {mkillStat}");
+
+                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                {
+                    var missionKill = new Text("<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                        new object[]
+                        {
+                            mkillStat,
+                            pilot?.StatCollection.GetValue<int>("MissionKilledThreshold")
+                        });
+
+
+                    pilot?.ParentActor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                        new ShowActorInfoSequence(pilot?.ParentActor, missionKill, FloatieMessage.MessageNature.PilotInjury, false)));
+                }
 
                 if (!string.IsNullOrEmpty(chosen.injuryID_Post))
                 {
@@ -692,7 +711,20 @@ namespace TisButAScratch.Framework
                     StatCollection.StatOperation.Int_Add, chosen.severity);
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
+                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                {
+                    var mknum = pilot?.StatCollection.GetValue<int>(MissionKilledStat);
+                    var missionKill = new Text("<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                        new object[]
+                        {
+                            mknum,
+                            pilot?.StatCollection.GetValue<int>("MissionKilledThreshold")
+                        });
 
+
+                    pilot?.ParentActor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
+                        new ShowActorInfoSequence(pilot?.ParentActor, missionKill, FloatieMessage.MessageNature.PilotInjury, false)));
+                }
                 applyInjuryEffects(pilot?.ParentActor, chosen);
 
             }
