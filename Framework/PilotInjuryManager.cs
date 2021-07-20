@@ -598,7 +598,7 @@ namespace TisButAScratch.Framework
 
                 if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
                 {
-                    var missionKill = new Text("<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                    var missionKill = new Text("<color=#C65102>Pilot's current Consciousness Level: {0} of {1}</color=#C65102>",
                         new object[]
                         {
                             mkillStat,
@@ -714,7 +714,7 @@ namespace TisButAScratch.Framework
                 if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
                 {
                     var mknum = pilot?.StatCollection.GetValue<int>(MissionKilledStat);
-                    var missionKill = new Text("<color=#C65102>Pilot's current Mission-Killed Level: {0} of {1}</color=#C65102>",
+                    var missionKill = new Text("<color=#C65102>Pilot's current Consciousness Level: {0} of {1}</color=#C65102>",
                         new object[]
                         {
                             mknum,

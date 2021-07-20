@@ -350,19 +350,17 @@ namespace TisButAScratch.Patches
                     if (__instance == null) return true;
                     ModInit.modLog.LogMessage(
                             $"{__instance.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
-                        PilotInjuryHolder.HolderInstance.injuryStat =
-                            __instance.StatCollection.GetValue<int>("Injuries");
-                        ModInit.modLog.LogMessage(
-                            $"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                    PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
+                    ModInit.modLog.LogMessage($"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
 
-                        if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
-                            (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
-                             damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion))
-                    {
-                        ModInit.modLog.LogMessage(
-                            $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
-                        return false;
-                    }
+                    if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
+                        (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
+                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion)) 
+                        {
+                            ModInit.modLog.LogMessage(
+                                $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
+                            return false;
+                        }
                 }
                 catch (Exception ex)
                 {
