@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using BattleTech;
 using Harmony;
 using System.Linq;
@@ -12,16 +13,47 @@ namespace TisButAScratch.Patches
 {
     public class BleedingOut
     {
+        
+        //pretty much copied from MechEngineer
+        [HarmonyPatch(typeof(Pilot), "InjuryReasonDescription", MethodType.Getter)]
+        public static class Pilot_InjuryReasonDescription_Patch
+        {
+            public static InjuryReason InjuryReasonOverheat = (InjuryReason)666;
+            public static void Postfix(Pilot __instance, ref string __result)
+            {
+                if (__instance.InjuryReason == InjuryReasonOverheat)
+                {
+                    __result = "OVERHEATED";
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(AbstractActor), "OnActivationEnd",
             new Type[] {typeof(string), typeof(int)})]
         public static class AbstractActor_OnActivationEnd
         {
-            public static void Prefix(AbstractActor __instance)
+            public static void Prefix(AbstractActor __instance, string sourceID, int stackItemID)
             {
                 if (__instance == null) return;
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
+                if (__instance is Mech mech)
+                {
+                    if (!mech.IsOverheated)
+                    {
+                        return;
+                    }
+
+                    if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.OverheatInjuryStat))
+                    {
+                        p.SetNeedsInjury(Pilot_InjuryReasonDescription_Patch.InjuryReasonOverheat);
+                        p.InjurePilot(sourceID, stackItemID, 1,
+                            DamageType.Overheat, default(Weapon), __instance);
+                        p.ClearNeedsInjury();
+                    }
+                }
+
+                
                 ModInit.modLog.LogMessage(
                     $"Actor {p.Callsign} {pKey} ending turn.");
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);

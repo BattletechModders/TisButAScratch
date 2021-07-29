@@ -559,6 +559,7 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);
+                __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.OverheatInjuryStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.DisableBleedingStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat, false);
                 ModInit.modLog.LogMessage(

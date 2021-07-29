@@ -68,6 +68,7 @@ namespace TisButAScratch
         public List<string> crewOrCockpitCustomID = new List<string>();
         public List<string> lifeSupportCustomID = new List<string>();
 
+        public string OverheatInjuryStat = "InjureOnOverheat";
         public string isTorsoMountStatName = "isTorsoMount";
         public bool lifeSupportSupportsLifeTM = false;
 
