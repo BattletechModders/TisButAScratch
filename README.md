@@ -192,6 +192,7 @@ Injuries are defined in the settings.json, and have the following structure:
 
 "crewOrCockpitCustomID": ["Cockpit", "CrewCompartment", "LifeSupportA", "LifeSupportB", "SensorsA", "SensorsB"],
 "lifeSupportCustomID": ["LifeSupportA", "LifeSupportB"],
+"OverheatInjuryStat": "InjureOnOverheat",
 "isTorsoMountStatName": "isTorsoMount",
 "lifeSupportSupportsLifeTM": true,
 
@@ -321,6 +322,8 @@ Example stat effect added to DNI cockpit given below:
 `injureVehiclePilotOnDestroy` - string.  Controls vehicle pilot injury behavior when vehicles are destroyed. Possible values are "MAX", "HIGH", "SINGLE", "OFF". MAX functions the same as a CT destruction for mechs (max injuries = pilot <i>usually</i> dies.) "HIGH" is effectively MAX - 1; pilot will be severely injured but not dead. "SINGLE" inflicts a single injury on Vehicle destruction. "OFF" means no guaranteed injury on vehicle destruction (does not disable injuries from `crewOrCockpitCustomID` however).
 
 `lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
+
+`OverheatInjuryStat` - string. name of bool statistic set by critical effects, etc to note that a pilot should take an injury immediately upon overheating. primarily used by damaged life support, etc. similar setup as below.
 	
 `isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
 
