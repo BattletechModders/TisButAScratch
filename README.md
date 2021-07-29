@@ -323,7 +323,7 @@ Example stat effect added to DNI cockpit given below:
 
 `lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
 
-`OverheatInjuryStat` - string. name of bool statistic set by critical effects, etc to note that a pilot should take an injury immediately upon overheating. primarily used by damaged life support, etc. similar setup as below.
+`OverheatInjuryStat` - string. name of bool statistic (on AbstractActor statcollection) set by critical effects, etc to note that a pilot should take an injury immediately upon overheating. primarily used by damaged life support, etc. similar setup as below.
 	
 `isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
 
