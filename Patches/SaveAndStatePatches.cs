@@ -590,7 +590,7 @@ namespace TisButAScratch.Patches
                 if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Callsign} missing, added to combatInjuriesMap");
+                    ModInit.modLog.LogMessage($"{p.Callsign}, {pKey}, piloting {unit.DisplayName}, {unit.VariantName} missing, added to combatInjuriesMap");
                 }
 
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))

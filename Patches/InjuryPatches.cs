@@ -398,7 +398,6 @@ namespace TisButAScratch.Patches
                 {
                     ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign} {pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType);
-
                 }
 
                 if ((ModInit.modSettings.debilSeverityThreshold > 0) &&
@@ -420,15 +419,11 @@ namespace TisButAScratch.Patches
 
                     if (ModInit.modSettings.debilSeverityThreshold > 0)
                     {
-
-
                         var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
-
 
                         foreach (var injuryLoc in groupedLocs)
                         {
                             var t = injuryLoc.Sum(x => x.severity);
-
 
                             if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
@@ -443,6 +438,8 @@ namespace TisButAScratch.Patches
                                     ModInit.modLog.LogMessage(
                                         $"{__instance.Callsign}_{pKey} has debilitated Torso or Head; lethal injury!");
                                 }
+//                                __instance.ParentActor.FlagForDeath(DEBILITATEDTAG, DeathMethod.PilotKilled, DamageType.Combat, 1, stackItemUID, sourceActor.GUID, true);
+//                                __instance.ParentActor.HandleDeath(sourceActor.GUID);
                             }
                         }
                     }

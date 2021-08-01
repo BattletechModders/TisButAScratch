@@ -39,21 +39,18 @@ namespace TisButAScratch.Patches
                 var pKey = p.FetchGUID();
                 if (__instance is Mech mech)
                 {
-                    if (!mech.IsOverheated)
+                    if (mech.IsOverheated)
                     {
-                        return;
-                    }
-
-                    if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.OverheatInjuryStat))
-                    {
-                        p.SetNeedsInjury(Pilot_InjuryReasonDescription_Patch.InjuryReasonOverheat);
-                        p.InjurePilot(sourceID, stackItemID, 1,
-                            DamageType.Overheat, default(Weapon), __instance);
-                        p.ClearNeedsInjury();
+                        if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.OverheatInjuryStat))
+                        {
+                            p.SetNeedsInjury(Pilot_InjuryReasonDescription_Patch.InjuryReasonOverheat);
+                            p.InjurePilot(sourceID, stackItemID, 1,
+                                DamageType.Overheat, default(Weapon), __instance);
+                            p.ClearNeedsInjury();
+                        }
                     }
                 }
 
-                
                 ModInit.modLog.LogMessage(
                     $"Actor {p.Callsign} {pKey} ending turn.");
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
