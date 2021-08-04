@@ -475,7 +475,7 @@ namespace TisButAScratch.Framework
         }
 
 
-        internal void rollInjury(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
+        internal void rollInjury(Pilot pilot, int dmg, DamageType damageType, InjuryReason reason) //to be postfix patched into InjurePilot
         {
             InjuryLoc loc;
             var pKey = pilot.FetchGUID();
@@ -554,7 +554,7 @@ namespace TisButAScratch.Framework
 
 //                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8); // old
 
-                if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf)
+                if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || (int)reason ==  101 || (int)reason == 666)
                 {
                     injuryList.RemoveAll(x => x.couldBeThermal == false || x.severity >= 100);
                 }
