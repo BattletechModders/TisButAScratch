@@ -162,6 +162,7 @@ Injuries are defined in the settings.json, and have the following structure:
 ```
 {
 "enableLogging" : true,
+"enableTrace" : true,
 "enableLethalTorsoHead" : true,
 "debilIncapacitates" : false,
 "BleedingOutLethal" : false,
@@ -212,6 +213,8 @@ Injuries are defined in the settings.json, and have the following structure:
 ```
 
 `enableLogging` - bool, enables logging.
+
+`enableTrace` - bool, enables trace logging (not usually needed).
 
 `enableLethalTorsoHead` - bool, if `true`, debilitated Torso or Head is lethal.
 
