@@ -4,6 +4,7 @@ using BattleTech;
 using Harmony;
 using System.Linq;
 using BattleTech.UI;
+using Localize;
 using TisButAScratch.Framework;
 using UnityEngine;
 using Text = Localize.Text;
@@ -95,11 +96,18 @@ namespace TisButAScratch.Patches
                     ModInit.modLog.LogMessage(
                         $"{p.Callsign}_{pKey} has bled out!");
 
-                    __instance.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), true);
-
+                    __instance.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), false);
                     if (ModInit.modSettings.BleedingOutLethal) p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                         StatCollection.StatOperation.Set, true);
+                    __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(new ShowActorInfoSequence(__instance, Strings.T("PILOT INCAPACITATED!"), FloatieMessage.MessageNature.PilotInjury, true)));
                     __instance.HandleDeath(p.FetchGUID()); // added handledeath for  bleeding out
+                    return;
+                }
+                if (p.IsIncapacitated)
+                {
+                    __instance.FlagForDeath("Pilot Killed", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), false);
+                    __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(new ShowActorInfoSequence(__instance, Strings.T("PILOT INCAPACITATED!"), FloatieMessage.MessageNature.PilotInjury, true)));
+                    __instance.HandleDeath(p.FetchGUID());
                     return;
                 }
 
@@ -211,7 +219,7 @@ namespace TisButAScratch.Patches
                 if (!(theInstance.DisplayedCombatant is AbstractActor actor)) return;
                 if (effect?.Description?.Id == null)
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog.LogTrace(
                         $"Effect {effect} had null description");
                     return;
                 }
@@ -240,11 +248,11 @@ namespace TisButAScratch.Patches
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
-                ModInit.modLog.LogMessage(
+                ModInit.modLog.LogTrace(
                     $"ProcessDetailString: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) - 1);
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog.LogTrace(
                     $"At ProcessDetailString: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
                 if (tgtEffect == null) return;

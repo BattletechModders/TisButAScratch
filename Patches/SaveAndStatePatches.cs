@@ -545,9 +545,6 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(AbstractActor __instance)
             {
-
-                //rearragne ; calc bloodcap after effects initialized?
-
                 var p = __instance.GetPilot();
                 p.StatCollection.AddStatistic<bool>("NeedsFeedbackInjury", false);
                 p.StatCollection.AddStatistic<bool>("BledOut", false);
@@ -562,8 +559,6 @@ namespace TisButAScratch.Patches
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.OverheatInjuryStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.DisableBleedingStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat, false);
-                ModInit.modLog.LogMessage(
-                    $"Initializing {p.Callsign} EffectStat `NeedsFeedbackInjury`, `BledOut`, `internalDmgInjuryCount`, `{MissionKilledStat}`, `LastInjuryId`, `{ModInit.modSettings.internalDmgStatName}`, and `{ModInit.modSettings.isTorsoMountStatName}`");
             }
         }
 

@@ -49,6 +49,7 @@ namespace TisButAScratch
     class Settings
     {
         public bool enableLogging = false;
+        public bool enableTrace = false;
         public bool enableFatigue = false;
         public bool enableLethalTorsoHead = false;
         public bool debilIncapacitates = false;

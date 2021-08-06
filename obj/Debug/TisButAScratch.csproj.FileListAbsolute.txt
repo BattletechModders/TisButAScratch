@@ -115,4 +115,3 @@ D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomAmmoCategories.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
 D:\Users\Anthony\Documents\GitHub\TisButAScratch\bin\Debug\EPPlus.dll
-D:\Users\Anthony\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csprojAssemblyReference.cache

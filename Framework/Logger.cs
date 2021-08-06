@@ -24,7 +24,16 @@ namespace TisButAScratch.Framework
 
         public void LogMessage(string message)
         {
-            if (enableLogging)
+            if (ModInit.modSettings.enableLogging)
+            {
+                string ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                logStreamWriter.WriteLine($"INFO: {ts} - {message}");
+            }
+        }
+
+        public void LogTrace(string message)
+        {
+            if (ModInit.modSettings.enableTrace)
             {
                 string ts = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
                 logStreamWriter.WriteLine($"INFO: {ts} - {message}");
