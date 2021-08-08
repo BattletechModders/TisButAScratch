@@ -94,43 +94,6 @@ namespace TisButAScratch.Patches
                         ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
                         pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         __instance.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
-                        //pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, 1, DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
-                        if (!pilot.IsIncapacitated)
-                        {
-                            if (__instance.team.LocalPlayerControlsTeam)
-                            {
-                                AudioEventManager.PlayAudioEvent("audioeventdef_musictriggers_combat", "friendly_warrior_injured", null, null);
-                            }
-                            else
-                            {
-                                AudioEventManager.PlayAudioEvent("audioeventdef_musictriggers_combat", "enemy_warrior_injured", null, null);
-                            }
-                            IStackSequence sequence;
-                            if (pilot.Injuries == 0)
-                            {
-                                sequence = new ShowActorInfoSequence(__instance, Strings.T("{0}: INJURY IGNORED", new object[]
-                                {
-                                    pilot.InjuryReasonDescription
-                                }), FloatieMessage.MessageNature.PilotInjury, true);
-                            }
-                            else
-                            {
-                                sequence = new ShowActorInfoSequence(__instance, Strings.T("{0}: PILOT INJURED", new object[]
-                                {
-                                    pilot.InjuryReasonDescription
-                                }), FloatieMessage.MessageNature.PilotInjury, true);
-                                AudioEventManager.SetPilotVOSwitch<AudioSwitch_dialog_dark_light>(AudioSwitch_dialog_dark_light.dark, __instance);
-                                AudioEventManager.PlayPilotVO(VOEvents.Pilot_TakeDamage, __instance, null, null, true);
-                            }
-                            __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(sequence));
-                        }
-                        pilot.ClearNeedsInjury();
-                        if (pilot.IsIncapacitated)
-                        {
-                            __instance.FlagForDeath("Pilot Killed", DeathMethod.PilotKilled, DamageType.Combat, 1, hitInfo.stackItemUID, hitInfo.attackerId, false);
-                            __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(new ShowActorInfoSequence(__instance, Strings.T("PILOT INCAPACITATED!"), FloatieMessage.MessageNature.PilotInjury, true)));
-                            __instance.HandleDeath(hitInfo.attackerId);
-                        }
                     }
                 }
             }

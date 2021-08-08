@@ -14,7 +14,6 @@ namespace TisButAScratch.Patches
 {
     public class BleedingOut
     {
-        
         //pretty much copied from MechEngineer
         [HarmonyPatch(typeof(Pilot), "InjuryReasonDescription", MethodType.Getter)]
         public static class Pilot_InjuryReasonDescription_Patch
