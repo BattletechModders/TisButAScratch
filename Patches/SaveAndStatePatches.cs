@@ -607,6 +607,8 @@ namespace TisButAScratch.Patches
                         StatCollection.StatOperation.Set, PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count);
                 }
 
+                ModInit.modLog.LogTrace($"{p.Callsign} {p.FetchGUID()} - Is actor dead?: {p.ParentActor.IsDead} Because is incapacitated: {p.IsIncapacitated} from {p.Injuries} injuries / {p.Health} health and lethal injuries {p.LethalInjuries}.");
+
                 p.StatCollection.Set("LethalInjury", false);
                 p.StatCollection.Set("HasEjected", false);
 
