@@ -665,20 +665,26 @@ namespace TisButAScratch.Patches
                         .AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
                     ModInit.modLog.LogMessage($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
 
+                    var replacementInjuries = new List<string>();
 
-                    foreach (var inj in PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x =>
-                        x.injuryID_Post != ""))
+                    for (var index = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - 1; index >= 0;
+ index--)
                     {
-                        if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(inj.injuryID))
+                        var injury = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey][index];
+                        var injuryDef =
+                            PilotInjuryManager.ManagerInstance.InjuryEffectsList.FirstOrDefault(x =>
+                                x.injuryID == injury);
+                        if (injuryDef == null) continue;
+                        if (string.IsNullOrEmpty(injuryDef.injuryID_Post))
                         {
-                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(inj.injuryID);
-                            ModInit.modLog.LogMessage(
-                                $"Removed {inj.injuryName} with bleeding effect from {p.Callsign}");
-                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(inj.injuryID_Post);
-                            ModInit.modLog.LogMessage(
-                                $"Added {inj.injuryID_Post} to {p.Callsign} for post-combat injury");
+                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(index);
+                            ModInit.modLog.LogMessage($"Removed {injuryDef.injuryName} with bleeding effect from {p.Callsign}");
+                            replacementInjuries.Add(injuryDef.injuryID_Post);
+                            ModInit.modLog.LogMessage($"Added {injuryDef.injuryID_Post} to {p.Callsign} for post-combat injury");
                         }
                     }
+
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].AddRange(replacementInjuries);
 
                     if (p.StatCollection.GetValue<int>("Injuries") <
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count)

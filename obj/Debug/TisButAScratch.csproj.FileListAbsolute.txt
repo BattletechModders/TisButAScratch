@@ -166,3 +166,4 @@ C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.C
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
+C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.AssemblyReference.cache
