@@ -675,12 +675,16 @@ namespace TisButAScratch.Patches
                             PilotInjuryManager.ManagerInstance.InjuryEffectsList.FirstOrDefault(x =>
                                 x.injuryID == injury);
                         if (injuryDef == null) continue;
-                        if (string.IsNullOrEmpty(injuryDef.injuryID_Post))
+                        if (!string.IsNullOrEmpty(injuryDef.injuryID_Post))
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(index);
                             ModInit.modLog.LogMessage($"Removed {injuryDef.injuryName} with bleeding effect from {p.Callsign}");
                             replacementInjuries.Add(injuryDef.injuryID_Post);
                             ModInit.modLog.LogMessage($"Added {injuryDef.injuryID_Post} to {p.Callsign} for post-combat injury");
+                        }
+                        else
+                        {
+                            ModInit.modLog.LogMessage($"Injury {injury} not a bleeding injury, not doing post-mission replacement.");
                         }
                     }
 
