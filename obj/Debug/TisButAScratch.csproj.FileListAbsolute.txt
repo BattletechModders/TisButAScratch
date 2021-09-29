@@ -120,7 +120,6 @@ C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\TisButAScratch.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\TisButAScratch.pdb
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\0Harmony.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\Assembly-CSharp.dll
-C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\CustomAmmoCategories.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.ParticleSystemModule.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.PhysicsModule.dll
@@ -159,10 +158,10 @@ C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\Mono.Data.Sqlite.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AWSSDK.CognitoIdentity.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\protobuf-net.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.AudioModule.dll
-C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\EPPlus.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.SharedInternalsModule.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AWSSDK.SecurityToken.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CoreCompileInputs.cache
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
+C:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.AssemblyReference.cache

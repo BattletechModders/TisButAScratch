@@ -570,7 +570,7 @@ namespace TisButAScratch.Patches
             {
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
-
+                p.ForceRefreshDef();
                 if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     var newPKey = $"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}";
