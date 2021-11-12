@@ -79,6 +79,15 @@ namespace TisButAScratch.Patches
                 ModInit.modLog.LogMessage(
                     $"OnActivationEnd: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var bloodBank = p.GetBloodBank();
+                var bloodCap = p.GetBloodCapacity();
+                if (bloodBank > bloodCap)
+                {
+                    ModInit.modLog.LogMessage(
+                        $"OnActivationEnd: {p.Callsign}_{pKey} bloodbank {bloodBank} > blood capacity {bloodCap}. Setting bloodbank to blood capacity before bleeding continues.");
+                    p.SetBloodBank(bloodCap);
+                    bloodBank = p.GetBloodBank();
+                }
+
                 ModInit.modLog.LogMessage(
                     $"{p.Callsign}_{pKey}: Current bloodBank at {bloodBank}!");
                 var newbloodBank = bloodBank - bleedRate;
