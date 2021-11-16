@@ -44,7 +44,7 @@
     </Reference>
     <Reference Include="CustomComponents, Version=8.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
     </Reference>
     <Reference Include="InControl">
       <HintPath>F:\Steam Library\steamapps\common\BATTLETECH\BattleTech_Data\Managed\InControl.dll</HintPath>
