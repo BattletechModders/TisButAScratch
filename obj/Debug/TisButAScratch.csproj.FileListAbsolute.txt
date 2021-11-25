@@ -171,3 +171,4 @@ D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.A
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CoreCompileInputs.cache
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.dll
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete

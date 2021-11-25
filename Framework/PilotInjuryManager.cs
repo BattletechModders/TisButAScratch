@@ -570,8 +570,14 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
-//                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
-//                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
+                //                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
+                //                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
+
+                if (pilot != null && pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
+                {
+                    injuryList.RemoveAll(x => !string.IsNullOrEmpty(x.injuryID_Post));
+                    ModInit.modLog.LogMessage($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
+                }
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
                 ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
