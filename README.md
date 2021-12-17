@@ -41,6 +41,9 @@ The status effect gives an indicator of activations remain before the pilot blee
 ![TextPop](https://github.com/ajkroeg/TisButAScratch/blob/main/doc/bleedingout.png)
 
 ### <b>Advanced Life Support Gear</b>:
+
+To completely disabled TBAS for a unit, give the unit a tag from setting disableTBASTag (by default "TBAS_Disabled")
+
 Mech gear to influence injury effects:
 
 Gear that sets `DisablesBleeding` to True will prevent the pilot from taking bleeding injuries.
@@ -330,6 +333,8 @@ Example stat effect added to DNI cockpit given below:
 
 `lifeSupportCustomID` - List<string> - list of CustomId (from CustomComponents) that defines specific life support components which, if a torso-mounted cockpit is used and `"lifeSupportSupportsLifeTM": true` will cause an injury or pilot death when life support is critted or destroyed, respectively.
 
+`disableTBASTag` - string, by default "TBAS_Disabled", unit Tag (MechDef, VehicleDef, etc) that disables TBAS functionality for that unit.
+	
 `OverheatInjuryStat` - string. name of bool statistic (on AbstractActor statcollection) set by critical effects, etc to note that a pilot should take an injury immediately upon overheating. primarily used by damaged life support, etc. similar setup as below.
 	
 `isTorsoMountStatName` - string, name of bool statistic being used in gear to determine whether a torso-mounted cockpit is being used. Example stat effect added to torso-mount cockpit component below:
