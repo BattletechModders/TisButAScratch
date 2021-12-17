@@ -37,6 +37,11 @@ namespace TisButAScratch.Patches
                 if (__instance == null) return;
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
+                if (__instance.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
+                {
+                    ModInit.modLog.LogMessage($"[AbstractActor_OnActivationEnd] {p.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag}, not processing TBAS injuries.");
+                    return;
+                }
                 if (__instance is Mech mech)
                 {
                     if (mech.IsOverheated)

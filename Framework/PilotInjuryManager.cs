@@ -409,9 +409,9 @@ namespace TisButAScratch.Framework
         private void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
-            if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat))
+            if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat) || actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
             {
-                ModInit.modLog.LogMessage($"Found advanced life-support: nullifying injury effects for {p.Callsign}");
+                ModInit.modLog.LogMessage($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)}: nullifying injury effects for {p.Callsign}");
                 return;
             }
             var pKey = p.FetchGUID();

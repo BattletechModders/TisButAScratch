@@ -322,6 +322,13 @@ namespace TisButAScratch.Patches
             {
                 var pKey = __instance.FetchGUID();
 
+                if (__instance.ParentActor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
+                {
+                    ModInit.modLog.LogMessage(
+                        $"[Pilot_InjurePilot_Patch_Post] {__instance.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag}, not processing TBAS injuries.");
+                    return;
+                }
+
                 if (PilotInjuryHolder.HolderInstance.injuryStat >= //changed to <= instead of == 1021
                     __instance.StatCollection.GetValue<int>("Injuries"))
                 {
