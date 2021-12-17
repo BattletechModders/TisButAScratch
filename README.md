@@ -42,6 +42,9 @@ The status effect gives an indicator of activations remain before the pilot blee
 
 ### <b>Advanced Life Support Gear</b>:
 Mech gear to influence injury effects:
+
+Gear that sets `DisablesBleeding` to True will prevent the pilot from taking bleeding injuries.
+
 ```
 	"statisticData": {
 		"statName": "DisablesBleeding",
@@ -50,7 +53,8 @@ Mech gear to influence injury effects:
 		"modType": "System.Boolean"
 	}
 ```
-Gear that sets `DisablesBleeding` to True will prevent the pilot from taking bleeding injuries.
+
+Gear that sets `NullifiesInjuryEffects` to True will prevent any effects from TBAS injuries from affecting pilot. They will still <i>take</i> TBAS injuries, they just won't have an effect in combat.
 
 ```
 	"statisticData": {
