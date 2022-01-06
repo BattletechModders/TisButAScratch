@@ -42,7 +42,7 @@ The status effect gives an indicator of activations remain before the pilot blee
 
 ### <b>Advanced Life Support Gear</b>:
 
-To completely disabled TBAS for a unit, give the unit a tag from setting disableTBASTag (by default "TBAS_Disabled")
+To completely disabled TBAS for a unit, give the unit def (not ChassisDef) a tag from setting disableTBASTag (by default "TBAS_Disabled")
 
 Mech gear to influence injury effects:
 
