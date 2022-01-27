@@ -602,7 +602,7 @@ namespace TisButAScratch.Framework
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat. Total is now {mkillStat}");
 
-                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness)
                 {
                     var missionKill = new Text("<color=#C65102>Pilot's current Consciousness Threshold: {0} of {1}</color=#C65102>",
                         new object[]
@@ -717,7 +717,7 @@ namespace TisButAScratch.Framework
                     StatCollection.StatOperation.Int_Add, chosen.severity);
                 ModInit.modLog.LogMessage(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
-                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness)
                 {
                     var mknum = pilot?.StatCollection.GetValue<int>(MissionKilledStat);
                     var missionKill = new Text("<color=#C65102>Pilot's current Consciousness Threshold: {0} of {1}</color=#C65102>",

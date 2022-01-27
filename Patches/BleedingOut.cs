@@ -140,7 +140,7 @@ namespace TisButAScratch.Patches
             {
                 var p = actor.GetPilot();
                 var pKey = p.FetchGUID();
-                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0)
+                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness)
                 {
                     var mknum = p.StatCollection.GetValue<int>(MissionKilledStat);
                     var missionKill = new Text("<color=#C65102>Pilot's current Consciousness Threshold: {0} of {1}</color=#C65102>",
@@ -148,9 +148,7 @@ namespace TisButAScratch.Patches
                         {
                             mknum,
                             p.StatCollection.GetValue<int>("MissionKilledThreshold")
-                });
-                    
-
+                        });
                     actor.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(
                         new ShowActorInfoSequence(actor, missionKill, FloatieMessage.MessageNature.PilotInjury, false)));
                 }
@@ -238,7 +236,7 @@ namespace TisButAScratch.Patches
                 }
                 var p = actor.GetPilot();
 
-                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0 && PilotInjuryManager.ManagerInstance.InjuryEffectIDs.Contains(effect.Description.Id))
+                if (p.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness && PilotInjuryManager.ManagerInstance.InjuryEffectIDs.Contains(effect.Description.Id))
                 {
                     var mknum = p.StatCollection.GetValue<int>(MissionKilledStat);
                     var missionKill = new Text(
