@@ -37,9 +37,10 @@ namespace TisButAScratch.Patches
                 if (__instance == null) return;
                 var p = __instance.GetPilot();
                 var pKey = p.FetchGUID();
-                if (__instance.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
+                if (__instance.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.UnitIsTrooperSquad()))
                 {
-                    ModInit.modLog.LogMessage($"[AbstractActor_OnActivationEnd] {p.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag}, not processing TBAS injuries.");
+                    ModInit.modLog.LogMessage(
+                        $"[OnActivationEnd] {__instance.GetPilot().Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
                     return;
                 }
                 if (__instance is Mech mech)

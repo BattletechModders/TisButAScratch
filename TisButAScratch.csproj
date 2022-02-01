@@ -78,6 +78,7 @@
     <Compile Include="ModInit.cs" />
     <None Include="Patches\FloatyPatches.cs" />
     <Compile Include="Patches\BleedingOut.cs" />
+    <Compile Include="Patches\Utility.cs" />
     <Compile Include="Patches\DescriptionPatches.cs" />
     <Compile Include="Patches\InjuryPatches.cs" />
     <Compile Include="Patches\SaveAndStatePatches.cs" />

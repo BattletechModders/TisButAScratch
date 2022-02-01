@@ -13,6 +13,7 @@ using HBS.Util;
 using Localize;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using TisButAScratch.Patches;
 using static TisButAScratch.Framework.GlobalVars;
 
 
@@ -409,9 +410,9 @@ namespace TisButAScratch.Framework
         private void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
-            if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat) || actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
+            if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat) || actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (actor.UnitIsTrooperSquad() && ModInit.modSettings.disableTBASTroopers))
             {
-                ModInit.modLog.LogMessage($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)}: nullifying injury effects for {p.Callsign}");
+                ModInit.modLog.LogMessage($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} and  - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)} or is a trooper squad and disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}:  nullifying injury effects for {p.Callsign}");
                 return;
             }
             var pKey = p.FetchGUID();

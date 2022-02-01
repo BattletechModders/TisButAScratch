@@ -50,6 +50,7 @@ namespace TisButAScratch
     {
         public bool enableLogging = false;
         public bool enableTrace = false;
+        public bool debugPatchEnabled = false;
         public bool enableConsciousness = true;
         public bool enableLethalTorsoHead = false;
         public bool debilIncapacitates = false;
@@ -69,6 +70,7 @@ namespace TisButAScratch
         public List<string> crewOrCockpitCustomID = new List<string>();
         public List<string> lifeSupportCustomID = new List<string>();
 
+        public bool disableTBASTroopers = false;
         public string disableTBASTag = "TBAS_Disabled";
         public string OverheatInjuryStat = "InjureOnOverheat";
         public string isTorsoMountStatName = "isTorsoMount";

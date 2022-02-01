@@ -9,6 +9,7 @@ using BattleTech.Save;
 using BattleTech.Save.Test;
 using BattleTech.UI;
 using HBS;
+using HBS.Collections;
 using Localize;
 
 namespace TisButAScratch.Patches
@@ -717,6 +718,7 @@ namespace TisButAScratch.Patches
                 }
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
+                Utility.CachedTagSets = new Dictionary<string, TagSet>();
             }
         }
 

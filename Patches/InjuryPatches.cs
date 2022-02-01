@@ -117,6 +117,14 @@ namespace TisButAScratch.Patches
                 ComponentDamageLevel damageLevel, bool applyEffects)
             {
                 var pilot = __instance.parent.GetPilot();
+                var pKey = pilot.FetchGUID();
+                if (__instance.parent.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.parent.UnitIsTrooperSquad()))
+                {
+                    ModInit.modLog.LogMessage(
+                        $"[DamageComponent] {pilot.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
+                    return;
+                }
+
                 if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
                     (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
                 {
@@ -322,10 +330,10 @@ namespace TisButAScratch.Patches
             {
                 var pKey = __instance.FetchGUID();
 
-                if (__instance.ParentActor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag))
+                if (__instance.ParentActor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.ParentActor.UnitIsTrooperSquad()))
                 {
                     ModInit.modLog.LogMessage(
-                        $"[Pilot_InjurePilot_Patch_Post] {__instance.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag}, not processing TBAS injuries.");
+                        $"[Pilot_InjurePilot_Patch_Post] {__instance.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
                     return;
                 }
 
