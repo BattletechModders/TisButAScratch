@@ -36,8 +36,12 @@ namespace TisButAScratch.Patches
 
             public static void Postfix(MechDef __instance, ref TagSet __result)
             {
-                var combat = UnityGameInstance.BattleTechGame.Combat;
-                if (combat == null) return;
+                if (UnityGameInstance.HasInstance)
+                {
+                    var combat = UnityGameInstance.BattleTechGame?.Combat;
+                    if (combat == null) return;
+                }
+                
                 if (string.IsNullOrEmpty(__instance?.Description?.Id))
                 {
                     //ModInit.modLog.LogMessage($"[UtilityPatches_MechTag] .");
