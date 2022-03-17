@@ -44,7 +44,7 @@ namespace TisButAScratch.Patches
                 
                 if (string.IsNullOrEmpty(__instance?.Description?.Id))
                 {
-                    //ModInit.modLog.LogMessage($"[UtilityPatches_MechTag] .");
+                    //ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] .");
                     return;
                 }
                 if (!Utility.CachedTagSets.ContainsKey(__instance?.Description?.Id))
@@ -55,7 +55,7 @@ namespace TisButAScratch.Patches
                     {
                         values += $"\n{tag}";
                     }
-                    ModInit.modLog.LogMessage($"[UtilityPatches_MechTag] TagSet for {__instance.Description.Id} did not exist in cache, inititalizing with values: {values}.");
+                    ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] TagSet for {__instance.Description.Id} did not exist in cache, inititalizing with values: {values}.");
                     return;
                 }
                 if (!Utility.CachedTagSets[__instance.Description.Id].Equals(__result))
@@ -65,7 +65,7 @@ namespace TisButAScratch.Patches
                     {
                         values += $"\n{tag}";
                     }
-                    ModInit.modLog.LogMessage($"[UtilityPatches_MechTag] Equality check failure, Tagset changed since init. Dumping stack trace and tagset: {Environment.StackTrace} TagSet Values: {values}");
+                    ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] Equality check failure, Tagset changed since init. Dumping stack trace and tagset: {Environment.StackTrace} TagSet Values: {values}");
                 }
             }
         }

@@ -39,7 +39,7 @@ namespace TisButAScratch.Patches
                 var pKey = p.FetchGUID();
                 if (__instance.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.UnitIsTrooperSquad()))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"[OnActivationEnd] {__instance.GetPilot().Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
                     return;
                 }
@@ -57,7 +57,7 @@ namespace TisButAScratch.Patches
                     }
                 }
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Trace?.Write(
                     $"Actor {p.Callsign} {pKey} ending turn.");
                 var effects = __instance.Combat.EffectManager.GetAllEffectsTargeting(__instance);
                 if (effects.Count == 0) return;
@@ -66,7 +66,7 @@ namespace TisButAScratch.Patches
                 {
                     if (effect.EffectData?.Description?.Id == null)
                     {
-                        ModInit.modLog.LogMessage(
+                        ModInit.modLog?.Trace?.Write(
                             $"Effect {effect?.EffectData} had null description");
                         continue;
                     }
@@ -82,23 +82,23 @@ namespace TisButAScratch.Patches
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"OnActivationEnd: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var bloodBank = p.GetBloodBank();
                 var bloodCap = p.GetBloodCapacity();
                 if (bloodBank > bloodCap)
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"OnActivationEnd: {p.Callsign}_{pKey} bloodbank {bloodBank} > blood capacity {bloodCap}. Setting bloodbank to blood capacity before bleeding continues.");
                     p.SetBloodBank(bloodCap);
                     bloodBank = p.GetBloodBank();
                 }
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"{p.Callsign}_{pKey}: Current bloodBank at {bloodBank}!");
                 var newbloodBank = bloodBank - bleedRate;
                 p.SetBloodBank(newbloodBank);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"{p.Callsign}_{pKey}: BloodBank set to {p.GetBloodBank()}");
 
                 if (newbloodBank <= 0)
@@ -107,7 +107,7 @@ namespace TisButAScratch.Patches
                     
                     p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
                         StatCollection.StatOperation.Set, true);
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{p.Callsign}_{pKey} has bled out!");
 
                     __instance.FlagForDeath("Bled Out", DeathMethod.PilotKilled, DamageType.Unknown, 1, 1, p.FetchGUID(), false);
@@ -161,7 +161,7 @@ namespace TisButAScratch.Patches
                 {
                     if (effect.EffectData?.Description?.Id == null)
                     {
-                        ModInit.modLog.LogMessage(
+                        ModInit.modLog?.Trace?.Write(
                             $"Effect {effect?.EffectData} had null description");
                         continue;
                     }
@@ -177,11 +177,11 @@ namespace TisButAScratch.Patches
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Trace?.Write(
                     $"OnActorSelected: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) -1); 
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Trace?.Write(
                     $"At OnActorSelected: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
 
                 var eject = "";
@@ -231,8 +231,7 @@ namespace TisButAScratch.Patches
                 if (!(theInstance.DisplayedCombatant is AbstractActor actor)) return;
                 if (effect?.Description?.Id == null)
                 {
-                    ModInit.modLog.LogTrace(
-                        $"Effect {effect} had null description");
+                    ModInit.modLog?.Trace?.Write($"Effect {effect} had null description");
                     return;
                 }
                 var p = actor.GetPilot();
@@ -260,11 +259,11 @@ namespace TisButAScratch.Patches
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
-                ModInit.modLog.LogTrace(
+                ModInit.modLog?.Trace?.Write(
                     $"ProcessDetailString: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) - 1);
 
-                ModInit.modLog.LogTrace(
+                ModInit.modLog?.Trace?.Write(
                     $"At ProcessDetailString: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var tgtEffect = effectsList.FirstOrDefault(x => x.EffectData == effect);
                 if (tgtEffect == null) return;

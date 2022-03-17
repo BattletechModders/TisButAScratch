@@ -70,11 +70,11 @@ namespace TisButAScratch.Framework
             {
                 pilot.pilotDef.PilotTags.Add($"{iGUID}{pilot.pilotDef.Description.Id}{Guid.NewGuid()}");
                 guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
-                ModInit.modLog.LogMessage($"WTF IS {pilot.Callsign}'s GUID NULL?!, making a new GUID I guess.");
+                ModInit.modLog?.Info?.Write($"WTF IS {pilot.Callsign}'s GUID NULL?!, making a new GUID I guess.");
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(guid))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(guid, new List<string>());
-                    ModInit.modLog.LogMessage($"{pilot.Callsign} was also not in pilotInjuriesMap. Adding them.");
+                    ModInit.modLog?.Info?.Write($"{pilot.Callsign} was also not in pilotInjuriesMap. Adding them.");
                 }
                 return guid;
             }
@@ -127,7 +127,7 @@ namespace TisButAScratch.Framework
             var pKey = pilot.FetchGUID();
             if (!PilotInjuryHolder.HolderInstance.bloodStatForSimGame.ContainsKey(pKey))
             {
-                ModInit.modLog.LogMessage($"Something very wrong here!");
+                ModInit.modLog?.Info?.Write($"Something very wrong here!");
                 PilotInjuryHolder.HolderInstance.bloodStatForSimGame.Add(pKey, 1);
             }
             var bloodLevelForSim = PilotInjuryHolder.HolderInstance.bloodStatForSimGame[pKey];
@@ -139,10 +139,10 @@ namespace TisButAScratch.Framework
             foreach (var simEffect in PilotInjuryManager.ManagerInstance.SimBleedingEffectList)
             {
                 var simBleedingEffectDecimal = 1 - simEffect.bleedingEffectLvl / (float) bleedingEffectTotal;
-                ModInit.modLog.LogMessage($"{simEffect.simBleedingEffectID} needs blood level <= {simBleedingEffectDecimal} to apply.");
+                ModInit.modLog?.Info?.Write($"{simEffect.simBleedingEffectID} needs blood level <= {simBleedingEffectDecimal} to apply.");
                 if (!(bloodLevelForSim <= simBleedingEffectDecimal)) continue;
                 simBleedLvl = simEffect.bleedingEffectLvl;
-                ModInit.modLog.LogMessage($"Calculated SimBleedEffectLvl {simBleedLvl}.");
+                ModInit.modLog?.Info?.Write($"Calculated SimBleedEffectLvl {simBleedLvl}.");
                 break;
             }
             var tempList = new List<SimBleedingEffect>(PilotInjuryManager.ManagerInstance.SimBleedingEffectList.Where(x=>x.bleedingEffectLvl == simBleedLvl));
@@ -151,7 +151,7 @@ namespace TisButAScratch.Framework
 
             var chosenBleedingResult = tempList[idx];
 
-            ModInit.modLog.LogMessage($"{chosenBleedingResult.simBleedingEffectID} chosen for pilot {pilot.Description.Callsign}_{pKey}");
+            ModInit.modLog?.Info?.Write($"{chosenBleedingResult.simBleedingEffectID} chosen for pilot {pilot.Description.Callsign}_{pKey}");
 
             var objects = new List<object> {pilot};
             foreach (var result in chosenBleedingResult.simResult)
@@ -174,18 +174,18 @@ namespace TisButAScratch.Framework
             {
                 PilotInjuryHolder.HolderInstance.bloodStatForSimGame[pKey] = bloodLevelDecimal;
             }
-            ModInit.modLog.LogMessage($"Calculated {pKey}'s bloodLevel fraction: {bloodLevelDecimal}!");
+            ModInit.modLog?.Info?.Write($"Calculated {pKey}'s bloodLevel fraction: {bloodLevelDecimal}!");
             var bleedingEffectTotal = PilotInjuryManager.ManagerInstance.BleedingEffectsList.Count + 1;
 
             var bleedLvl = 0;
             foreach (var bleedEffect in PilotInjuryManager.ManagerInstance.BleedingEffectsList)
             {
                 var bleedingEffectDecimal = 1 - bleedEffect.bleedingEffectLvl / (float) bleedingEffectTotal;
-                ModInit.modLog.LogMessage($"{bleedEffect.bleedingName} needs blood level <= {bleedingEffectDecimal} to apply.");
+                ModInit.modLog?.Info?.Write($"{bleedEffect.bleedingName} needs blood level <= {bleedingEffectDecimal} to apply.");
                 if (!(bloodLevelDecimal <=
                       bleedingEffectDecimal)) continue;
                 bleedLvl = bleedEffect.bleedingEffectLvl;
-                ModInit.modLog.LogMessage($"Calculated bleedEffectLvl {bleedLvl}.");
+                ModInit.modLog?.Info?.Write($"Calculated bleedEffectLvl {bleedLvl}.");
                 break;
             }
             var tempList = new List<BleedingEffect>(PilotInjuryManager.ManagerInstance.BleedingEffectsList.Where(x=>x.bleedingEffectLvl == bleedLvl));
@@ -195,7 +195,7 @@ namespace TisButAScratch.Framework
 
             var chosenBleedingEffect = tempList[idx];
 
-            ModInit.modLog.LogMessage($"{chosenBleedingEffect.bleedingName} chosen for pilot {pilot.Description.Callsign}_{pKey}");
+            ModInit.modLog?.Info?.Write($"{chosenBleedingEffect.bleedingName} chosen for pilot {pilot.Description.Callsign}_{pKey}");
 
             var effectsList =
                 UnityGameInstance.BattleTechGame.Combat.EffectManager.GetAllEffectsTargeting(pilot.ParentActor);
@@ -204,17 +204,17 @@ namespace TisButAScratch.Framework
             {
                 if (effectsList.Any(x => x.EffectData?.Description?.Id == effectData?.Description?.Id))
                 {
-                    ModInit.modLog.LogMessage($"{pilot.Description.Callsign}_{pKey} already has bleeding effect {effectData.Description.Name}, skipping.");
+                    ModInit.modLog?.Info?.Write($"{pilot.Description.Callsign}_{pKey} already has bleeding effect {effectData.Description.Name}, skipping.");
                     continue;
                 }
-                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {pilot.Description.Callsign}_{pKey}");
+                ModInit.modLog?.Info?.Write($"processing {effectData.Description.Name} for {pilot.Description.Callsign}_{pKey}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
                     var id = ($"BleedingEffect_{pilot.Description.Callsign}_{effectData.Description.Id}");
 
-                    ModInit.modLog.LogMessage($"Applying {id}");
+                    ModInit.modLog?.Info?.Write($"Applying {id}");
                     pilot.ParentActor.Combat.EffectManager.CreateEffect(effectData, id, -1, pilot.ParentActor, pilot.ParentActor, default(WeaponHitInfo), 1);
                 }
             }
@@ -264,11 +264,11 @@ namespace TisButAScratch.Framework
             SimBleedingEffectList = new List<SimBleedingEffect>();
             foreach (var simBleedingEffect in ModInit.modSettings.SimBleedingEffects) 
             {
-                ModInit.modLog.LogMessage($"Adding effects for {simBleedingEffect.simBleedingEffectID}!");
+                ModInit.modLog?.Info?.Write($"Adding effects for {simBleedingEffect.simBleedingEffectID}!");
                 foreach (var jObject in simBleedingEffect.simResultJO)
                 {
                     var simResult = processSimBleedingSettings(jObject);
-                    ModInit.modLog.LogMessage($"TEMPORARY: {simResult.Scope}\n{simResult.Requirements}\n{simResult.AddedTags}\n{simResult.RemovedTags}\n{simResult.Stats} AND {JsonConvert.SerializeObject(simResult)}!");
+                    ModInit.modLog?.Info?.Write($"TEMPORARY: {simResult.Scope}\n{simResult.Requirements}\n{simResult.AddedTags}\n{simResult.RemovedTags}\n{simResult.Stats} AND {JsonConvert.SerializeObject(simResult)}!");
 
                     simBleedingEffect.simResult.Add(simResult);
                 }
@@ -280,7 +280,7 @@ namespace TisButAScratch.Framework
             BleedingEffectsList = new List<BleedingEffect>();
             foreach (var bleedingEffect in ModInit.modSettings.BleedingEffects) 
             {
-                ModInit.modLog.LogMessage($"Adding effects for {bleedingEffect.bleedingName}!");
+                ModInit.modLog?.Info?.Write($"Adding effects for {bleedingEffect.bleedingName}!");
                 foreach (var jObject in bleedingEffect.effectDataJO)
                 {
                     var effectData = new EffectData();
@@ -296,7 +296,7 @@ namespace TisButAScratch.Framework
             InjuryEffectIDs = new List<string>();
             foreach (var injuryEffect in ModInit.modSettings.InjuryEffectsList) 
             {
-                ModInit.modLog.LogMessage($"Adding effects for {injuryEffect.injuryName}!");
+                ModInit.modLog?.Info?.Write($"Adding effects for {injuryEffect.injuryName}!");
                 foreach (var jObject in injuryEffect.effectDataJO)
                 {
                     var effectData = new EffectData();
@@ -316,7 +316,7 @@ namespace TisButAScratch.Framework
 
                 foreach (var internalDmgEffect in ModInit.modSettings.InternalDmgInjuries)
                 {
-                    ModInit.modLog.LogMessage($"Adding effects for {internalDmgEffect.injuryName}!");
+                    ModInit.modLog?.Info?.Write($"Adding effects for {internalDmgEffect.injuryName}!");
                     foreach (var jObject in internalDmgEffect.effectDataJO)
                     {
                         var effectData = new EffectData();
@@ -377,7 +377,7 @@ namespace TisButAScratch.Framework
                 {
                     p?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, statType,
                         StatCollection.StatOperation.Int_Add, resultINT);
-                    ModInit.modLog.LogMessage($"Pilot {pKey} gets {resultINT} {statType} due to bleeding previously.");
+                    ModInit.modLog?.Info?.Write($"Pilot {pKey} gets {resultINT} {statType} due to bleeding previously.");
                 }
                 else
                 {
@@ -386,7 +386,7 @@ namespace TisButAScratch.Framework
                     {
                         p?.StatCollection.ModifyStat<float>("TBAS_Injuries", 0, statType,
                             StatCollection.StatOperation.Float_Add, resultFLT);
-                        ModInit.modLog.LogMessage($"Pilot {pKey} gets {resultFLT} {statType} due to bleeding previously.");
+                        ModInit.modLog?.Info?.Write($"Pilot {pKey} gets {resultFLT} {statType} due to bleeding previously.");
                     }
                 }
             }
@@ -397,12 +397,12 @@ namespace TisButAScratch.Framework
                 foreach (Injury injury in ManagerInstance.InternalDmgInjuries.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
+                    ModInit.modLog?.Info?.Write($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
                 }
                 foreach (Injury injury in ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id))
                 {
                     this.applyInjuryEffects(actor, injury);
-                    ModInit.modLog.LogMessage($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
+                    ModInit.modLog?.Info?.Write($"Gathered {injury.injuryName} for {p.Description.Callsign}_{pKey}");
                 }
             }
         }
@@ -412,21 +412,21 @@ namespace TisButAScratch.Framework
             var p = actor.GetPilot();
             if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat) || actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (actor.UnitIsTrooperSquad() && ModInit.modSettings.disableTBASTroopers))
             {
-                ModInit.modLog.LogMessage($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} and  - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)} or is a trooper squad and disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}:  nullifying injury effects for {p.Callsign}");
+                ModInit.modLog?.Info?.Write($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} and  - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)} or is a trooper squad and disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}:  nullifying injury effects for {p.Callsign}");
                 return;
             }
             var pKey = p.FetchGUID();
-            ModInit.modLog.LogMessage($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}_{pKey}");
+            ModInit.modLog?.Info?.Write($"processing {injury.effects.Count} injury effects for {p.Description.Callsign}_{pKey}");
             foreach (EffectData effectData in injury.effects)
             {
-                ModInit.modLog.LogMessage($"processing {effectData.Description.Name} for {p.Description.Callsign}_{pKey}");
+                ModInit.modLog?.Info?.Write($"processing {effectData.Description.Name} for {p.Description.Callsign}_{pKey}");
 
                 if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
                     effectData.targetingData.effectTargetType == EffectTargetType.Creator)
                 {
                     string id = ($"InjuryEffect_{p.Description.Callsign}_{effectData.Description.Id}");
 
-                    ModInit.modLog.LogMessage($"Applying {id}");
+                    ModInit.modLog?.Info?.Write($"Applying {id}");
                     actor.Combat.EffectManager.CreateEffect(effectData, id, -1, actor, actor, default(WeaponHitInfo), 1);
                 }
             }
@@ -450,11 +450,11 @@ namespace TisButAScratch.Framework
                 var baseRate = p.GetBleedingRate();
                 var multi = p.GetBleedingRateMulti();
                 var bleedRate = baseRate * multi;
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"applyInjuryEffects: {p.Callsign}_{pKey} bleeding out at rate of {bleedRate}/activation from base {baseRate} * multi {multi}!");
                 var durationInfo = Mathf.CeilToInt(p.GetBloodBank() / (bleedRate) - 1);
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"At ApplyInjuryEffects: Found bleeding effect(s) for {actor.GetPilot().Callsign}, processing time to bleedout for display: {durationInfo} activations remain");
                 var eject = "";
                 if (durationInfo <= 0)
@@ -484,13 +484,13 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to combatInjuriesMap");
+                ModInit.modLog?.Info?.Write($"{pilot.Callsign} missing, added to combatInjuriesMap");
             }
 
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
+                ModInit.modLog?.Info?.Write($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             for (int i = 0; i < dmg; i++)
@@ -502,7 +502,7 @@ namespace TisButAScratch.Framework
                 if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count > 0 || PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Count > 0)
                 {
                     var curInjuryList = new List<Injury>();
-                    ModInit.modLog.LogMessage($"{pilot?.Callsign} has preexisting conditions, processing location weight");
+                    ModInit.modLog?.Info?.Write($"{pilot?.Callsign} has preexisting conditions, processing location weight");
                     foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
                     {
                         curInjuryList.AddRange(
@@ -518,7 +518,7 @@ namespace TisButAScratch.Framework
                     if (pilot != null && pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
                     {
                         curInjuryList.RemoveAll(x => !string.IsNullOrEmpty(x.injuryID_Post));
-                        ModInit.modLog.LogMessage($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
+                        ModInit.modLog?.Info?.Write($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
                     }
 
                     if (ModInit.modSettings.reInjureWeightAppliesCurrentContract)
@@ -529,7 +529,7 @@ namespace TisButAScratch.Framework
                             {
                                 injuryLocs.Add((int)inj.injuryLoc);
                             }
-                            ModInit.modLog.LogMessage($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
+                            ModInit.modLog?.Info?.Write($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
                         }
                     }
 
@@ -541,10 +541,10 @@ namespace TisButAScratch.Framework
                             {
                                 injuryLocs.Add((int)inj.injuryLoc);
                             }
-                            ModInit.modLog.LogMessage($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
+                            ModInit.modLog?.Info?.Write($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
                         }
                     }
-                    ModInit.modLog.LogMessage($"Final list of injury location indices: {string.Join(",", injuryLocs)}");
+                    ModInit.modLog?.Info?.Write($"Final list of injury location indices: {string.Join(",", injuryLocs)}");
                 }
 
 
@@ -568,23 +568,23 @@ namespace TisButAScratch.Framework
                 {
                     injuryList.RemoveAll(x => x.severity >= 100);
                 }
-                ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
+                ModInit.modLog?.Info?.Write($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 //                injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
-                //                ModInit.modLog.LogMessage($"Removed all injuries that {pilot?.Callsign} already has.");
+                //                ModInit.modLog?.Info?.Write($"Removed all injuries that {pilot?.Callsign} already has.");
 
                 if (pilot != null && pilot.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.DisableBleedingStat))
                 {
                     injuryList.RemoveAll(x => !string.IsNullOrEmpty(x.injuryID_Post));
-                    ModInit.modLog.LogMessage($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
+                    ModInit.modLog?.Info?.Write($"Found advanced life-support: no bleeding out injuries allowed for {pilot.Callsign}!");
                 }
 
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)]; 
-                ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+                ModInit.modLog?.Info?.Write($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
                 var newList = pilot?.StatCollection.GetValue<List<string>>("LastInjuryId");
@@ -593,14 +593,14 @@ namespace TisButAScratch.Framework
                 pilot?.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",
                     StatCollection.StatOperation.Set, newList);
 
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Setting {chosen.injuryName} to {pilot?.Callsign}'s LastInjuryId stat. PilotID: {pKey}");
 
                 pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity);
 
                 var mkillStat = pilot?.StatCollection.GetValue<int>(MissionKilledStat);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat. Total is now {mkillStat}");
 
                 if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness)
@@ -625,7 +625,7 @@ namespace TisButAScratch.Framework
                     if (currentRate == 0f)
                     {
                         pilot.SetBleedingRate(chosen.severity);
-                        ModInit.modLog.LogMessage($"{pilot?.Callsign}'s Bleeding Rate was 0, now {currentRate}, {pilot.GetBleedingRateMulti() }is multi");
+                        ModInit.modLog?.Info?.Write($"{pilot?.Callsign}'s Bleeding Rate was 0, now {currentRate}, {pilot.GetBleedingRateMulti() }is multi");
                     }
                     else
                     {
@@ -634,7 +634,7 @@ namespace TisButAScratch.Framework
                         {
                             if (effect.EffectData?.Description?.Id == null)
                             {
-                                ModInit.modLog.LogMessage(
+                                ModInit.modLog?.Info?.Write(
                                     $"Effect {effect?.EffectData} had null description");
                                 continue;
                             }
@@ -650,26 +650,26 @@ namespace TisButAScratch.Framework
                         var addToRate = 0f;
                         if (ModInit.modSettings.additiveBleedingFactor < 0)
                         {
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"{pilot?.Callsign}'s Bleeding Rate {currentRate} before.");
                             addToRate = Math.Abs(ModInit.modSettings.additiveBleedingFactor);
                             currentRate += addToRate;
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"{pilot?.Callsign}'s Bleeding Rate have {addToRate} added to {currentRate}.");
                         }
 
                         else if (ModInit.modSettings.additiveBleedingFactor < 1 &&
                                  ModInit.modSettings.additiveBleedingFactor > 0)
                         {
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"{pilot?.Callsign}'s Bleeding Rate now {currentRate} before.");
                             addToRate = currentRate * ModInit.modSettings.additiveBleedingFactor;
                             currentRate += addToRate;
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"{pilot?.Callsign}'s Bleeding Rate have {addToRate} added to {currentRate}.");
                         }
                         pilot.SetBleedingRate(currentRate);
-                        ModInit.modLog.LogMessage(
+                        ModInit.modLog?.Info?.Write(
                             $"{pilot?.Callsign}'s Bleeding Rate set to {currentRate}.");
                     }
 
@@ -689,13 +689,13 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to combatInjuriesMap");
+                ModInit.modLog?.Info?.Write($"{pilot.Callsign} missing, added to combatInjuriesMap");
             }
 
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
+                ModInit.modLog?.Info?.Write($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             var loc = InjuryLoc.Head;
@@ -707,16 +707,16 @@ namespace TisButAScratch.Framework
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc);
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
-                ModInit.modLog.LogMessage($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+                ModInit.modLog?.Info?.Write($"Feedback Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
                 
 
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey].Add(chosen.injuryID);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
                 pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName}'s severity value: {chosen.severity} to {pilot?.Callsign}'s MissionKilledStat");
                 if (pilot?.StatCollection.GetValue<int>(MissionKilledStat) > 0 && ModInit.modSettings.enableConsciousness)
                 {
@@ -745,7 +745,7 @@ namespace TisButAScratch.Framework
             if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
             {
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                ModInit.modLog.LogMessage($"{pilot.Callsign} missing, added to pilotInjuriesMap");
+                ModInit.modLog?.Info?.Write($"{pilot.Callsign} missing, added to pilotInjuriesMap");
             }
 
             InjuryLoc loc;
@@ -754,16 +754,16 @@ namespace TisButAScratch.Framework
             {
                 var injuryList = new List<Injury>(PilotInjuryManager.ManagerInstance.InjuryEffectsList);
                 loc = (InjuryLoc)UnityEngine.Random.Range(2, 8);
-                    ModInit.modLog.LogMessage($"Injury Loc {loc} chosen for {pilot?.Callsign}");
+                    ModInit.modLog?.Info?.Write($"Injury Loc {loc} chosen for {pilot?.Callsign}");
 
 
                 injuryList.RemoveAll(x => x.severity >= 100 || x.injuryLoc != loc || !string.IsNullOrEmpty(x.injuryID_Post));
  //               injuryList.RemoveAll(x => PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Contains(x.injuryID));
                 var chosen = injuryList[UnityEngine.Random.Range(0, injuryList.Count)];
-                ModInit.modLog.LogMessage($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
+                ModInit.modLog?.Info?.Write($"Injury {chosen.injuryName} chosen for {pilot?.Callsign}");
 
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Add(chosen.injuryID);
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s injury map. PilotID: {pKey}");
             }
         }

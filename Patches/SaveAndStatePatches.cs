@@ -36,7 +36,7 @@ namespace TisButAScratch.Patches
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
+                    ModInit.modLog?.Info?.Write($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
                 }
 
 
@@ -54,7 +54,7 @@ namespace TisButAScratch.Patches
                     if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
+                        ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
                     }
                 }
             }
@@ -81,7 +81,7 @@ namespace TisButAScratch.Patches
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
+                    ModInit.modLog?.Info?.Write($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
                 }
 
 
@@ -99,7 +99,7 @@ namespace TisButAScratch.Patches
                     if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
+                        ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
                     }
                 }
 
@@ -107,7 +107,7 @@ namespace TisButAScratch.Patches
                 foreach (var key in new List<string>(rm))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
                 }
 
@@ -116,7 +116,7 @@ namespace TisButAScratch.Patches
                 foreach (var key in rm2)
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog.LogMessage($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
+                    ModInit.modLog?.Info?.Write($"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                 }
 
                 PilotInjuryHolder.HolderInstance.SerializeInjuryState();
@@ -139,7 +139,7 @@ namespace TisButAScratch.Patches
                 var curPilots = new List<string>();
                 PilotInjuryHolder.HolderInstance.DeserializeInjuryState();
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
-                ModInit.modLog.LogMessage($"Successfully deserialized or determined deserializing unnecessary.");
+                ModInit.modLog?.Info?.Write($"Successfully deserialized or determined deserializing unnecessary.");
 
                 if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
@@ -149,12 +149,12 @@ namespace TisButAScratch.Patches
 
                 var pKey = sim.Commander.FetchGUID();
 
-                ModInit.modLog.LogMessage($"Fetched Commander iGUID {pKey}");
+                ModInit.modLog?.Info?.Write($"Fetched Commander iGUID {pKey}");
                 curPilots.Add(pKey);
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
+                    ModInit.modLog?.Info?.Write($"Added Commander to pilotInjuriesMap with iGUID {pKey}");
                 }
 
                 foreach (var id in new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]))
@@ -163,7 +163,7 @@ namespace TisButAScratch.Patches
                         PilotInjuryManager.ManagerInstance.InternalDmgInjuries.All(x => x.injuryID != id))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(id);
-                        ModInit.modLog.LogMessage($"Removed deprecated injury from Commander with id {id}");
+                        ModInit.modLog?.Info?.Write($"Removed deprecated injury from Commander with id {id}");
                     }
                 }
 
@@ -177,7 +177,7 @@ namespace TisButAScratch.Patches
                     {
                         var dmg = sim.Commander.StatCollection.GetValue<int>("Injuries") -
                                   PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                        ModInit.modLog.LogMessage($"Commander is missing {dmg} TBAS injuries. Rerolling.");
+                        ModInit.modLog?.Info?.Write($"Commander is missing {dmg} TBAS injuries. Rerolling.");
                         PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
                         if (ModInit.modSettings.debilSeverityThreshold > 0
                            ) //now trying to add up "severity" threshold for crippled injury
@@ -219,7 +219,7 @@ namespace TisButAScratch.Patches
                         foreach (var key in rm2)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
                         }
                     }
@@ -230,7 +230,7 @@ namespace TisButAScratch.Patches
                     if (sim.Commander.StatCollection.GetValue<int>("Injuries") < 1)
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
-                        ModInit.modLog.LogMessage($"Commander had no vanilla injuries, clearing TBAS injuries.");
+                        ModInit.modLog?.Info?.Write($"Commander had no vanilla injuries, clearing TBAS injuries.");
                     }
                     else
                     {
@@ -238,7 +238,7 @@ namespace TisButAScratch.Patches
                         for (int i = 0; i < dmg; i++)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
-                            ModInit.modLog.LogMessage($"Commander has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
+                            ModInit.modLog?.Info?.Write($"Commander has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
                         }
                     }
                     
@@ -251,16 +251,16 @@ namespace TisButAScratch.Patches
                     {
                         //p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{sim.GenerateSimGameUID()}");
                         p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{Guid.NewGuid()}");
-                        ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag");
+                        ModInit.modLog?.Info?.Write($"Added {p.Callsign} iGUID tag");
                     }
 
                     pKey = p.FetchGUID();
-                    ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID {pKey}");
+                    ModInit.modLog?.Info?.Write($"Fetched {p.Callsign} iGUID {pKey}");
                     curPilots.Add(pKey);
                     if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
+                        ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
                     }
 
                     foreach (var id in new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]))
@@ -269,7 +269,7 @@ namespace TisButAScratch.Patches
                             PilotInjuryManager.ManagerInstance.InternalDmgInjuries.All(x => x.injuryID != id))
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Remove(id);
-                            ModInit.modLog.LogMessage($"Removed deprecated injury from {p.Callsign} with id {id}");
+                            ModInit.modLog?.Info?.Write($"Removed deprecated injury from {p.Callsign} with id {id}");
                         }
                     }
 
@@ -281,7 +281,7 @@ namespace TisButAScratch.Patches
                         {
                             var dmg = p.StatCollection.GetValue<int>("Injuries") -
                                       PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                            ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} TBAS injuries. Rerolling.");
+                            ModInit.modLog?.Info?.Write($"{p.Callsign} is missing {dmg} TBAS injuries. Rerolling.");
                             PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
                             if (ModInit.modSettings.debilSeverityThreshold > 0
                                ) //now trying to add up "severity" threshold for crippled injury
@@ -327,7 +327,7 @@ namespace TisButAScratch.Patches
                         if (p.StatCollection.GetValue<int>("Injuries") < 1)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
-                            ModInit.modLog.LogMessage($"Pilot {p.Callsign} had no vanilla injuries, clearing TBAS injuries.");
+                            ModInit.modLog?.Info?.Write($"Pilot {p.Callsign} had no vanilla injuries, clearing TBAS injuries.");
                         }
                         else
                         {
@@ -335,7 +335,7 @@ namespace TisButAScratch.Patches
                             for (int i = 0; i < dmg; i++)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
-                                ModInit.modLog.LogMessage($"Pilot {p.Callsign} has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
+                                ModInit.modLog?.Info?.Write($"Pilot {p.Callsign} has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
                             }
                         }
                     }
@@ -345,7 +345,7 @@ namespace TisButAScratch.Patches
                 foreach (var key in new List<string>(rm))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
                 }
             }
@@ -393,7 +393,7 @@ namespace TisButAScratch.Patches
                                 p.StatCollection.GetValue<int>("Injuries"))
                             {
                                 var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
-                                ModInit.modLog.LogMessage($"{p.Callsign} has {dmg} extra injuries. Removing.");
+                                ModInit.modLog?.Info?.Write($"{p.Callsign} has {dmg} extra injuries. Removing.");
                                 for (int j = 0; j < dmg; j++)
                                 {
                                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(j);
@@ -409,7 +409,7 @@ namespace TisButAScratch.Patches
                             {
                                 var dmg = p.StatCollection.GetValue<int>("Injuries") -
                                           PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                                ModInit.modLog.LogMessage($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
+                                ModInit.modLog?.Info?.Write($"{p.Callsign} is missing {dmg} injuries. Rerolling.");
                                 PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
                                 if (ModInit.modSettings.debilSeverityThreshold >
                                     0) //now trying to add up "severity" threshold for crippled injury
@@ -462,7 +462,7 @@ namespace TisButAScratch.Patches
                                 commander.StatCollection.GetValue<int>("Injuries"))
                             {
                                 var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - commander.StatCollection.GetValue<int>("Injuries");
-                                ModInit.modLog.LogMessage($"{commander.Callsign} has {dmg} extra injuries. Removing.");
+                                ModInit.modLog?.Info?.Write($"{commander.Callsign} has {dmg} extra injuries. Removing.");
                                 for (int j = 0; j < dmg; j++)
                                 {
                                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(j);
@@ -480,7 +480,7 @@ namespace TisButAScratch.Patches
                             {
                                 var dmg = commander.StatCollection.GetValue<int>("Injuries") -
                                           PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                                ModInit.modLog.LogMessage($"Commander is missing {dmg} injuries. Rerolling.");
+                                ModInit.modLog?.Info?.Write($"Commander is missing {dmg} injuries. Rerolling.");
                                 PilotInjuryManager.ManagerInstance.rollInjurySG(commander, dmg,
                                     DamageType.Unknown);
                                 if (ModInit.modSettings.debilSeverityThreshold > 0
@@ -538,14 +538,14 @@ namespace TisButAScratch.Patches
                 {
                     // p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{__instance.GenerateSimGameUID()}");
                     p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{Guid.NewGuid()}");
-                    ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag");
+                    ModInit.modLog?.Info?.Write($"Added {p.Callsign} iGUID tag");
                 }
 
                 var pKey = p.FetchGUID();
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    if (p != null) ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
+                    if (p != null) ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap");
                 }
             }
         }
@@ -586,45 +586,45 @@ namespace TisButAScratch.Patches
                     var newPKey = $"{iGUID}{p.Description.Id}{Guid.NewGuid()}{aiPilotFlag}";
                     p.pilotDef.PilotTags.Add(newPKey); //changed to sys NewGuid instead of simguid for skirmish compatibility
                     
-                    ModInit.modLog.LogMessage($"Added {p.Callsign} iGUID tag: {newPKey}");
+                    ModInit.modLog?.Info?.Write($"Added {p.Callsign} iGUID tag: {newPKey}");
                 }
 
                 var pKey = p.FetchGUID();
-                ModInit.modLog.LogMessage($"Fetched {p.Callsign} iGUID");
+                ModInit.modLog?.Info?.Write($"Fetched {p.Callsign} iGUID");
 
                 if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.combatInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Callsign}, {pKey}, piloting {unit.DisplayName}, {unit.VariantName} missing, added to combatInjuriesMap");
+                    ModInit.modLog?.Info?.Write($"{p.Callsign}, {pKey}, piloting {unit.DisplayName}, {unit.VariantName} missing, added to combatInjuriesMap");
                 }
 
                 if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                    ModInit.modLog.LogMessage($"{p.Callsign} missing, added to pilotInjuriesMap");
+                    ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap");
                 }
 
                 PilotInjuryManager.ManagerInstance.GatherAndApplyInjuries(unit);
-                ModInit.modLog.LogMessage($"Initializing injury effects for {p.Description?.Callsign}");
+                ModInit.modLog?.Info?.Write($"Initializing injury effects for {p.Description?.Callsign}");
 
                 if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
                     p.StatCollection.GetValue<int>("Injuries"))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{p.Callsign}'s Injury stat < existing injuries. Adding to Injury stat.");
                     p.StatCollection.ModifyStat<int>("TBAS_Injuries", -1,
                         "Injuries",
                         StatCollection.StatOperation.Set, PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count);
                 }
 
-                ModInit.modLog.LogTrace($"{p.Callsign} {p.FetchGUID()} - Is actor dead?: {p.ParentActor.IsDead} Because is incapacitated: {p.IsIncapacitated} from {p.Injuries} injuries / {p.Health} health and lethal injuries {p.LethalInjuries}.");
+                ModInit.modLog?.Trace?.Write($"{p.Callsign} {p.FetchGUID()} - Is actor dead?: {p.ParentActor.IsDead} Because is incapacitated: {p.IsIncapacitated} from {p.Injuries} injuries / {p.Health} health and lethal injuries {p.LethalInjuries}.");
 
                 p.StatCollection.Set("LethalInjury", false);
                 p.StatCollection.Set("HasEjected", false);
 
                 p.StatCollection.AddStatistic<float>("BloodBank", p.CalcBloodBank());
                 p.StatCollection.AddStatistic<float>("BloodCapacity", p.CalcBloodBank());
-                ModInit.modLog.LogMessage($"{p.Callsign} calculated BloodBank and BloodCapacity: {p.CalcBloodBank()}");
+                ModInit.modLog?.Info?.Write($"{p.Callsign} calculated BloodBank and BloodCapacity: {p.CalcBloodBank()}");
             }
         }
 
@@ -636,7 +636,7 @@ namespace TisButAScratch.Patches
             {
                 PilotInjuryHolder.HolderInstance.bloodStatForSimGame = new Dictionary<string, float>();
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Resetting combatInjuriesMap due to RestartMission button. Somebody must like CTD's.");
             }
         }
@@ -662,10 +662,10 @@ namespace TisButAScratch.Patches
 //                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
 //                   {
 //                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
-//                        ModInit.modLog.LogMessage($"Removing CrippledTag from AI pilot {p.Callsign} if present");
+//                        ModInit.modLog?.Info?.Write($"Removing CrippledTag from AI pilot {p.Callsign} if present");
 //                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
 //                        p.pilotDef.PilotTags.RemoveRange(rmt);
-//                        ModInit.modLog.LogMessage($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
+//                        ModInit.modLog?.Info?.Write($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
 //                        continue;
 //                    }
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
@@ -673,7 +673,7 @@ namespace TisButAScratch.Patches
 
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                         .AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
-                    ModInit.modLog.LogMessage($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
+                    ModInit.modLog?.Info?.Write($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
 
                     var replacementInjuries = new List<string>();
 
@@ -688,13 +688,13 @@ namespace TisButAScratch.Patches
                         if (!string.IsNullOrEmpty(injuryDef.injuryID_Post))
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(index);
-                            ModInit.modLog.LogMessage($"Removed {injuryDef.injuryName} with bleeding effect from {p.Callsign}");
+                            ModInit.modLog?.Info?.Write($"Removed {injuryDef.injuryName} with bleeding effect from {p.Callsign}");
                             replacementInjuries.Add(injuryDef.injuryID_Post);
-                            ModInit.modLog.LogMessage($"Added {injuryDef.injuryID_Post} to {p.Callsign} for post-combat injury");
+                            ModInit.modLog?.Info?.Write($"Added {injuryDef.injuryID_Post} to {p.Callsign} for post-combat injury");
                         }
                         else
                         {
-                            ModInit.modLog.LogMessage($"Injury {injury} not a bleeding injury, not doing post-mission replacement.");
+                            ModInit.modLog?.Info?.Write($"Injury {injury} not a bleeding injury, not doing post-mission replacement.");
                         }
                     }
 
@@ -705,12 +705,12 @@ namespace TisButAScratch.Patches
                     {
                         var diff = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count -
                                    p.StatCollection.GetValue<int>("Injuries");
-                        ModInit.modLog.LogMessage(
+                        ModInit.modLog?.Info?.Write(
                             $"Post-Mission Injuries ({p.StatCollection.GetValue<int>("Injuries")}) less than InjuryHolder count ({PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count})");
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Reverse();
                         for (int i = 0; i < diff; i++)
                         {
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"Removing {PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey][i]} from {p.Callsign}");
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
                         }
@@ -740,7 +740,7 @@ namespace TisButAScratch.Patches
                     pilot.ApplyClosestSimGameResult();
 
                 }
-                ModInit.modLog.LogMessage(
+                ModInit.modLog?.Info?.Write(
                     $"Clearing bloodStatForSimGame dict!");
                 PilotInjuryHolder.HolderInstance.bloodStatForSimGame = new Dictionary<string, float>();
             }

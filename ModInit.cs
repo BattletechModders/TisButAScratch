@@ -5,13 +5,14 @@ using Newtonsoft.Json;
 using Harmony;
 using System.Reflection;
 using BattleTech;
+using IRBTModUtils.Logging;
 using TisButAScratch.Framework;
 
 namespace TisButAScratch
 {
     public static class ModInit
     {
-        internal static Logger modLog;
+        internal static DeferringLogger modLog;
         private static string modDir;
 
 
@@ -20,7 +21,7 @@ namespace TisButAScratch
         public static void Init(string directory, string settingsJSON)
         {
             modDir = directory;
-            modLog = new Logger(modDir, "TBAS", true);
+            Exception settingsException = null;
             try
             {
                 using (StreamReader reader = new StreamReader($"{modDir}/settings.json"))
@@ -32,11 +33,16 @@ namespace TisButAScratch
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex);
+                settingsException =ex;
                 ModInit.modSettings = new Settings();
             }
+            modLog = new DeferringLogger(modDir, "TBAS", false, modSettings.enableTrace);
             //HarmonyInstance.DEBUG = true;
-            ModInit.modLog.LogMessage($"Initializing TisButAScratch - Version {typeof(Settings).Assembly.GetName().Version}");
+            if (settingsException != null)
+            {
+                ModInit.modLog?.Error?.Write($"EXCEPTION while reading settings file! Error was: {settingsException}");
+            }
+            ModInit.modLog?.Info?.Write($"Initializing TisButAScratch - Version {typeof(Settings).Assembly.GetName().Version}");
             PilotInjuryManager.ManagerInstance.Initialize();
             PilotInjuryHolder.HolderInstance.Initialize();
             var harmony = HarmonyInstance.Create(HarmonyPackage);

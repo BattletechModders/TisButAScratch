@@ -80,7 +80,7 @@ namespace TisButAScratch.Framework
             var injuryState = sim.CompanyTags.FirstOrDefault(( x) => x.StartsWith(injuryStateTag));
             sim.CompanyTags.Remove(injuryState);
             injuryState = $"{injuryStateTag}{JsonConvert.SerializeObject(HolderInstance.pilotInjuriesMap)}";
-            ModInit.modLog.LogMessage($"Serialized injuryState and adding to company tags. State was {injuryState}");
+            ModInit.modLog?.Info?.Write($"Serialized injuryState and adding to company tags. State was {injuryState}");
             sim.CompanyTags.Add(injuryState);
         }
 
@@ -92,12 +92,12 @@ namespace TisButAScratch.Framework
                 var InjuryStateCTag = sim.CompanyTags.FirstOrDefault((x) => x.StartsWith(injuryStateTag));
                 var injuryState = InjuryStateCTag?.Substring(injuryStateTag.Length);
                 HolderInstance.pilotInjuriesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(injuryState);
-                ModInit.modLog.LogMessage($"Deserializing injuryState and removing from company tags. State was {injuryState}");
+                ModInit.modLog?.Info?.Write($"Deserializing injuryState and removing from company tags. State was {injuryState}");
                 sim.CompanyTags.Remove(InjuryStateCTag);
             }
             else
             {
-                ModInit.modLog.LogMessage($"No injuryState to deserialize. Hopefully this is the first time you're running TBAS!");
+                ModInit.modLog?.Info?.Write($"No injuryState to deserialize. Hopefully this is the first time you're running TBAS!");
             }
         }
     }

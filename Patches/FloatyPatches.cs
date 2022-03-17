@@ -31,12 +31,12 @@ namespace TisButAScratch.Patches
                     if (instruction.opcode == OpCodes.Ldstr && "{0}: PILOT INJURED".Equals((string)instruction.operand, StringComparison.InvariantCultureIgnoreCase))
                     {
                         injuryStrIdx = i;
-                        ModInit.modLog.LogMessage($"Found PILOT INJURED instruction at idx: {i}");
+                        ModInit.modLog?.Info?.Write($"Found PILOT INJURED instruction at idx: {i}");
                     }
                     else if (instruction.opcode == OpCodes.Callvirt && (MethodInfo)instruction.operand == clearNeedsInjuryMI)
                     {
                         clearInjuryIdx = i;
-                        ModInit.modLog.LogMessage($"Found Pilot.ClearNeedsInjury instruction at idx: {i}");
+                        ModInit.modLog?.Info?.Write($"Found Pilot.ClearNeedsInjury instruction at idx: {i}");
                     }
                 }
 
@@ -64,7 +64,7 @@ namespace TisButAScratch.Patches
                     if (instruction.opcode == OpCodes.Ldstr && "KNOCKDOWN: PILOT INJURED".Equals((string)instruction.operand, StringComparison.InvariantCultureIgnoreCase))
                     {
                         targetIdx = i;
-                        ModInit.modLog.LogMessage($"KNOCKDOWN: PILOT INJURED instruction at idx: {i}");
+                        ModInit.modLog?.Info?.Write($"KNOCKDOWN: PILOT INJURED instruction at idx: {i}");
                     }
                 }
                 codes.RemoveRange(targetIdx - 4, 12);

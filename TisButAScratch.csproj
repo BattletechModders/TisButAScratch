@@ -49,6 +49,9 @@
     <Reference Include="InControl">
       <HintPath>F:\Steam Library\steamapps\common\BATTLETECH\BattleTech_Data\Managed\InControl.dll</HintPath>
     </Reference>
+    <Reference Include="IRBTModUtils">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BATTLETECH\Mods\IRBTModUtils\IRBTModUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>F:\Steam Library\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -74,7 +77,7 @@
     <Compile Include="Framework\GlobalVars.cs" />
     <Compile Include="Framework\PilotInjuryData.cs" />
     <Compile Include="Framework\PilotInjuryManager.cs" />
-    <Compile Include="Framework\Logger.cs" />
+    <None Include="Framework\Logger.cs" />
     <Compile Include="ModInit.cs" />
     <None Include="Patches\FloatyPatches.cs" />
     <Compile Include="Patches\BleedingOut.cs" />

@@ -173,3 +173,4 @@ D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.pdb
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.CopyComplete
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\CustomComponents.dll
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\obj\Debug\TisButAScratch.csproj.AssemblyReference.cache
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\IRBTModUtils.dll

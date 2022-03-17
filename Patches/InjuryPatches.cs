@@ -7,10 +7,8 @@ using BattleTech;
 using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
 using UnityEngine;
-
 using CustomComponents;
 using Localize;
-using Logger = TisButAScratch.Framework.Logger;
 
 namespace TisButAScratch.Patches
 {
@@ -29,11 +27,11 @@ namespace TisButAScratch.Patches
 
                 if (currentStructure - incomingStructureDamage <= 0f)
                 {
-                    ModInit.modLog.LogMessage($"Vehicle location will be destroyed; currentStructure at location {currentStructure}, will take {incomingStructureDamage} damage");
+                    ModInit.modLog?.Info?.Write($"Vehicle location will be destroyed; currentStructure at location {currentStructure}, will take {incomingStructureDamage} damage");
                     var pilot = __instance.GetPilot();
                     if (ModInit.modSettings.injureVehiclePilotOnDestroy == "MAX")
                     {
-                        ModInit.modLog.LogMessage($"Vehicle location destroyed, MaxInjure {pilot.Callsign} {pilot.FetchGUID()} due to injureVehiclePilotOnDestroy = MAX");
+                        ModInit.modLog?.Info?.Write($"Vehicle location destroyed, MaxInjure {pilot.Callsign} {pilot.FetchGUID()} due to injureVehiclePilotOnDestroy = MAX");
                         pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.MaxInjurePilot(__instance.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID,
                             DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
@@ -48,7 +46,7 @@ namespace TisButAScratch.Patches
                     else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "HIGH")
                     {
                         var dmg = pilot.Health - 1;
-                        ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
+                        ModInit.modLog?.Info?.Write($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
                         pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, dmg,
                             DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
@@ -91,7 +89,7 @@ namespace TisButAScratch.Patches
                     }
                     else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "SINGLE")
                     {
-                        ModInit.modLog.LogMessage($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
+                        ModInit.modLog?.Info?.Write($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
                         pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         __instance.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
                     }
@@ -120,7 +118,7 @@ namespace TisButAScratch.Patches
                 var pKey = pilot.FetchGUID();
                 if (__instance.parent.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.parent.UnitIsTrooperSquad()))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"[DamageComponent] {pilot.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
                     return;
                 }
@@ -128,7 +126,7 @@ namespace TisButAScratch.Patches
                 if (__instance.parent.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName) &&
                     (__instance.parent is Mech && (__instance.LocationDef.Location & ChassisLocations.Head) != 0))
                 {
-                    ModInit.modLog.LogMessage($"Head hit, but cockpit components not located in head!");
+                    ModInit.modLog?.Info?.Write($"Head hit, but cockpit components not located in head!");
                     return;
                 }
 
@@ -137,7 +135,7 @@ namespace TisButAScratch.Patches
                         (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
                     (damageLevel == ComponentDamageLevel.Penalized))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"Cockpit component ({__instance.Description.UIName}) damaged, pilot needs injury!");
                     pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                     __instance.parent.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
@@ -186,7 +184,7 @@ namespace TisButAScratch.Patches
                         (x => __instance.componentDef.GetComponents<Category>().Any(c => c.CategoryID == x)) &&
                     (damageLevel == ComponentDamageLevel.Destroyed))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"Cockpit component ({__instance.Description.UIName}) destroyed, pilot needs injury!");
                     pilot.MaxInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, DamageType.ComponentExplosion, null, __instance.parent.Combat.FindActorByGUID(hitInfo.attackerId));
                     __instance.parent.FlagForDeath("Injuries", DeathMethod.CenterTorsoDestruction, DamageType.HeadShot, 1, 1, hitInfo.attackerId, true);
@@ -202,12 +200,12 @@ namespace TisButAScratch.Patches
                 {
                     if (pilot.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt))
                     {
-                        ModInit.modLog.LogMessage($"Pilot {pilot.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from life support damage.");
+                        ModInit.modLog?.Info?.Write($"Pilot {pilot.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from life support damage.");
                         return;
                     }
                     if (damageLevel == ComponentDamageLevel.Penalized)
                     {
-                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {pilot.Callsign} is being cooked!");
+                        ModInit.modLog?.Info?.Write($"Life support ({__instance.Description.UIName}) damaged with Torso-Mount Cockpit! {pilot.Callsign} is being cooked!");
                         pilot.SetNeedsInjury(InjuryReason.ComponentExplosion);
                         __instance.parent.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
 //                        pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, 1, DamageType.Combat, null, pilot.ParentActor.Combat.FindActorByGUID(hitInfo.attackerId));
@@ -251,7 +249,7 @@ namespace TisButAScratch.Patches
                     }
                     if (damageLevel == ComponentDamageLevel.Destroyed)
                     {
-                        ModInit.modLog.LogMessage($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {pilot.Callsign} is well-done!");
+                        ModInit.modLog?.Info?.Write($"Life support ({__instance.Description.UIName}) destroyed with Torso-Mount Cockpit! {pilot.Callsign} is well-done!");
                         pilot.LethalInjurePilot(__instance.parent.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID, true, DamageType.OverheatSelf, null, null);
                         __instance.parent.FlagForDeath("Injuries", DeathMethod.PilotKilled, DamageType.HeadShot, 1, 1, hitInfo.attackerId, true);
                         __instance.parent.HandleDeath(hitInfo.attackerId);
@@ -275,7 +273,7 @@ namespace TisButAScratch.Patches
             {
                 if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
                 {
-                    ModInit.modLog.LogMessage($"Head hit, but cockpit not located in head! No injury should be sustained!");
+                    ModInit.modLog?.Info?.Write($"Head hit, but cockpit not located in head! No injury should be sustained!");
                     __instance.GetPilot().SetNeedsInjury(InjuryReason.NotSet);
                     return false;
                 }
@@ -302,24 +300,24 @@ namespace TisButAScratch.Patches
                 try
                 {
                     if (__instance == null) return true;
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                             $"{__instance.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
                     PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
-                    ModInit.modLog.LogMessage($"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                    ModInit.modLog?.Info?.Write($"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
 
                     if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
                         (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
                          damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)___injuryReason == 101 || (int)___injuryReason == 666
                          || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            ModInit.modLog.LogMessage(
+                            ModInit.modLog?.Info?.Write(
                                 $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
                             return false;
                         }
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogException(ex);
+                    ModInit.modLog?.Error?.Write(ex);
                     return true;
                 }
                 return true;
@@ -332,7 +330,7 @@ namespace TisButAScratch.Patches
 
                 if (__instance.ParentActor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (ModInit.modSettings.disableTBASTroopers && __instance.ParentActor.UnitIsTrooperSquad()))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"[Pilot_InjurePilot_Patch_Post] {__instance.Callsign}_{pKey} has {ModInit.modSettings.disableTBASTag} or disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}, not processing TBAS injuries.");
                     return;
                 }
@@ -340,7 +338,7 @@ namespace TisButAScratch.Patches
                 if (PilotInjuryHolder.HolderInstance.injuryStat >= //changed to <= instead of == 1021
                     __instance.StatCollection.GetValue<int>("Injuries"))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{__instance.Callsign}_{pKey} still has {PilotInjuryHolder.HolderInstance.injuryStat} injuries; aborting.");
                     return;
                 }
@@ -349,7 +347,7 @@ namespace TisButAScratch.Patches
                     __instance.ParentActor.StatCollection.GetValue<bool>(ModInit.modSettings.internalDmgStatName) &&
                     __instance.StatCollection.GetValue<bool>("NeedsFeedbackInjury"))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"Rolling neural feedback injury with {dmg} damage for {__instance.Callsign}_{pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjuryFeedback(__instance, dmg, damageType);
 
@@ -358,7 +356,7 @@ namespace TisButAScratch.Patches
 
                 else
                 {
-                    ModInit.modLog.LogMessage($"Rolling standard injury with {dmg} damage for {__instance.Callsign} {pKey}");
+                    ModInit.modLog?.Info?.Write($"Rolling standard injury with {dmg} damage for {__instance.Callsign} {pKey}");
                     PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType, ___injuryReason);
                 }
 
@@ -390,14 +388,14 @@ namespace TisButAScratch.Patches
                             if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
                                 __instance.pilotDef.PilotTags.Add(DEBILITATEDTAG);
-                                ModInit.modLog.LogMessage($"{__instance.Callsign}_{pKey} has been debilitated!");
+                                ModInit.modLog?.Info?.Write($"{__instance.Callsign}_{pKey} has been debilitated!");
 
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
                                     injuryLoc.Key == InjuryLoc.Torso))
                                 {
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                                         StatCollection.StatOperation.Set, true);
-                                    ModInit.modLog.LogMessage(
+                                    ModInit.modLog?.Info?.Write(
                                         $"{__instance.Callsign}_{pKey} has debilitated Torso or Head; lethal injury!");
                                 }
 //                                __instance.ParentActor.FlagForDeath(DEBILITATEDTAG, DeathMethod.PilotKilled, DamageType.Combat, 1, stackItemUID, sourceActor.GUID, true);
@@ -418,13 +416,13 @@ namespace TisButAScratch.Patches
             [HarmonyPriority(Priority.First)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries == __instance.Health)
-                {
-                    __result = false;
-                }
-                else
+                if (__instance.Injuries > 0)
                 {
                     __result = true;
+                }
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health)
+                {
+                    __result = false;
                 }
             }
         }
@@ -481,7 +479,7 @@ namespace TisButAScratch.Patches
                              (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 
                     {
-                        ModInit.modLog.LogMessage(
+                        ModInit.modLog?.Info?.Write(
                             $"{pilot.Callsign} was mission-killed, debilitated, or bled out with BleedingOutLethal = false!");
                     }
 
@@ -568,7 +566,7 @@ namespace TisButAScratch.Patches
                 {
                     __instance.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
                 }
-                ModInit.modLog.LogMessage($"{__instance.Callsign} has been healed!!");
+                ModInit.modLog?.Info?.Write($"{__instance.Callsign} has been healed!!");
             }
         }
 
@@ -591,7 +589,7 @@ namespace TisButAScratch.Patches
 
                 if (p.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt))
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{p.Callsign}_{pKey} has {ModInit.modSettings.pilotPainShunt}, ignoring feedback!");
                     return;
                 }
@@ -604,13 +602,13 @@ namespace TisButAScratch.Patches
                      ModInit.modSettings.internalDmgInjuryLimit) || ModInit.modSettings.internalDmgInjuryLimit < 1)
 
                 {
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{p.Callsign}_{pKey} has {internalDmgInjuryCount} preexisting feedback injuries!");
 
                     p.StatCollection.ModifyStat<bool>(p.FetchGUID(), 0, "NeedsFeedbackInjury",
                         StatCollection.StatOperation.Set, true);
 
-                    ModInit.modLog.LogMessage(
+                    ModInit.modLog?.Info?.Write(
                         $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign}_{pKey} from structure damage!");
 
                     p.SetNeedsInjury(InjuryReason.ComponentExplosion);
