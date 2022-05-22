@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using Harmony;
 using BattleTech;
 using TisButAScratch.Framework;
@@ -516,7 +517,21 @@ namespace TisButAScratch.Patches
             }
         }
 
+        [HarmonyPatch(typeof(SimGameState), "RefreshInjuries")]
+        public static class SimGameState_RefreshInjuries
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                List<CodeInstruction> codes = instructions.ToList();
+                
+                // only update injury cost of new cost is greater than old cost
+                int index = codes.FindIndex(c => c == codes.First(x => x.opcode == OpCodes.Beq));
 
+                codes[index].opcode = OpCodes.Bge;
+
+                return codes.AsEnumerable();
+            }
+        }
 
         [HarmonyPatch(typeof(SimGameState))]
         [HarmonyPatch("GetInjuryCost", typeof(Pilot))]
