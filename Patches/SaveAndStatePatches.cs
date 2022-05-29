@@ -57,16 +57,6 @@ namespace TisButAScratch.Patches
                         ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
                     }
                 }
-
-                //init deathchance stats for hospital upgrades:
-                if (!sim.CompanyStats.ContainsStatistic("LethalDeathChance"))
-                {
-                    sim.CompanyStats.AddStatistic("LethalDeathChance", sim.Constants.Pilot.LethalDeathChance);
-                }
-                if (!sim.CompanyStats.ContainsStatistic("IncapacitatedDeathChance"))
-                {
-                    sim.CompanyStats.AddStatistic("IncapacitatedDeathChance", sim.Constants.Pilot.IncapacitatedDeathChance);
-                }
             }
         }
 
@@ -357,15 +347,6 @@ namespace TisButAScratch.Patches
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
                     ModInit.modLog?.Info?.Write(
                         $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
-                }
-
-                if (!sim.CompanyStats.ContainsStatistic("LethalDeathChance"))
-                {
-                    sim.CompanyStats.AddStatistic("LethalDeathChance", sim.Constants.Pilot.LethalDeathChance);
-                }
-                if (!sim.CompanyStats.ContainsStatistic("IncapacitatedDeathChance"))
-                {
-                    sim.CompanyStats.AddStatistic("IncapacitatedDeathChance", sim.Constants.Pilot.IncapacitatedDeathChance);
                 }
             }
         }
