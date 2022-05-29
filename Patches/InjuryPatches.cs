@@ -486,10 +486,16 @@ namespace TisButAScratch.Patches
 
                     else
                     {
-                        
-                        float num = pilot.LethalInjuries
-                            ? sim.Constants.Pilot.LethalDeathChance
+                        var lethalDeathChance = sim.CompanyStats.ContainsStatistic("LethalDeathChance")
+                            ? sim.CompanyStats.GetValue<float>("LethalDeathChance")
+                            : sim.Constants.Pilot.LethalDeathChance;
+                        var incapacitatedDeathChance = sim.CompanyStats.ContainsStatistic("IncapacitatedDeathChance")
+                            ? sim.CompanyStats.GetValue<float>("IncapacitatedDeathChance")
                             : sim.Constants.Pilot.IncapacitatedDeathChance;
+
+                        float num = pilot.LethalInjuries
+                            ? lethalDeathChance
+                            : incapacitatedDeathChance;
                         num = Mathf.Max(0f, num - sim.Constants.Pilot.GutsDeathReduction * (float) pilot.Guts);
                         float num2 = sim.NetworkRandom.Float();
                         string s = string.Format(
