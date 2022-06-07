@@ -143,5 +143,27 @@ namespace TisButAScratch.Patches
                 ___subTitleColor.SetUIColor(UIColor.RedHalf);
             }
         }
+
+        [HarmonyPatch(typeof(TaskTimelineWidget), "OnTaskDetailsClicked")]
+        public static class TaskTimelineWidget_OnTaskDetailsClicked_Patch
+        {
+            static void Postfix(TaskTimelineWidget __instance, TaskManagementElement element)
+            {
+                if (element == null) return;
+                if (element.Entry.Type != WorkOrderType.MedLabHeal) return;
+                if (!(element.Entry is WorkOrderEntry_MedBayHeal medbayHealEntry) ||
+                    medbayHealEntry.Pilot.Injuries == 0) return;
+                var sim = UnityGameInstance.BattleTechGame.Simulation;
+                sim.SetTimeMoving(false);
+
+                var pilot = medbayHealEntry.Pilot;
+                var Desc = $"<b>PILOT: {pilot.FirstName} \"{pilot.Callsign}\" {pilot.LastName}</b>\n";
+                Desc += "<b>STATUS: INJURED</b>\n";
+                Desc += $"<b>SUMMARY:</b>\n";
+                Desc += $"{InjuryDescriptions.getPilotInjuryDescCompact(pilot)}";
+
+                PauseNotification.Show("Medical Summary", Desc, pilot.GetPortraitSprite(), "", true, null);
+            }
+        }
     }
 }
