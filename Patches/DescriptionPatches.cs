@@ -149,6 +149,7 @@ namespace TisButAScratch.Patches
         {
             static void Postfix(TaskTimelineWidget __instance, TaskManagementElement element)
             {
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) return; //needed so Timeline mods AdvanceToTask works.
                 if (element == null) return;
                 if (element.Entry.Type != WorkOrderType.MedLabHeal) return;
                 if (!(element.Entry is WorkOrderEntry_MedBayHeal medbayHealEntry) ||

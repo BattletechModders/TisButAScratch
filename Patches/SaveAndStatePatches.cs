@@ -649,6 +649,7 @@ namespace TisButAScratch.Patches
             public static void Prefix(Contract __instance, MissionResult result, bool isGoodFaithEffort)
             {
                 var sim = UnityGameInstance.BattleTechGame.Simulation;
+                if (sim == null) return;
                 var playerPilots = new List<Pilot>();
                 playerPilots.AddRange(sim.PilotRoster);
                 playerPilots.Add(sim.Commander);

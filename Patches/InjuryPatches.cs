@@ -421,7 +421,7 @@ namespace TisButAScratch.Patches
                 {
                     __result = true;
                 }
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health)
+                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health || __instance.pilotDef.TimeoutRemaining > 0)
                 {
                     __result = false;
                 }
