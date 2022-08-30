@@ -22,6 +22,7 @@ namespace TisButAScratch.Framework
         public bool couldBeThermal = false;
         public int severity = 1;
         public string description = "";
+        public List<string> InjuryTags = new List<string>();
 
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();

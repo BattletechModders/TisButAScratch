@@ -410,6 +410,11 @@ namespace TisButAScratch.Framework
         private void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
+            if (injury.InjuryTags.Count > 0)
+            {
+                p.pilotDef.PilotTags.AddRange(injury.InjuryTags);
+                ModInit.modLog?.Info?.Write($"Adding injury tags {string.Join(", ", injury.InjuryTags)}");
+            }
             if (actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat) || actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag) || (actor.UnitIsTrooperSquad() && ModInit.modSettings.disableTBASTroopers))
             {
                 ModInit.modLog?.Info?.Write($"Found advanced life-support - {actor.StatCollection.GetValue<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat)} or tag {ModInit.modSettings.disableTBASTag} and  - {actor.GetStaticUnitTags().Contains(ModInit.modSettings.disableTBASTag)} or is a trooper squad and disableTBASTroopers {ModInit.modSettings.disableTBASTroopers}:  nullifying injury effects for {p.Callsign}");
