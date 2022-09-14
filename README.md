@@ -111,6 +111,7 @@ Injuries are defined in the settings.json, and have the following structure:
 			"couldBeThermal" : false,
 			"severity" : 1,
 			"description" : "This pilot has a compound fracture in their arm, and is suffering an accuracy penalty.",
+			"InjuryTags":[],
 			"effectDataJO" : [
 				{
 					"durationData": {
@@ -161,6 +162,8 @@ Injuries are defined in the settings.json, and have the following structure:
 `severity` - used in conjunction with both the below settings `missionKillSeverityThreshold` and `debilSeverityThreshold`. Although injured pilots are no longer prevented from piloting mechs, particularly severe or repeated injuries to the same location can result in the pilot becoming incapacitated, `DEBILITATED`, and unable to pilot if the total `severity` of injuries in a given location exceeds the value set in `debilSeverityThreshold` (value < 1 disables debilitating injuries). Similarly, a pilot will become incapacitated if the total `severity` of injuries <i>sustained in the current contract</i> exceeds their `missionKillSeverityThreshold`. The threshold set missionKillSeverityThreshold is the "default" threshold for all pilots. This value can be modified for individual pilots/units by altering the <i>Pilot</i> statistic "MissionKilledThreshold" via equipment, traits, etc.
 
 `description` - human-legible description of this injury and its effects.
+
+`InjuryTags` - list of tags that will be added to the pilotDef when this injury is inflicted. Requested feature for MechAffinity to use to create more permanent debuffs
 
 `effectDataJO` - list of status effects this injury applies. Importantly, `durationData` is used in conjunction with the status effect name suffix and `BleedingOutSuffix` setting below to note than an injury should inflict <b>Bleeding Out</b>, and either incapacitate or kill the pilot on expiration. 
 
