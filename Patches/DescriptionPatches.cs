@@ -12,6 +12,25 @@ namespace TisButAScratch.Patches
 {
     public class DescriptionPatches
     {
+        //pretty much copied from MechEngineer
+        [HarmonyPatch(typeof(Pilot), "InjuryReasonDescription", MethodType.Getter)]
+        public static class Pilot_InjuryReasonDescription_Patch // also add head-only injury reason?
+        {
+            public static InjuryReason InjuryReasonOverheat = (InjuryReason)666;
+            public static InjuryReason InjuryReasonFeedback = (InjuryReason)667;
+            public static void Postfix(Pilot __instance, ref string __result)
+            {
+                if (__instance.InjuryReason == InjuryReasonOverheat)
+                {
+                    __result = "OVERHEATED";
+                }
+                if (__instance.InjuryReason == InjuryReasonFeedback)
+                {
+                    __result = "NEURAL FEEDBACK";
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
         
         public static class SGBarracksRosterSlot_Refresh_Patch

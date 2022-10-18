@@ -560,7 +560,13 @@ namespace TisButAScratch.Framework
 
 //                loc = (InjuryLoc)UnityEngine.Random.Range(2, 8); // old
 
-                if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || (int)reason ==  101 || (int)reason == 666)
+                if ((int) reason == 20)
+                {
+                    loc = InjuryLoc.Head;
+                    injuryList.RemoveAll(x => x.injuryLoc != InjuryLoc.Head || !string.IsNullOrEmpty(x.injuryID_Post));
+                }
+
+                else if (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf || (int)reason ==  101 || (int)reason == 666)
                 {
                     injuryList.RemoveAll(x => x.couldBeThermal == false || x.severity >= 100);
                 }

@@ -308,8 +308,8 @@ namespace TisButAScratch.Patches
 
                     if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
                         (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
-                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)___injuryReason == 101 || (int)___injuryReason == 666
-                         || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase)))
+                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)___injuryReason == 101 || (int)___injuryReason == 666 || (int)___injuryReason == 667
+                         || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase))) //add head-only injury herre?
                         {
                             ModInit.modLog?.Info?.Write(
                                 $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
@@ -319,6 +319,7 @@ namespace TisButAScratch.Patches
                 catch (Exception ex)
                 {
                     ModInit.modLog?.Error?.Write(ex);
+                    return true;
                     return true;
                 }
                 return true;
@@ -627,7 +628,7 @@ namespace TisButAScratch.Patches
                     ModInit.modLog?.Info?.Write(
                         $"{internalDmgInjuryCount} is < {ModInit.modSettings.internalDmgInjuryLimit}! Injuring {p.Callsign}_{pKey} from structure damage!");
 
-                    p.SetNeedsInjury(InjuryReason.ComponentExplosion);
+                    p.SetNeedsInjury(DescriptionPatches.Pilot_InjuryReasonDescription_Patch.InjuryReasonFeedback); // change this to new "feedback EI" reason?
                     __instance.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
                     //p.InjurePilot(p.FetchGUID(), -1, 1, DamageType.ComponentExplosion, null, null);
 

@@ -14,20 +14,6 @@ namespace TisButAScratch.Patches
 {
     public class BleedingOut
     {
-        //pretty much copied from MechEngineer
-        [HarmonyPatch(typeof(Pilot), "InjuryReasonDescription", MethodType.Getter)]
-        public static class Pilot_InjuryReasonDescription_Patch
-        {
-            public static InjuryReason InjuryReasonOverheat = (InjuryReason)666;
-            public static void Postfix(Pilot __instance, ref string __result)
-            {
-                if (__instance.InjuryReason == InjuryReasonOverheat)
-                {
-                    __result = "OVERHEATED";
-                }
-            }
-        }
-
         [HarmonyPatch(typeof(AbstractActor), "OnActivationEnd",
             new Type[] {typeof(string), typeof(int)})]
         public static class AbstractActor_OnActivationEnd
@@ -49,7 +35,7 @@ namespace TisButAScratch.Patches
                     {
                         if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.OverheatInjuryStat))
                         {
-                            p.SetNeedsInjury(Pilot_InjuryReasonDescription_Patch.InjuryReasonOverheat);
+                            p.SetNeedsInjury(DescriptionPatches.Pilot_InjuryReasonDescription_Patch.InjuryReasonOverheat);
                             p.InjurePilot(sourceID, stackItemID, 1,
                                 DamageType.Overheat, default(Weapon), __instance);
                             p.ClearNeedsInjury();
