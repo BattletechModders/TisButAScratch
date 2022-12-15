@@ -245,3 +245,6 @@ ModelManifest.xml
 *.pdb
 *.dll
 .vs/TisButAScratch/v16/.suo
+
+# Ignore the VS Directory.build.props file
+Directory.Build.props 

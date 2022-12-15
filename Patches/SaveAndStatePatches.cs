@@ -103,12 +103,15 @@ namespace TisButAScratch.Patches
                     }
                 }
 
-                var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => !curPilots.Contains(x));
-                foreach (var key in new List<string>(rm))
+                if (false)
                 {
-                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                    ModInit.modLog?.Info?.Write(
-                        $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
+                    var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => !curPilots.Contains(x));
+                    foreach (var key in new List<string>(rm))
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
+                        ModInit.modLog?.Info?.Write(
+                            $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
+                    }
                 }
 
                 var rm2 = new List<string>(
@@ -167,65 +170,8 @@ namespace TisButAScratch.Patches
                     }
                 }
 
-                if (false)
-                {
-
-
-                    // this bigass clusterfuck is just for if you have existing injuries when first loading up TBAS
-                    if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
-                        sim.Commander.StatCollection.GetValue<int>("Injuries"))
-                    {
-                        var dmg = sim.Commander.StatCollection.GetValue<int>("Injuries") -
-                                  PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                        ModInit.modLog?.Info?.Write($"Commander is missing {dmg} TBAS injuries. Rerolling.");
-                        PilotInjuryManager.ManagerInstance.rollInjurySG(sim.Commander, dmg, DamageType.Unknown);
-                        if (ModInit.modSettings.debilSeverityThreshold > 0
-                           ) //now trying to add up "severity" threshold for crippled injury
-                        {
-
-                            var injuryList = new List<Injury>();
-                            foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
-                            {
-                                injuryList.AddRange(
-                                    PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(x => x.injuryID == id));
-                            }
-
-                            var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
-
-                            foreach (var injuryLoc in groupedLocs)
-                            {
-                                var t = 0;
-                                foreach (var injury in injuryLoc)
-                                {
-                                    t += injury.severity;
-                                }
-
-                                if (t >= ModInit.modSettings.debilSeverityThreshold)
-                                {
-                                    sim.Commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
-                                    if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
-                                            injuryLoc.Key == InjuryLoc.Torso))
-                                    {
-                                        sim.Commander.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
-                                            "LethalInjury",
-                                            StatCollection.StatOperation.Set, true);
-                                    }
-                                }
-                            }
-                        }
-
-                        var rm2 = new List<string>(
-                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => x.EndsWith(aiPilotFlag)));
-                        foreach (var key in rm2)
-                        {
-                            PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
-                            ModInit.modLog?.Info?.Write(
-                                $"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
-                        }
-                    }
-                }
                 if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
-                         sim.Commander.StatCollection.GetValue<int>("Injuries"))
+                    sim.Commander.StatCollection.GetValue<int>("Injuries"))
                 {
                     if (sim.Commander.StatCollection.GetValue<int>("Injuries") < 1)
                     {
@@ -234,14 +180,16 @@ namespace TisButAScratch.Patches
                     }
                     else
                     {
-                        var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - sim.Commander.StatCollection.GetValue<int>("Injuries");
+                        var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count -
+                                  sim.Commander.StatCollection.GetValue<int>("Injuries");
                         for (int i = 0; i < dmg; i++)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
-                            ModInit.modLog?.Info?.Write($"Commander has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
+                            ModInit.modLog?.Info?.Write(
+                                $"Commander has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
                         }
                     }
-                    
+
                 }
 
                 foreach (Pilot p in sim.PilotRoster)
@@ -260,7 +208,8 @@ namespace TisButAScratch.Patches
                     if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
                     {
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
-                        ModInit.modLog?.Info?.Write($"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
+                        ModInit.modLog?.Info?.Write(
+                            $"{p.Callsign} missing, added to pilotInjuriesMap with iGUID {pKey}");
                     }
 
                     foreach (var id in new List<string>(PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]))
@@ -272,81 +221,48 @@ namespace TisButAScratch.Patches
                             ModInit.modLog?.Info?.Write($"Removed deprecated injury from {p.Callsign} with id {id}");
                         }
                     }
-
-                    // this bigass clusterfuck is just for if you have existing injuries when first loading up TBAS.
-                    if (false)
-                    {
-                        if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count <
-                            p.StatCollection.GetValue<int>("Injuries"))
-                        {
-                            var dmg = p.StatCollection.GetValue<int>("Injuries") -
-                                      PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count;
-                            ModInit.modLog?.Info?.Write($"{p.Callsign} is missing {dmg} TBAS injuries. Rerolling.");
-                            PilotInjuryManager.ManagerInstance.rollInjurySG(p, dmg, DamageType.Unknown);
-                            if (ModInit.modSettings.debilSeverityThreshold > 0
-                               ) //now trying to add up "severity" threshold for crippled injury
-                            {
-
-                                var injuryList = new List<Injury>();
-                                foreach (var id in PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey])
-                                {
-                                    injuryList.AddRange(
-                                        PilotInjuryManager.ManagerInstance.InjuryEffectsList.Where(
-                                            x => x.injuryID == id));
-                                }
-
-                                var groupedLocs = injuryList.GroupBy(x => x.injuryLoc);
-
-                                foreach (var injuryLoc in groupedLocs)
-                                {
-                                    var t = 0;
-                                    foreach (var injury in injuryLoc)
-                                    {
-                                        t += injury.severity;
-                                    }
-
-                                    if (t > ModInit.modSettings.debilSeverityThreshold)
-                                    {
-                                        p.pilotDef.PilotTags.Add(DEBILITATEDTAG);
-                                        if (ModInit.modSettings.enableLethalTorsoHead &&
-                                            (injuryLoc.Key == InjuryLoc.Head ||
-                                             injuryLoc.Key == InjuryLoc.Torso))
-                                        {
-                                            p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0,
-                                                "LethalInjury",
-                                                StatCollection.StatOperation.Set, true);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    
                     if (PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count >
-                             p.StatCollection.GetValue<int>("Injuries"))
+                        p.StatCollection.GetValue<int>("Injuries"))
                     {
                         if (p.StatCollection.GetValue<int>("Injuries") < 1)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
-                            ModInit.modLog?.Info?.Write($"Pilot {p.Callsign} had no vanilla injuries, clearing TBAS injuries.");
+                            ModInit.modLog?.Info?.Write(
+                                $"Pilot {p.Callsign} had no vanilla injuries, clearing TBAS injuries.");
                         }
                         else
                         {
-                            var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
+                            var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count -
+                                      p.StatCollection.GetValue<int>("Injuries");
                             for (int i = 0; i < dmg; i++)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
-                                ModInit.modLog?.Info?.Write($"Pilot {p.Callsign} has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
+                                ModInit.modLog?.Info?.Write(
+                                    $"Pilot {p.Callsign} has {dmg} more TBAS injuries than vanilla injuries, removing TBAS injury at {i}.");
                             }
                         }
                     }
                 }
 
-                var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => !curPilots.Contains(x));
-                foreach (var key in new List<string>(rm))
+                var rm2 = new List<string>(
+                    PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => x.EndsWith(aiPilotFlag)));
+                foreach (var key in rm2)
                 {
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
                     ModInit.modLog?.Info?.Write(
-                        $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
+                        $"Pilot with pilotID {key} was AI Pilot, removing from pilotInjuriesMap");
+                }
+
+                if (false)
+                {
+                    var rm = PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Keys.Where(x => !curPilots.Contains(x));
+                    foreach (var key in new List<string>(rm))
+                    {
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Remove(key);
+                        ModInit.modLog?.Info?.Write(
+                            $"Pilot with pilotID {key} not in roster, removing from pilotInjuriesMap");
+                    }
                 }
             }
         }
