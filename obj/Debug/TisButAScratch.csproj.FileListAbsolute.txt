@@ -253,3 +253,9 @@ D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.VRModule.dl
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.CrashReportingModule.dll
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\UnityEngine.PerformanceReportingModule.dll
 D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AWSSDK.SecurityToken.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AsmResolver.DotNet.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AsmResolver.PE.File.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AsmResolver.PE.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\AsmResolver.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\BepInEx.AssemblyPublicizer.MSBuild.dll
+D:\Users\ajkro\Documents\GitHub\TisButAScratch\bin\Debug\BepInEx.AssemblyPublicizer.dll

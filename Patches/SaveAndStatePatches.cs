@@ -671,21 +671,21 @@ namespace TisButAScratch.Patches
             [HarmonyBefore(new string[] {"io.mission.customunits"})]
             [HarmonyPriority(Priority.First)]
             public static void Postfix(LanceLoadoutSlot __instance, IMechLabDraggableItem item, bool validate,
-                ref bool __result, LanceConfiguratorPanel ___LC, ref Mech ___selectedMech, ref Pilot ___selectedPilot)
+                ref bool __result)
             {
-                if (___LC == null) return;
+                if (__instance.LC == null) return;
                 if (__instance.SelectedPilot != null && item.ItemType == MechLabDraggableItemType.Mech)
                 {
                     if (__instance.SelectedPilot.Pilot.TagReqsAreMet(item, __instance)) 
                     {
                         __result = true;
-                        ___LC.ValidateLance();
+                        __instance.LC.ValidateLance();
                         return;
                     }
-                    ___LC.ReturnItem(item);
-                    ___selectedMech = null;
+                    __instance.LC.ReturnItem(item);
+                    __instance.selectedMech = null;
                     __result = false;
-                    ___LC.ValidateLance();
+                    __instance.LC.ValidateLance();
                     return;
                 }
                 else if (__instance.SelectedMech != null && item.ItemType == MechLabDraggableItemType.Pilot)
@@ -693,20 +693,20 @@ namespace TisButAScratch.Patches
                     if (!(item is SGBarracksRosterSlot slot))
                     {
                         __result = true;
-                        ___LC.ValidateLance();
+                        __instance.LC.ValidateLance();
                         return;
                     }
 
                     if (slot.Pilot.TagReqsAreMet(item, __instance))
                     {
                         __result = true;
-                        ___LC.ValidateLance();
+                        __instance.LC.ValidateLance();
                         return;
                     }
-                    ___LC.ReturnItem(item);
-                    ___selectedPilot = null;
+                    __instance.LC.ReturnItem(item);
+                    __instance.selectedPilot = null;
                     __result = false;
-                    ___LC.ValidateLance();
+                    __instance.LC.ValidateLance();
                     return;
                 }
                 __result = true;

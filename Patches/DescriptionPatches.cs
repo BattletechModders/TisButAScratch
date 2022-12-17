@@ -36,7 +36,7 @@ namespace TisButAScratch.Patches
         public static class SGBarracksRosterSlot_Refresh_Patch
         {
             [HarmonyAfter(new string[] { "ca.jwolf.MechAffinity" })] //without whom this would not have happened
-            public static void Postfix(SGBarracksRosterSlot __instance, GameObject ___incapacitatedObj)
+            public static void Postfix(SGBarracksRosterSlot __instance)
             {
                 if (__instance.Pilot == null)
                 {
@@ -55,14 +55,14 @@ namespace TisButAScratch.Patches
                     }
                 }
  
-                if (___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
+                if (__instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
 
-                var tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
+                var tooltip = __instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
 
                 if (tooltip == null && (__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || displayAnyway))
                 {
-                    ___incapacitatedObj.gameObject.SetActive(true);
-                    tooltip = ___incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
+                    __instance.incapacitatedObj.gameObject.SetActive(true);
+                    tooltip = __instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
                     tooltip.gameObject.SetActive(true);
                 }
 
@@ -87,8 +87,7 @@ namespace TisButAScratch.Patches
         public static class SGBarracksDossierPanel_SetPilot_Patch
         {
             [HarmonyAfter(new string[] { "ca.jwolf.MechAffinity" })] //without whom this would not have happened
-            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p, GameObject ___injureBackground,
-                GameObject ___timeoutBackground)
+            public static void Postfix(SGBarracksDossierPanel __instance, Pilot p)
             {
                 var displayAnyway = false;
 
@@ -101,18 +100,18 @@ namespace TisButAScratch.Patches
                     }
                 }
 
-                if (___injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
+                if (__instance.injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
                     !p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
-                if (displayAnyway && !___injureBackground.activeSelf)
+                if (displayAnyway && !__instance.injureBackground.activeSelf)
                 {
-                    ___injureBackground.SetActive(true);
+                    __instance.injureBackground.SetActive(true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !___injureBackground.activeSelf)
+                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !__instance.injureBackground.activeSelf)
                 {
-                    ___timeoutBackground.SetActive(true);
+                    __instance.timeoutBackground.SetActive(true);
 
-                    var tooltip = ___timeoutBackground.GetComponentInChildren<HBSTooltip>(true);
+                    var tooltip = __instance.timeoutBackground.GetComponentInChildren<HBSTooltip>(true);
 
                     tooltip.gameObject.SetActive(true);
 
@@ -131,7 +130,7 @@ namespace TisButAScratch.Patches
 
                 else
                 {
-                    var tooltip = ___injureBackground.GetComponentInChildren<HBSTooltip>(false);
+                    var tooltip = __instance.injureBackground.GetComponentInChildren<HBSTooltip>(false);
 
                     string Desc = tooltip.GetText();
                     if (String.IsNullOrEmpty(Desc))
@@ -153,13 +152,13 @@ namespace TisButAScratch.Patches
         public static class TaskManagementElement_UpdateTaskInfo_Patch
         {
             [HarmonyPriority(Priority.Last)]
-            public static void Postfix(TaskManagementElement __instance, WorkOrderEntry ___entry, LocalizableText ___subTitleText, UIColorRefTracker ___subTitleColor)
+            public static void Postfix(TaskManagementElement __instance)
             {
-                if (___entry.Type != WorkOrderType.MedLabHeal) return;
-                if (!(___entry is WorkOrderEntry_MedBayHeal medbayHealEntry) ||
+                if (__instance.entry.Type != WorkOrderType.MedLabHeal) return;
+                if (!(__instance.entry is WorkOrderEntry_MedBayHeal medbayHealEntry) ||
                     medbayHealEntry.Pilot.Injuries == 0) return;
-                ___subTitleText.SetText("INJURED");
-                ___subTitleColor.SetUIColor(UIColor.RedHalf);
+                __instance.subTitleText.SetText("INJURED");
+                __instance.subTitleColor.SetUIColor(UIColor.RedHalf);
             }
         }
 

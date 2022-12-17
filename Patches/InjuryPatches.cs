@@ -296,7 +296,7 @@ namespace TisButAScratch.Patches
         {
             [HarmonyPriority(Priority.First)]
 
-            public static bool Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor, InjuryReason ___injuryReason)
+            public static bool Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
                 try
                 {
@@ -308,7 +308,7 @@ namespace TisButAScratch.Patches
 
                     if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
                         (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
-                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)___injuryReason == 101 || (int)___injuryReason == 666 || (int)___injuryReason == 667
+                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)__instance.injuryReason == 101 || (int)__instance.injuryReason == 666 || (int)__instance.injuryReason == 667
                          || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase))) //add head-only injury herre?
                         {
                             ModInit.modLog?.Info?.Write(
@@ -326,7 +326,7 @@ namespace TisButAScratch.Patches
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
-                DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor, InjuryReason ___injuryReason)
+                DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
                 var pKey = __instance.FetchGUID();
 
@@ -359,7 +359,7 @@ namespace TisButAScratch.Patches
                 else
                 {
                     ModInit.modLog?.Info?.Write($"Rolling standard injury with {dmg} damage for {__instance.Callsign} {pKey}");
-                    PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType, ___injuryReason);
+                    PilotInjuryManager.ManagerInstance.rollInjury(__instance, dmg, damageType, __instance.injuryReason);
                 }
 
                 if ((ModInit.modSettings.debilSeverityThreshold > 0) &&
@@ -450,13 +450,14 @@ namespace TisButAScratch.Patches
        
         public class ContractFinalizeKilledMechwarriorsPatch
         {
-            private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
-            private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
-            private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
+            //private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
+            //private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
+            //private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
             [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
             public static bool Prefix(Contract __instance)
             {
-                pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
+                __instance.PushReport("MechWarriorFinalizeKill");
+                //pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
                 foreach (UnitResult unitResult in __instance.PlayerUnitResults)
                 {
                     Pilot pilot = unitResult.pilot;
@@ -502,7 +503,8 @@ namespace TisButAScratch.Patches
                                 num2,
                                 (num2 < num) ? "DEATH" : "LIFE"
                             });
-                        reportLog.Invoke(__instance, new object[] {s});
+                        __instance.ReportLog(s);
+                        //reportLog.Invoke(__instance, new object[] {s});
                         if (num2 < num)
                         {
                             __instance.KilledPilots.Add(pilot);
@@ -513,8 +515,8 @@ namespace TisButAScratch.Patches
                         }
                     }
                 }
-
-                popReport.Invoke(__instance, new object[] { });
+                __instance.PopReport();
+                //popReport.Invoke(__instance, new object[] { });
                 return false;
             }
         }
