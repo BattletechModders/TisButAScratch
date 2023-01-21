@@ -320,7 +320,6 @@ namespace TisButAScratch.Patches
                 {
                     ModInit.modLog?.Error?.Write(ex);
                     return true;
-                    return true;
                 }
                 return true;
             }
