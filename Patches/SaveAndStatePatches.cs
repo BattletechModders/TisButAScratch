@@ -576,18 +576,26 @@ namespace TisButAScratch.Patches
                     var pKey = p.FetchGUID();
                     if (string.IsNullOrEmpty(pKey)) continue;
                     if (playerPilots.All(x => x.pilotDef.Description.Id != p.pilotDef.Description.Id)) continue;
-//                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
-//                   {
-//                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
-//                        ModInit.modLog?.Info?.Write($"Removing CrippledTag from AI pilot {p.Callsign} if present");
-//                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
-//                        p.pilotDef.PilotTags.RemoveRange(rmt);
-//                        ModInit.modLog?.Info?.Write($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
-//                        continue;
-//                    }
+                    //                   if (p.pilotDef.PilotTags.Any(x => x.EndsWith(aiPilotFlag)))
+                    //                   {
+                    //                        p.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
+                    //                        ModInit.modLog?.Info?.Write($"Removing CrippledTag from AI pilot {p.Callsign} if present");
+                    //                        var rmt = p.pilotDef.PilotTags.Where(x => x.EndsWith(aiPilotFlag));
+                    //                        p.pilotDef.PilotTags.RemoveRange(rmt);
+                    //                        ModInit.modLog?.Info?.Write($"Removing AI GUID Tag from AI pilot {p.Callsign} if present");
+                    //                        continue;
+                    //                    }
                     //now only adding to pilotInjuryMap at contract resolution instead of on the fly.
-
-
+                    if (!PilotInjuryHolder.HolderInstance.pilotInjuriesMap.ContainsKey(pKey))
+                    {
+                        ModInit.modLog?.Info?.Write($"PilotInjuryMap doesn't have {p.Callsign} {p.Description.Id}?  That shouldnt be possible. Adding them.");
+                        PilotInjuryHolder.HolderInstance.pilotInjuriesMap.Add(pKey, new List<string>());
+                    }
+                    if (!PilotInjuryHolder.HolderInstance.combatInjuriesMap.ContainsKey(pKey))
+                    {
+                        ModInit.modLog?.Info?.Write($"combatInjuriesMap doesn't have {p.Callsign} {p.Description.Id}? That shouldnt be possible. skipping anyway.");
+                        continue;
+                    }
                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey]
                         .AddRange(PilotInjuryHolder.HolderInstance.combatInjuriesMap[pKey]);
                     ModInit.modLog?.Info?.Write($"Adding {p.Callsign}'s combatInjuryMap to their pilotInjuryMap");
