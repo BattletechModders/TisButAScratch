@@ -182,7 +182,7 @@ namespace TisButAScratch.Patches
                     {
                         var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count -
                                   sim.Commander.StatCollection.GetValue<int>("Injuries");
-                        for (int i = 0; i < dmg; i++)
+                        for (int i = dmg - 1; i >= 0; i--)
                         {
                             PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
                             ModInit.modLog?.Info?.Write(
@@ -235,7 +235,7 @@ namespace TisButAScratch.Patches
                         {
                             var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count -
                                       p.StatCollection.GetValue<int>("Injuries");
-                            for (int i = 0; i < dmg; i++)
+                            for (int i = dmg - 1; i >= 0; i--)
                             {
                                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(i);
                                 ModInit.modLog?.Info?.Write(
@@ -310,7 +310,7 @@ namespace TisButAScratch.Patches
                             {
                                 var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - p.StatCollection.GetValue<int>("Injuries");
                                 ModInit.modLog?.Info?.Write($"{p.Callsign} has {dmg} extra injuries. Removing.");
-                                for (int j = 0; j < dmg; j++)
+                                for (int j = dmg - 1; j >= 0; j--)
                                 {
                                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(j);
                                 }
@@ -379,7 +379,7 @@ namespace TisButAScratch.Patches
                             {
                                 var dmg = PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count - commander.StatCollection.GetValue<int>("Injuries");
                                 ModInit.modLog?.Info?.Write($"{commander.Callsign} has {dmg} extra injuries. Removing.");
-                                for (int j = 0; j < dmg; j++)
+                                for (int j = dmg - 1; j >= 0; j--)
                                 {
                                     PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].RemoveAt(j);
                                 }
@@ -633,7 +633,7 @@ namespace TisButAScratch.Patches
                         ModInit.modLog?.Info?.Write(
                             $"Post-Mission Injuries ({p.StatCollection.GetValue<int>("Injuries")}) less than InjuryHolder count ({PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Count})");
                         PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey].Reverse();
-                        for (int i = 0; i < diff; i++)
+                        for (int i = diff - 1; i >= 0; i--)
                         {
                             ModInit.modLog?.Info?.Write(
                                 $"Removing {PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey][i]} from {p.Callsign}");
