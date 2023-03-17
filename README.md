@@ -171,9 +171,9 @@ Injuries are defined in the settings.json, and have the following structure:
 
 The number of available pilot slots in the barracks is now tracked via a company stat `RosterCapacityRemaining` which can be used in events, results blocks, etc. This statistic is automagically updated on save, save load, and when pilots are hired/fired/killed.
 
-A new mod.json setting `CanIntentionallyHotBunk` allows players to intentionally hire more pilots than their barracks can support; otherwise players can only exceed the limit via events or other sources that directly add pilots to the roster without going through the hiring hall.
+A new settings.json setting `CanIntentionallyHotBunk` allows players to intentionally hire more pilots than their barracks can support; otherwise players can only exceed the limit via events or other sources that directly add pilots to the roster without going through the hiring hall.
 
-In addition, a new mod.json setting `OvercrowdingEffects` has been added, allowing various malus'es to be applied to player pilots if the absolute value of RosterCapacityRemaining exceeds the `Threshold` value set for configured `OvercrowdingEffects`. Each pilot can only get one `OvercrowdingEffect`, which is chosen randomly from the pool of effects where the threshold is met.
+In addition, a settings mod.json setting `OvercrowdingEffects` has been added, allowing various malus'es to be applied to player pilots if the absolute value of RosterCapacityRemaining exceeds the `Threshold` value set for configured `OvercrowdingEffects`. Each pilot can only get one `OvercrowdingEffect`, which is chosen randomly from the pool of effects where the threshold is met.
 
 An example `OvercrowdingEffects` follows, which can apply if the player has at least two pilots over their number of barracks slots (not including the commander).
 
