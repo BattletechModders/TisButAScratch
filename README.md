@@ -515,3 +515,8 @@ Bleeding effects have the following structure:
 },
 ```
 Similar to `BleedingEffects`, SimBleedingEffects use `bleedingEffectLvl` to define if/when the effects are to be applied to a pilot that is/has been bleeding out, int the same manner. The remainder of the structure is identical to a `SimGameEventResult` that gives the pilot a specific temporary tag. The format of the tag (when present) is then parsed at the start of combat to generate certain effects. These tags are of the basic structure `TBAS_SimBleed__StatName__Amount`. In the above example, a Pilots' Guts statistic would be reduced by 1 at the start of the contract. Temporarily reducing skills directly in SimGame would efffectively allow players to purchase additional levels of the skill at discounted XP costs, which is why we are parsing a temporary tag instead; the tags are processed at contract start rather than directly through the `SimGameEventResult` to prevent "easy" leveling up. Of course the downside is that these stat mods are limited to statistics present on Pilots rather than AbstractActors (e.g. skill stats, but not things like `AccuracyModifier`), and the only available operation on the stat is Adding or Subtracting (if Amount is negative).
+	
+	
+`CanIntentionallyHotBunk` - bool, allows player to intentionally hire more pilots than barracks can support
+
+`OvercrowdingEffects` - overcrowding effects applied in combat. see overcrowding effects section for config
