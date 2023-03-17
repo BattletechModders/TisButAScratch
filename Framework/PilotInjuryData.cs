@@ -13,6 +13,18 @@ namespace TisButAScratch.Framework
         public string PilotTag = "";
         public string PilotTagDisplay = "";
     }
+    public class OvercrowdedEffect
+    {
+        public string ID = "";
+        public int Threshold = 0;
+        public string Name = "";
+        public string Description = "";
+        [JsonIgnore]
+        public List<EffectData> effects = new List<EffectData>();
+        public List<JObject> effectDataJO = new List<JObject>();
+        public List<SimGameEventResult> simResult = new List<SimGameEventResult>();
+        public List<JObject> simResultJO = new List<JObject>();
+    }
     public class Injury
     {
         public string injuryID = "";

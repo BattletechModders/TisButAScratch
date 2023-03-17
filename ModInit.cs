@@ -110,5 +110,7 @@ namespace TisButAScratch
         public List<BleedingEffect> BleedingEffects = new List<BleedingEffect>();
         public bool UseSimBleedingEffects = true;
         public List<SimBleedingEffect> SimBleedingEffects = new List<SimBleedingEffect>();
+        public bool CanIntentionallyHotBunk = false;
+        public List<OvercrowdedEffect> OvercrowdingEffects = new List<OvercrowdedEffect>();
     }
 }

@@ -25,6 +25,17 @@ namespace TisButAScratch.Patches
                 sim = UnityGameInstance.BattleTechGame.Simulation;
 //                var curPilots = new List<string>();
 
+                if (sim == null) return;
+                if (!sim.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    sim.CompanyStats.AddStatistic("RosterCapacityRemaining", sim.GetMaxMechWarriors() - sim.PilotRoster.Count);
+                }
+                else
+                {
+                    sim.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        sim.GetMaxMechWarriors() - sim.PilotRoster.Count, -1, true);
+                }
+                    
                 if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
                     //sim.Commander.pilotDef.PilotTags.Add($"{iGUID}{sim.Commander.Description.Id}{sim.GenerateSimGameUID()}");
@@ -68,6 +79,17 @@ namespace TisButAScratch.Patches
             {
                 PilotInjuryManager.PreloadIcons();
                 sim = __instance;
+
+                if (!sim.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    sim.CompanyStats.AddStatistic("RosterCapacityRemaining", sim.GetMaxMechWarriors() - sim.PilotRoster.Count);
+                }
+                else
+                {
+                    sim.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        sim.GetMaxMechWarriors() - sim.PilotRoster.Count, -1, true);
+                }
+
                 var curPilots = new List<string>();
 
                 if (!sim.Commander.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
@@ -139,6 +161,17 @@ namespace TisButAScratch.Patches
             {
                 sim = __instance;
                 PilotInjuryManager.PreloadIcons();
+
+                if (!sim.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    sim.CompanyStats.AddStatistic("RosterCapacityRemaining", sim.GetMaxMechWarriors() - sim.PilotRoster.Count);
+                }
+                else
+                {
+                    sim.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        sim.GetMaxMechWarriors() - sim.PilotRoster.Count, -1, true);
+                }
+
                 var curPilots = new List<string>();
                 PilotInjuryHolder.HolderInstance.DeserializeInjuryState();
                 PilotInjuryHolder.HolderInstance.combatInjuriesMap = new Dictionary<string, List<string>>();
@@ -442,6 +475,41 @@ namespace TisButAScratch.Patches
             }
         }
 
+        [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
+        public static class SimGameState_DismissPilot
+        {
+            public static void Postfix(SimGameState __instance, Pilot p)
+            {
+                if (!__instance.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    __instance.CompanyStats.AddStatistic("RosterCapacityRemaining", __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count);
+                }
+                else
+                {
+                    __instance.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count, -1, true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SimGameState), "KillPilot", new Type[] {typeof(Pilot), typeof(bool), typeof(string), typeof(string)})]
+        public static class SimGameState_KillPilot
+        {
+            public static void Postfix(SimGameState __instance, Pilot p, bool fromEvent = false,
+                string StarSystemID = null, string causeOfDeathOverride = null)
+            {
+                if (!__instance.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    __instance.CompanyStats.AddStatistic("RosterCapacityRemaining", __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count);
+                }
+                else
+                {
+                    __instance.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count, -1, true);
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster",
             new Type[] {typeof(PilotDef), typeof(bool), typeof(bool)})]
         public static class SGS_AddPilotToRoster_Patch
@@ -449,6 +517,16 @@ namespace TisButAScratch.Patches
             public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false,
                 bool initialHiringDontSpawnMessage = false)
             {
+                if (!__instance.CompanyStats.ContainsStatistic("RosterCapacityRemaining"))
+                {
+                    __instance.CompanyStats.AddStatistic("RosterCapacityRemaining", __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count);
+                }
+                else
+                {
+                    __instance.CompanyStats.ModifyStat("SetRosterCapacityRemaining", 0, "RosterCapacityRemaining", StatCollection.StatOperation.Set,
+                        __instance.GetMaxMechWarriors() - __instance.PilotRoster.Count, -1, true);
+                }
+
                 var p = __instance.PilotRoster.FirstOrDefault(x => x.pilotDef.Description.Id == def.Description.Id);
                 if (p != null && !p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                 {
@@ -541,6 +619,36 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<float>("BloodBank", p.CalcBloodBank());
                 p.StatCollection.AddStatistic<float>("BloodCapacity", p.CalcBloodBank());
                 ModInit.modLog?.Info?.Write($"{p.Callsign} calculated BloodBank and BloodCapacity: {p.CalcBloodBank()}");
+
+                //handle overcrowded effects
+                if (unit.team.IsLocalPlayer)
+                {
+                    var capacity = sim.CompanyStats.GetValue<int>("RosterCapacityRemaining");
+                    if (capacity > 0) return;
+                    
+                    var potentialEffects = new List<OvercrowdedEffect>();
+                    foreach (var overCrowdedEffect in PilotInjuryManager.ManagerInstance.OvercrowdedEffectsList)
+                    {
+                        if (overCrowdedEffect.Threshold <= Math.Abs(capacity)) potentialEffects.Add(overCrowdedEffect);
+                    }
+                    if (potentialEffects.Count > 0)
+                    {
+                        var chosenEffect = potentialEffects.GetRandomElement();
+                        foreach (EffectData effectData in chosenEffect.effects)
+                        {
+                            ModInit.modLog?.Info?.Write($"processing overcrowding effect {effectData.Description.Name} for {p.Callsign}_{pKey}");
+
+                            if (effectData.targetingData.effectTriggerType == EffectTriggerType.Passive &&
+                                effectData.targetingData.effectTargetType == EffectTargetType.Creator)
+                            {
+                                string id = ($"OvercrowdingEffect_{p.Callsign}_{effectData.Description.Id}");
+
+                                ModInit.modLog?.Info?.Write($"Applying {id}");
+                                unit.Combat.EffectManager.CreateEffect(effectData, id, -1, unit, unit, default(WeaponHitInfo), 1);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -649,7 +757,6 @@ namespace TisButAScratch.Patches
 
 
         [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
-        
         public static class ResolveCompleteContract_Patch
         {
             public static bool Prepare() => ModInit.modSettings.UseSimBleedingEffects;
@@ -719,6 +826,26 @@ namespace TisButAScratch.Patches
                 }
                 __result = true;
                 return;
+            }
+        }
+
+        [HarmonyPatch(typeof(SG_HiringHall_Screen), "CheckMaxBerthsWarning")]
+        public static class SG_HiringHall_Screen_CheckMaxBerthsWarning
+        {
+            public static bool Prepare() => ModInit.modSettings.CanIntentionallyHotBunk;
+
+            public static bool Prefix(SG_HiringHall_Screen __instance, ref bool __result, bool JustTest = false)
+            {
+                if (__instance.simState.PilotRoster.Count >= __instance.simState.GetMaxMechWarriors())
+                {
+                    if (!JustTest)
+                    {
+                        __instance.SetWarningText(Strings.T("Cannot Fit anymore MechWarriors in your barracks."), Array.Empty<object>());
+                        __instance.WarningAreaObject.SetActive(true);
+                    }
+                }
+                __result = false;
+                return false;
             }
         }
     }

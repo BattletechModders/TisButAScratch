@@ -224,6 +224,7 @@ namespace TisButAScratch.Framework
     public class PilotInjuryManager
     {
         private static PilotInjuryManager _instance;
+        public List<OvercrowdedEffect> OvercrowdedEffectsList;
         public List<Injury> InjuryEffectsList;
         public List<Injury> InternalDmgInjuries;
         public List<BleedingEffect> BleedingEffectsList;
@@ -261,6 +262,27 @@ namespace TisButAScratch.Framework
 
         internal void Initialize()
         {
+            OvercrowdedEffectsList = new List<OvercrowdedEffect>();
+            ModInit.modLog.Info?.Write($"[InitializeEffects] Initializing effects for Overcrowding");
+            foreach (var overcrowdEffect in ModInit.modSettings.OvercrowdingEffects)
+            {
+                ModInit.modLog?.Info?.Write($"Adding effects for {overcrowdEffect.ID}!");
+                foreach (var jObject in overcrowdEffect.effectDataJO)
+                {
+                    var effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    overcrowdEffect.effects.Add(effectData);
+                }
+                foreach (var jObject in overcrowdEffect.simResultJO)
+                {
+                    var simResult = processSimBleedingSettings(jObject);
+                    ModInit.modLog?.Info?.Write($"TEMPORARY: {simResult.Scope}\n{simResult.Requirements}\n{simResult.AddedTags}\n{simResult.RemovedTags}\n{simResult.Stats} AND {JsonConvert.SerializeObject(simResult)}!");
+
+                    overcrowdEffect.simResult.Add(simResult);
+                }
+                OvercrowdedEffectsList.Add(overcrowdEffect);
+            }
+
             SimBleedingEffectList = new List<SimBleedingEffect>();
             foreach (var simBleedingEffect in ModInit.modSettings.SimBleedingEffects) 
             {
@@ -307,9 +329,7 @@ namespace TisButAScratch.Framework
                 InjuryEffectsList.Add(injuryEffect);
                 
             }
-
-
-
+            
             if (ModInit.modSettings.enableInternalDmgInjuries)
             {
                 InternalDmgInjuries = new List<Injury>();
