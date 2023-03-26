@@ -572,6 +572,7 @@ namespace TisButAScratch.Patches
         {
             public static void Postfix(Team __instance, AbstractActor unit)
             {
+                if (sim == null) return;
                 //still need to make AI GUID end with aiPilotFlag
                 var p = unit.GetPilot();
                 p.ForceRefreshDef();
