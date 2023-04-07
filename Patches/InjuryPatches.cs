@@ -274,13 +274,33 @@ namespace TisButAScratch.Patches
             {
                 if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
                 {
-                    ModInit.modLog?.Info?.Write($"Head hit, but cockpit not located in head! No injury should be sustained!");
-                    __instance.GetPilot().SetNeedsInjury(InjuryReason.NotSet);
-                    return false;
+                    var currentReason = __instance.GetPilot().InjuryReason;
+                    if (currentReason != InjuryReason.HeadHit && currentReason != InjuryReason.NotSet)
+                    {
+                        ModInit.modLog?.Info?.Write($" [Mech_ApplyHeadStructureEffects Prefix] Head hit, cockpit not located in head BUT existing reason == {currentReason}, not processing set needs Injury here!");
+                        return false;
+                    }
+
+                    if (newDamageLevel == LocationDamageLevel.Destroyed)
+                    {
+                        ModInit.modLog?.Info?.Write($"[Mech_ApplyHeadStructureEffects Prefix] Head destroyed, but cockpit not located in head! Not injuring pilot here!");
+                        return false;
+                    }
                 }
-                else
+                return true;
+            }
+
+            public static void Postfix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
+                LocationDamageLevel newDamageLevel, WeaponHitInfo hitInfo)
+            {
+                if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
                 {
-                    return true;
+                    var currentReason = __instance.GetPilot().InjuryReason;
+                    if (currentReason == InjuryReason.HeadHit)
+                    {
+                        ModInit.modLog?.Info?.Write($"[Mech_ApplyHeadStructureEffects Postfix] Head hit, but cockpit not located in head! Existing injury reason was {currentReason}, resetting to NotSet!");
+                        __instance.GetPilot().SetNeedsInjury(InjuryReason.NotSet);
+                    }
                 }
             }
         }
