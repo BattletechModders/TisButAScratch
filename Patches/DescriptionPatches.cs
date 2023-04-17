@@ -2,7 +2,6 @@
 using static TisButAScratch.Framework.GlobalVars;
 using BattleTech;
 using BattleTech.UI;
-using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using TisButAScratch.Framework;
 using UnityEngine;

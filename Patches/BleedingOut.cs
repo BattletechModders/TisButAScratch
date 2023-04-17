@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using BattleTech;
 using System.Linq;
 using BattleTech.UI;

@@ -1,6 +1,5 @@
 ﻿using BattleTech;
 using System.Linq;
-using System.Text.RegularExpressions;
 using static TisButAScratch.Framework.GlobalVars;
 
 namespace TisButAScratch.Framework
