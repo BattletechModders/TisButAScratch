@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using Harmony;
 using BattleTech;
 using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
@@ -269,25 +268,29 @@ namespace TisButAScratch.Patches
         public static class Mech_ApplyHeadStructureEffects
         {
             [HarmonyPriority(Priority.First)]
-            public static bool Prefix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
+            public static void Prefix(ref bool __runOriginal, Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
                 LocationDamageLevel newDamageLevel, WeaponHitInfo hitInfo)
             {
+                if (!__runOriginal) return;
                 if (__instance.StatCollection.GetValue<bool>(ModInit.modSettings.isTorsoMountStatName))
                 {
                     var currentReason = __instance.GetPilot().InjuryReason;
                     if (currentReason != InjuryReason.HeadHit && currentReason != InjuryReason.NotSet)
                     {
                         ModInit.modLog?.Info?.Write($" [Mech_ApplyHeadStructureEffects Prefix] Head hit, cockpit not located in head BUT existing reason == {currentReason}, not processing set needs Injury here!");
-                        return false;
+                        __runOriginal = false;
+                        return;
                     }
 
                     if (newDamageLevel == LocationDamageLevel.Destroyed)
                     {
                         ModInit.modLog?.Info?.Write($"[Mech_ApplyHeadStructureEffects Prefix] Head destroyed, but cockpit not located in head! Not injuring pilot here!");
-                        return false;
+                        __runOriginal = false;
+                        return;
                     }
                 }
-                return true;
+                __runOriginal = true;
+                return;
             }
 
             public static void Postfix(Mech __instance, ChassisLocations location, LocationDamageLevel oldDamageLevel,
@@ -315,33 +318,32 @@ namespace TisButAScratch.Patches
         public static class Pilot_InjurePilot_Patch
         {
             [HarmonyPriority(Priority.First)]
-
-            public static bool Prefix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
+            [HarmonyWrapSafe]
+            public static void Prefix(ref bool __runOriginal, Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
             {
-                try
+                if (!__runOriginal)return;
+                if (__instance == null)
                 {
-                    if (__instance == null) return true;
-                    ModInit.modLog?.Info?.Write(
-                            $"{__instance.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
-                    PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
-                    ModInit.modLog?.Info?.Write($"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
+                    __runOriginal = true;
+                    return;
+                }
+                ModInit.modLog?.Info?.Write(
+                        $"{__instance.Callsign} has {__instance.StatCollection.GetValue<int>("Injuries")} injuries before InjurePilot; proceeding.");
+                PilotInjuryHolder.HolderInstance.injuryStat = __instance.StatCollection.GetValue<int>("Injuries");
+                ModInit.modLog?.Info?.Write($"{__instance.Callsign} injuryStat set to {PilotInjuryHolder.HolderInstance.injuryStat}.");
 
-                    if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
-                        (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
-                         damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)__instance.injuryReason == 101 || (int)__instance.injuryReason == 666 || (int)__instance.injuryReason == 667
-                         || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase))) //add head-only injury herre?
-                        {
-                            ModInit.modLog?.Info?.Write(
-                                $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
-                            return false;
-                        }
-                }
-                catch (Exception ex)
-                {
-                    ModInit.modLog?.Error?.Write(ex);
-                    return true;
-                }
-                return true;
+                if (__instance.pilotDef.PilotTags.Contains(ModInit.modSettings.pilotPainShunt) &&
+                    (damageType == DamageType.Overheat || damageType == DamageType.OverheatSelf ||
+                     damageType == DamageType.AmmoExplosion || damageType == DamageType.ComponentExplosion || (int)__instance.injuryReason == 101 || (int)__instance.injuryReason == 666 || (int)__instance.injuryReason == 667
+                     || "OVERHEATED".Equals(__instance.InjuryReasonDescription, StringComparison.InvariantCultureIgnoreCase))) //add head-only injury herre?
+                    {
+                        ModInit.modLog?.Info?.Write(
+                            $"Pilot {__instance.Callsign} has {ModInit.modSettings.pilotPainShunt}, ignoring injury from {damageType}.");
+                        __runOriginal = false;
+                        return;
+                    }
+                __runOriginal = true;
+                return;
             }
 
             public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg,
@@ -473,8 +475,9 @@ namespace TisButAScratch.Patches
             //private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
             //private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
             [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
-            public static bool Prefix(Contract __instance)
+            public static void Prefix(ref bool __runOriginal, Contract __instance)
             {
+                if (!__runOriginal) return;
                 __instance.PushReport("MechWarriorFinalizeKill");
                 //pushReport.Invoke(__instance, new object[] {"MechWarriorFinalizeKill"});
                 foreach (UnitResult unitResult in __instance.PlayerUnitResults)
@@ -536,7 +539,8 @@ namespace TisButAScratch.Patches
                 }
                 __instance.PopReport();
                 //popReport.Invoke(__instance, new object[] { });
-                return false;
+                __runOriginal = false;
+                return;
             }
         }
 

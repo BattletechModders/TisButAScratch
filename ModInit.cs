@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using Harmony;
 using System.Reflection;
 using BattleTech;
 using IRBTModUtils.Logging;
@@ -45,11 +44,10 @@ namespace TisButAScratch
             ModInit.modLog?.Info?.Write($"Initializing TisButAScratch - Version {typeof(Settings).Assembly.GetName().Version}");
             PilotInjuryManager.ManagerInstance.Initialize();
             PilotInjuryHolder.HolderInstance.Initialize();
-            var harmony = HarmonyInstance.Create(HarmonyPackage);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-            
+            //var harmony = HarmonyInstance.Create(HarmonyPackage);
+            //harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), HarmonyPackage);
         }
-
     }
 
     class Settings

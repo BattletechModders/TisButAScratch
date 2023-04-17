@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Harmony;
 using BattleTech;
 using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
@@ -835,8 +834,9 @@ namespace TisButAScratch.Patches
         {
             public static bool Prepare() => ModInit.modSettings.CanIntentionallyHotBunk;
 
-            public static bool Prefix(SG_HiringHall_Screen __instance, ref bool __result, bool JustTest = false)
+            public static void Prefix(ref bool __runOriginal, SG_HiringHall_Screen __instance, ref bool __result, bool JustTest = false)
             {
+                if (!__runOriginal) return;
                 if (__instance.simState.PilotRoster.Count >= __instance.simState.GetMaxMechWarriors())
                 {
                     if (!JustTest)
@@ -846,7 +846,8 @@ namespace TisButAScratch.Patches
                     }
                 }
                 __result = false;
-                return false;
+                __runOriginal = false;
+                return;
             }
         }
     }

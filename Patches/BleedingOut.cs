@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using BattleTech;
-using Harmony;
 using System.Linq;
 using BattleTech.UI;
 using Localize;

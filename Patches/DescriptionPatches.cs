@@ -5,7 +5,6 @@ using BattleTech.UI;
 using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using TisButAScratch.Framework;
-using Harmony;
 using UnityEngine;
 
 namespace TisButAScratch.Patches

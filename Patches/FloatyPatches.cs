@@ -1,5 +1,4 @@
 ﻿using BattleTech;
-using Harmony;
 using Localize;
 using System;
 using System.Collections.Generic;
