@@ -8,8 +8,8 @@ namespace TisButAScratch.Patches
 {
     public class FloatyPatches
     {
-        [HarmonyPatch(typeof(AbstractActor), "CheckPilotStatusFromAttack")]
 
+        [HarmonyPatch(typeof(AbstractActor), "CheckPilotStatusFromAttack")]
         static class AbstractActor_CheckPilotStatusFromAttack
         {
             [HarmonyPriority(Priority.Last)]
@@ -17,7 +17,10 @@ namespace TisButAScratch.Patches
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
             {
                 List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-
+                ModInit.modLog?.Info?.Write($"Dump code - pre\r");
+                ModInit.modLog?.Info?.Write($"{string.Join("\r", codes)}\r");
+                
+                //return codes;
                 // Create a new label for our target point
                 Label clearNeedsInjuryLabel = ilGenerator.DefineLabel();
 
@@ -25,6 +28,7 @@ namespace TisButAScratch.Patches
 
                 int injuryStrIdx = 0, clearInjuryIdx = 0;
                 var foundIdx = false;
+                var foundIdx2 = false;
                 for (int i = 0; i < codes.Count; i++)
                 {
                     CodeInstruction instruction = codes[i];
@@ -37,12 +41,12 @@ namespace TisButAScratch.Patches
                     else if (instruction.opcode == OpCodes.Callvirt && (MethodInfo)instruction.operand == clearNeedsInjuryMI)
                     {
                         clearInjuryIdx = i;
-                        foundIdx = true;
+                        foundIdx2 = true;
                         ModInit.modLog?.Info?.Write($"Found Pilot.ClearNeedsInjury instruction at idx: {i}");
                     }
                 }
 
-                if (foundIdx )
+                if (foundIdx && foundIdx2)
                 {
                     CodeInstruction cnjInstruction = codes[clearInjuryIdx - 1];
                     cnjInstruction.labels.Add(clearNeedsInjuryLabel);
@@ -50,8 +54,10 @@ namespace TisButAScratch.Patches
                     codes.RemoveRange(injuryStrIdx, 15);
                     codes.Insert(injuryStrIdx - 1, new CodeInstruction(OpCodes.Br_S, clearNeedsInjuryLabel));
                 }
-
+                ModInit.modLog?.Info?.Write($"Dump code - post\r");
+                ModInit.modLog?.Info?.Write($"{string.Join("\r", codes)}\r");
                 return codes;
+
             }
         }
 
