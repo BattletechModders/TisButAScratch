@@ -232,7 +232,7 @@ An example `OvercrowdingEffects` follows, which can apply if the player has at l
 	"pilotPainShunt": "pilot_PainShunt",
 	"pilotingReqs": {
 		"PilotNeedsSpecialTag": {
-			"PilotTag": [
+			"PilotTags": [
 				"commander_player",
 				"!pilot_criminal"
 			],
