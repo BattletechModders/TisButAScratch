@@ -299,7 +299,7 @@ An example `OvercrowdingEffects` follows, which can apply if the player has at l
 
 `pilotingReqs` - **NOTE: Format has changes as of 1.1.1.0!** Dictionary of PilotingReqs. They Keys to this dictionary correspond to the ComponentTag for which you are setting requirements.:
 
-	~~`ComponentTag` - the tag on the component~~
+	`ComponentTag` - the tag on the component -> deprecated
 	`PilotTags` - **field name changes to PilotTags** List of tags comprising piloting requirements. items starting with `!` will be parsed as "not" tag; i.e. if `!pilot_criminal`, pilot must not have `pilot_criminal` tag. If multiple tags set here, all requirements must be met.
 	`PilotTagDisplay` - Human-legible display statement for PilotTag requirement not met message. Hard-coded strings have been removed from the error message, so this should be a statement on its own, e.g. "Pilot must be left-handed and not born on a Tuesday."
 
