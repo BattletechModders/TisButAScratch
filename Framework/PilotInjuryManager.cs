@@ -25,15 +25,26 @@ namespace TisButAScratch.Framework
                 if (!(item is LanceLoadoutMechItem lanceLoadoutMechItem)) return true;
                 foreach (var component in lanceLoadoutMechItem.MechDef.Inventory)
                 {
-                    if (!component.Def.ComponentTags.Any(x =>
-                        ModInit.modSettings.pilotingReqs.Any(y=>y.ComponentTag == x))) continue;
+                    foreach (var ctag in component.Def.ComponentTags)
                     {
-                        var match = ModInit.modSettings.pilotingReqs.FirstOrDefault(x =>
-                            component.Def.ComponentTags.Contains(x.ComponentTag));
-                        if (!pilot.pilotDef.PilotTags.Contains(match.PilotTag))
+                        if (ModInit.modSettings.pilotingReqs.TryGetValue(ctag, out var req))
                         {
-                            GenericPopupBuilder.Create($"Cannot Add {item.MechDef.Name}", Strings.T($"{item.MechDef.Name} contains {component.Def.Description.Name}, which requires {pilot.Callsign} to have {match.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
-                            return false;
+                            foreach (var pTag in req.PilotTags)
+                            {
+                                if (pTag.StartsWith("!"))
+                                {
+                                    if (pilot.pilotDef.PilotTags.Contains(pTag.Substring(1)))
+                                    {
+                                        GenericPopupBuilder.Create($"Cannot Add {item.MechDef.Name}", Strings.T($"{item.MechDef.Name} contains {component.Def.Description.Name}. {req.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                                        return false;
+                                    }
+                                }
+                                else if (!pilot.pilotDef.PilotTags.Contains(pTag))
+                                {
+                                    GenericPopupBuilder.Create($"Cannot Add {item.MechDef.Name}", Strings.T($"{item.MechDef.Name} contains {component.Def.Description.Name}. {req.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                                    return false;
+                                }
+                            }
                         }
                     }
                 }
@@ -42,20 +53,44 @@ namespace TisButAScratch.Framework
             if (item.ItemType == MechLabDraggableItemType.Pilot)
             {
                 if (slot.SelectedMech == null) return true;
-                foreach (var component in slot.SelectedMech.MechDef.Inventory)
+                foreach (var component in slot.selectedMech.MechDef.Inventory)
                 {
-                    if (!component.Def.ComponentTags.Any(x =>
-                        ModInit.modSettings.pilotingReqs.Any(y=>y.ComponentTag == x))) continue;
+                    foreach (var ctag in component.Def.ComponentTags)
                     {
-                        var match = ModInit.modSettings.pilotingReqs.FirstOrDefault(x =>
-                            component.Def.ComponentTags.Contains(x.ComponentTag));
-                        if (!pilot.pilotDef.PilotTags.Contains(match.PilotTag))
+                        if (ModInit.modSettings.pilotingReqs.TryGetValue(ctag, out var req))
                         {
-                            GenericPopupBuilder.Create($"Cannot Add {pilot.Callsign}", Strings.T($"{slot.SelectedMech.MechDef.Name} contains {component.Def.Description.Name}, which requires {pilot.Callsign} to have {match.PilotTagDisplay}")).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0f, true).Render();
-                            return false;
+                            foreach (var pTag in req.PilotTags)
+                            {
+                                if (pTag.StartsWith("!"))
+                                {
+                                    if (pilot.pilotDef.PilotTags.Contains(pTag.Substring(1)))
+                                    {
+                                        GenericPopupBuilder
+                                            .Create($"Cannot Add {pilot.Callsign}",
+                                                Strings.T(
+                                                    $"{slot.selectedMech.MechDef.Name} contains {component.Def.Description.Name}. {req.PilotTagDisplay}"))
+                                            .AddFader(
+                                                new UIColorRef?(LazySingletonBehavior<UIManager>.Instance
+                                                    .UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                                        return false;
+                                    }
+                                }
+                                else if (!pilot.pilotDef.PilotTags.Contains(pTag))
+                                {
+                                    GenericPopupBuilder
+                                        .Create($"Cannot Add {pilot.Callsign}",
+                                            Strings.T(
+                                                $"{slot.selectedMech.MechDef.Name} contains {component.Def.Description.Name}. {req.PilotTagDisplay}"))
+                                        .AddFader(
+                                            new UIColorRef?(LazySingletonBehavior<UIManager>.Instance
+                                                .UILookAndColorConstants.PopupBackfill), 0f, true).Render();
+                                    return false;
+                                }
+                            }
                         }
                     }
                 }
+                return true;
             }
             return true;
         }
@@ -156,7 +191,6 @@ namespace TisButAScratch.Framework
                 SimGameState.ApplySimGameEventResult(result, objects);
             }
         }
-
 
         internal static void ApplyClosestBleedingEffect(this Pilot pilot)
         {

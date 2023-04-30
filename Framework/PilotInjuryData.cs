@@ -9,8 +9,8 @@ namespace TisButAScratch.Framework
 {
     public class PilotingReq
     {
-        public string ComponentTag = "";
-        public string PilotTag = "";
+        public string ComponentTag = ""; // this is deprecated
+        public List<string> PilotTags = new List<string>(); // if starts with !, will be not tag
         public string PilotTagDisplay = "";
     }
     public class OvercrowdedEffect

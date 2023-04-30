@@ -88,7 +88,7 @@ namespace TisButAScratch
 
         public string pilotPainShunt = "pilot_PainShunt";
 
-        public List<PilotingReq> pilotingReqs = new List<PilotingReq>();
+        public Dictionary<string, PilotingReq> pilotingReqs = new Dictionary<string, PilotingReq>(); // change format. key is now component tag we are settings requirements for
 
         public float injuryHealTimeMultiplier = 0f;
         public List<ChassisLocations> internalDmgInjuryLocs = new List<ChassisLocations>();

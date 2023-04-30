@@ -44,7 +44,7 @@ namespace TisButAScratch.Patches
                     }
                     else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "HIGH")
                     {
-                        var dmg = pilot.Health - 1;
+                        var dmg = pilot.TotalHealth - 1;
                         ModInit.modLog?.Info?.Write($"Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
                         pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
                         pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, dmg,
@@ -95,6 +95,93 @@ namespace TisButAScratch.Patches
                 }
             }
         }
+
+        [HarmonyPatch(typeof(Mech), "DamageLocation")]
+        public static class Mech_DamageLocation
+        {
+            public static bool Prepare() => ModInit.modSettings.injureVehiclePilotOnDestroy != "OFF";
+            public static void Prefix(Mech __instance, int originalHitLoc, WeaponHitInfo hitInfo, ArmorLocation aLoc, Weapon weapon, float totalArmorDamage, float directStructureDamage, int hitIndex, AttackImpactQuality impactQuality, DamageType damageType)
+            {
+                if (!__instance.UnitIsCustomUnitVehicle()) return;
+                var currentStructure = __instance.GetCurrentStructure(MechStructureRules.GetChassisLocationFromArmorLocation(aLoc));
+                if (currentStructure <= 0f) return;
+
+                var incomingStructureDamage = directStructureDamage + totalArmorDamage - __instance.GetCurrentArmor(aLoc);
+
+                if (currentStructure - incomingStructureDamage <= 0f)
+                {
+                    ModInit.modLog?.Info?.Write($"[Mech_DamageLocation] Vehicle location will be destroyed; currentStructure at location {currentStructure}, will take {incomingStructureDamage} damage");
+                    var pilot = __instance.GetPilot();
+                    if (ModInit.modSettings.injureVehiclePilotOnDestroy == "MAX")
+                    {
+                        ModInit.modLog?.Info?.Write($"[Mech_DamageLocation] Vehicle location destroyed, MaxInjure {pilot.Callsign} {pilot.FetchGUID()} due to injureVehiclePilotOnDestroy = MAX");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
+                        pilot.MaxInjurePilot(__instance.Combat.Constants, hitInfo.attackerId, hitInfo.stackItemUID,
+                            DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
+                        if (pilot.IsIncapacitated)
+                        {
+                            __instance.FlagForDeath("Pilot Killed", DeathMethod.PilotKilled, DamageType.Combat, 1, hitInfo.stackItemUID, hitInfo.attackerId, false);
+                            __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(new ShowActorInfoSequence(__instance, Strings.T("PILOT INCAPACITATED!"), FloatieMessage.MessageNature.PilotInjury, true)));
+                            __instance.HandleDeath(hitInfo.attackerId);
+                        }
+                        pilot.ClearNeedsInjury();
+                    }
+                    else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "HIGH")
+                    {
+                        var dmg = pilot.TotalHealth - 1;
+                        ModInit.modLog?.Info?.Write($"[Mech_DamageLocation] Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for {dmg} due to injureVehiclePilotOnDestroy = HIGH");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
+                        pilot.InjurePilot(hitInfo.attackerId, hitInfo.stackItemUID, dmg,
+                            DamageType.Combat, weapon, __instance.Combat.FindActorByGUID(hitInfo.attackerId));
+                        if (!pilot.IsIncapacitated)
+                        {
+                            if (__instance.team.LocalPlayerControlsTeam)
+                            {
+                                AudioEventManager.PlayAudioEvent("audioeventdef_musictriggers_combat", "friendly_warrior_injured", null, null);
+                            }
+                            else
+                            {
+                                AudioEventManager.PlayAudioEvent("audioeventdef_musictriggers_combat", "enemy_warrior_injured", null, null);
+                            }
+                            IStackSequence sequence;
+                            if (pilot.Injuries == 0)
+                            {
+                                sequence = new ShowActorInfoSequence(__instance, Strings.T("{0}: INJURY IGNORED", new object[]
+                                {
+                                    pilot.InjuryReasonDescription
+                                }), FloatieMessage.MessageNature.PilotInjury, true);
+                            }
+                            else
+                            {
+                                sequence = new ShowActorInfoSequence(__instance, Strings.T("{0}: PILOT INJURED", new object[]
+                                {
+                                    pilot.InjuryReasonDescription
+                                }), FloatieMessage.MessageNature.PilotInjury, true);
+                                AudioEventManager.SetPilotVOSwitch<AudioSwitch_dialog_dark_light>(AudioSwitch_dialog_dark_light.dark, __instance);
+                                AudioEventManager.PlayPilotVO(VOEvents.Pilot_TakeDamage, __instance, null, null, true);
+                            }
+                            __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(sequence));
+                        }
+                        pilot.ClearNeedsInjury();
+                        if (pilot.IsIncapacitated)
+                        {
+                            __instance.FlagForDeath("Pilot Killed", DeathMethod.PilotKilled, DamageType.Combat, 1, hitInfo.stackItemUID, hitInfo.attackerId, false);
+                            __instance.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(new ShowActorInfoSequence(__instance, Strings.T("PILOT INCAPACITATED!"), FloatieMessage.MessageNature.PilotInjury, true)));
+                            __instance.HandleDeath(hitInfo.attackerId);
+                        }
+                    }
+                    else if (ModInit.modSettings.injureVehiclePilotOnDestroy == "SINGLE")
+                    {
+                        ModInit.modLog?.Info?.Write($"[Mech_DamageLocation] Vehicle location destroyed, Injuring {pilot.Callsign} {pilot.FetchGUID()} for 1 due to injureVehiclePilotOnDestroy = SINGLE");
+                        pilot.SetNeedsInjury(InjuryReason.ActorDestroyed);
+                        __instance.CheckPilotStatusFromAttack(hitInfo.attackerId, hitInfo.attackSequenceId, hitInfo.stackItemUID);
+                    }
+                }
+            }
+        }
+
+
+
 
         // this should hopefully cause vehile injuries and injuries when certain components are damaged/destroyeded. also implements "forced ejections" for pilots.
         [HarmonyPatch(typeof(MechComponent), "DamageComponent",
@@ -442,7 +529,7 @@ namespace TisButAScratch.Patches
                 {
                     __result = true;
                 }
-                if (__instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health || __instance.pilotDef.TimeoutRemaining > 0)
+                if (__instance.pilotDef.PilotTags.Contains(PermanentlyIncapacitated) || __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health || __instance.pilotDef.TimeoutRemaining > 0)
                 {
                     __result = false;
                 }

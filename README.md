@@ -220,56 +220,69 @@ An example `OvercrowdingEffects` follows, which can apply if the player has at l
 ## General Settings:
 
 ```
+
 {
-"enableLogging" : true,
-"enableTrace" : true,
-"enableLethalTorsoHead" : true,
-"debilIncapacitates" : false,
-"BleedingOutLethal" : false,
-"BleedingOutSuffix" : "_bleedout",
-"enableInternalDmgInjuries" : true,
-"pilotPainShunt": "pilot_PainShunt",
-"pilotingReqs": [
-	{
-		"ComponentTag": "PilotNeedsSpecialTag",
-		"PilotTag": "commander_player",
-		"PilotTagDisplay": "Level 5 Fancy Pants"
-	}
-],
+	"enableLogging": true,
+	"enableTrace": true,
+	"enableLethalTorsoHead": true,
+	"debilIncapacitates": false,
+	"BleedingOutLethal": false,
+	"BleedingOutSuffix": "_bleedout",
+	"enableInternalDmgInjuries": true,
+	"pilotPainShunt": "pilot_PainShunt",
+	"pilotingReqs": {
+		"PilotNeedsSpecialTag": {
+			"PilotTag": [
+				"commander_player",
+				"!pilot_criminal"
+			],
+			"PilotTagDisplay": "Pilot must be commander and not criminal"
+		}
+	},
+	"internalDmgStatName": "InjureOnStructDmg",
+	"internalDmgInjuryLimit": 1,
+	"internalDmgLvlReq": 20,
+	"timeHealsAllWounds": true,
+	"missionKillSeverityThreshold": 6,
+	"reInjureWeightAppliesCurrentContract": false,
+	"reInjureLocWeight": 11,
+	"debilSeverityThreshold": 3,
+	"severityCost": 360,
+	"debilitatedCost": 4320,
+	"medtechDebilMultiplier": 0.5,
+	"injuryHealTimeMultiplier": 5.0,
+	"crewOrCockpitCustomID": [
+		"Cockpit",
+		"CrewCompartment",
+		"LifeSupportA",
+		"LifeSupportB",
+		"SensorsA",
+		"SensorsB"
+	],
+	"lifeSupportCustomID": [
+		"LifeSupportA",
+		"LifeSupportB"
+	],
+	"OverheatInjuryStat": "InjureOnOverheat",
+	"isTorsoMountStatName": "isTorsoMount",
+	"lifeSupportSupportsLifeTM": true,
+	"internalDmgInjuryLocs": [
+		"Head",
+		"CenterTorso"
+	],
+	"InjuryEffectsList": [],
+	"InternalDmgInjuries": [],
+	"additiveBleedingFactor": 0.75,
+	"minBloodBank": 2,
+	"baseBloodBankAdd": 0,
+	"UseGutsForBloodBank": true,
+	"factorBloodBankMult": 1,
+	"UseBleedingEffects": true,
+	"BleedingEffects": [],
+	"UseSimBleedingEffects": true,
+	"SimBleedingEffects": []
+}
 
-"internalDmgStatName" : "InjureOnStructDmg",
-"internalDmgInjuryLimit" : 1,
-"internalDmgLvlReq" : 20,
-"timeHealsAllWounds" : true,
-"missionKillSeverityThreshold" : 6,
-"reInjureWeightAppliesCurrentContract" : false,
-"reInjureLocWeight" : 11,
-
-"debilSeverityThreshold" : 3,
-"severityCost" : 360,
-"debilitatedCost" : 4320,
-"medtechDebilMultiplier" : 0.5,
-"injuryHealTimeMultiplier" : 5.0,
-
-"crewOrCockpitCustomID": ["Cockpit", "CrewCompartment", "LifeSupportA", "LifeSupportB", "SensorsA", "SensorsB"],
-"lifeSupportCustomID": ["LifeSupportA", "LifeSupportB"],
-"OverheatInjuryStat": "InjureOnOverheat",
-"isTorsoMountStatName": "isTorsoMount",
-"lifeSupportSupportsLifeTM": true,
-
-"internalDmgInjuryLocs" : ["Head", "CenterTorso"],
-"InjuryEffectsList": [],
-"InternalDmgInjuries": [],
-
-"additiveBleedingFactor": 0.75,
-"minBloodBank": 2,
-"baseBloodBankAdd": 0,
-"UseGutsForBloodBank": true,
-"factorBloodBankMult": 1,
-"UseBleedingEffects": true,
-"BleedingEffects": [],
-"UseSimBleedingEffects": true,
-"SimBleedingEffects": []
 ```
 
 `enableLogging` - bool, enables logging.
@@ -284,11 +297,11 @@ An example `OvercrowdingEffects` follows, which can apply if the player has at l
 
 `pilotPainShunt` - string, pilot tag that denotes pilot has a "Pain Shunt", rendering them immune to injuries from ammo/component explosions, overheating, and neural feedback.
 
-`pilotingReqs` - List of PilotingReqs which contain the following fields:
+`pilotingReqs` - **NOTE: Format has changes as of 1.1.1.0!** Dictionary of PilotingReqs. They Keys to this dictionary correspond to the ComponentTag for which you are setting requirements.:
 
-	`ComponentTag` - the tag on the component
-	`PilotTag` - the tag a pilot must have in order to use a mech/vehicle with the above component mounted
-	`PilotTagDisplay` - Human-legible display name for PilotTag (so players know what the pilot is missing when the popup happens)
+	~~`ComponentTag` - the tag on the component~~
+	`PilotTags` - **field name changes to PilotTags** List of tags comprising piloting requirements. items starting with `!` will be parsed as "not" tag; i.e. if `!pilot_criminal`, pilot must not have `pilot_criminal` tag. If multiple tags set here, all requirements must be met.
+	`PilotTagDisplay` - Human-legible display statement for PilotTag requirement not met message. Hard-coded strings have been removed from the error message, so this should be a statement on its own, e.g. "Pilot must be left-handed and not born on a Tuesday."
 
 `BleedingOutLethal` - bool, determines whether <b>Bleeding Out</b> from an injury is lethal (`true`) or merely incapacitates (`false`)
 

@@ -29,7 +29,7 @@ namespace TisButAScratch.Framework
         internal const string injuryStateTag = "injuryState_";
         internal const string DEBILITATEDTAG = "DEBILITATED";
         internal const string MissionKilledStat = "MissionKilled";
-
+        public const string PermanentlyIncapacitated = "PermanentlyIncapacitated";
 
         internal static Injury DEBIL = new Injury
         {
