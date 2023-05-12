@@ -61,7 +61,9 @@ namespace TisButAScratch.Patches
                     {
                         values += $"\n{tag}";
                     }
-                    ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] Equality check failure for {__instance.Description.Id}, Tagset changed since init. Dumping stack trace and tagset: {Environment.StackTrace} TagSet Values: {values}");
+                    ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] Equality check failure for {__instance.Description.Id}, Tagset changed since last check. Dumping stack trace and tagset: {Environment.StackTrace} TagSet Values: {values}");
+                    Utility.CachedTagSets[__instance.Description.Id] = __result;
+                    ModInit.modLog?.Info?.Write($"[UtilityPatches_MechTag] updated cached values with above");
                 }
             }
         }
