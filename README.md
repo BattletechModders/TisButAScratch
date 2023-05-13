@@ -85,7 +85,7 @@ Gear that sets `NullifiesInjuryEffects` to True will prevent injuries from causi
 Pilots with a specific tag will ignore injuries from overheating, component/ammo explosions, or neural feedback from DNI/EI cockpits.
 
 ### <b>Piloting Requirements</b>:
-Units with certain component tags can require pilots have certain pilot tags in order to pilot those units. Intended to prevent just any old grunt from using a DNI/EI cockpit (pilot would need the "implant" tag), but could also be used to require "ECM Training" for a pilot to use a mech with advanced ECM gear, etc.
+Units with certain component tags can require pilots have certain pilot tags in order to pilot those units, or prevent pilots with certain tags from piloting them. Intended to prevent just any old grunt from using a DNI/EI cockpit (pilot would need the "implant" tag), but could also be used to require "ECM Training" for a pilot to use a mech with advanced ECM gear, etc.
 
 ### <b>Increased Injury Heal Time</b>:
 Injuries take longer to heal, defined in the settings below.
