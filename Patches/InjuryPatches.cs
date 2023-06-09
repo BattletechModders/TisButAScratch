@@ -103,11 +103,13 @@ namespace TisButAScratch.Patches
             public static void Prefix(Mech __instance, int originalHitLoc, WeaponHitInfo hitInfo, ArmorLocation aLoc, Weapon weapon, float totalArmorDamage, float directStructureDamage, int hitIndex, AttackImpactQuality impactQuality, DamageType damageType)
             {
                 if (!__instance.UnitIsCustomUnitVehicle()) return;
-                var currentStructure = __instance.GetCurrentStructure(MechStructureRules.GetChassisLocationFromArmorLocation(aLoc));
+                var cLoc = MechStructureRules.GetChassisLocationFromArmorLocation(aLoc);
+                if (cLoc == ChassisLocations.None || cLoc == ChassisLocations.Arms || cLoc == ChassisLocations.MainBody) return;
+                var structureStat = __instance.GetStringForStructureLocation(cLoc);
+                if (structureStat == null) return;
+                var currentStructure = __instance.GetCurrentStructure(cLoc);
                 if (currentStructure <= 0f) return;
-
                 var incomingStructureDamage = directStructureDamage + totalArmorDamage - __instance.GetCurrentArmor(aLoc);
-
                 if (currentStructure - incomingStructureDamage <= 0f)
                 {
                     ModInit.modLog?.Info?.Write($"[Mech_DamageLocation] Vehicle location will be destroyed; currentStructure at location {currentStructure}, will take {incomingStructureDamage} damage");
