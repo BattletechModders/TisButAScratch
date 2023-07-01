@@ -44,10 +44,15 @@ namespace TisButAScratch.Framework
                     }
                 }
 
-
-                if (pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
+                foreach (var tag in pilot.pilotDef.PilotTags)
                 {
-                    rtrn += DEBIL.description + "\n";
+                    if (tag.StartsWith(DebilitatedPrefix))
+                    {
+                        if (DebilitatingInjuryDescriptions.TryGetValue(tag, out var tagDesc))
+                        {
+                            rtrn += tagDesc + "\n";
+                        }
+                    }
                 }
             }
 
@@ -112,10 +117,15 @@ namespace TisButAScratch.Framework
                     }
                 }
 
-
-                if (pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG))
+                foreach (var tag in pilot.pilotDef.PilotTags)
                 {
-                    rtrn += DEBIL.description + "\n\n";
+                    if (tag.StartsWith(DebilitatedPrefix))
+                    {
+                        if (DebilitatingInjuryDescriptions.TryGetValue(tag, out var tagDesc))
+                        {
+                            rtrn += tagDesc + "\n";
+                        }
+                    }
                 }
             }
 

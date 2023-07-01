@@ -382,7 +382,7 @@ namespace TisButAScratch.Patches
 
                                         if (t > ModInit.modSettings.debilSeverityThreshold)
                                         {
-                                            p.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                            p.pilotDef.PilotTags.Add($"{DebilitatedPrefix}_{injuryLoc.Key}");
                                             if (ModInit.modSettings.enableLethalTorsoHead &&
                                                 (injuryLoc.Key == InjuryLoc.Head ||
                                                  injuryLoc.Key == InjuryLoc.Torso))
@@ -454,7 +454,7 @@ namespace TisButAScratch.Patches
 
                                         if (t >= ModInit.modSettings.debilSeverityThreshold)
                                         {
-                                            commander.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                            commander.pilotDef.PilotTags.Add($"{DebilitatedPrefix}_{injuryLoc.Key}");
                                             if (ModInit.modSettings.enableLethalTorsoHead &&
                                                 (injuryLoc.Key == InjuryLoc.Head ||
                                                  injuryLoc.Key == InjuryLoc.Torso))

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Security.Cryptography.X509Certificates;
 using BattleTech;
 using TisButAScratch.Framework;
 using static TisButAScratch.Framework.GlobalVars;
@@ -498,11 +499,11 @@ namespace TisButAScratch.Patches
 
                             if (t >= ModInit.modSettings.debilSeverityThreshold)
                             {
-                                __instance.pilotDef.PilotTags.Add(DEBILITATEDTAG);
+                                __instance.pilotDef.PilotTags.Add(DebilitatedPrefix);
+                                __instance.pilotDef.PilotTags.Add($"{DebilitatedPrefix}_{injuryLoc.Key}");
                                 ModInit.modLog?.Info?.Write($"{__instance.Callsign}_{pKey} has been debilitated!");
-
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
-                                    injuryLoc.Key == InjuryLoc.Torso))
+                                        injuryLoc.Key == InjuryLoc.Torso))
                                 {
                                     __instance.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "LethalInjury",
                                         StatCollection.StatOperation.Set, true);
@@ -531,7 +532,7 @@ namespace TisButAScratch.Patches
                 {
                     __result = true;
                 }
-                if (__instance.pilotDef.PilotTags.Contains(PermanentlyIncapacitated) || __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || __instance.Injuries >= __instance.Health || __instance.pilotDef.TimeoutRemaining > 0)
+                if (__instance.pilotDef.PilotTags.Contains(PermanentlyIncapacitated) || __instance.pilotDef.PilotTags.Any(x=>x.StartsWith(DebilitatedPrefix)) || __instance.Injuries >= __instance.Health || __instance.pilotDef.TimeoutRemaining > 0)
                 {
                     __result = false;
                 }
@@ -546,7 +547,7 @@ namespace TisButAScratch.Patches
             [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || 
+                if (ModInit.modSettings.debilIncapacitates && __instance.pilotDef.PilotTags.Any(x => x.StartsWith(DebilitatedPrefix)) || 
                     __instance.StatCollection.GetValue<bool>("BledOut") ||
                     (ModInit.modSettings.enableConsciousness &&__instance.StatCollection.GetValue<int>(MissionKilledStat) >= __instance.StatCollection.GetValue<int>("MissionKilledThreshold") && __instance.StatCollection.GetValue<int>("MissionKilledThreshold") > 0))
                 {
@@ -588,7 +589,7 @@ namespace TisButAScratch.Patches
 
                     else if (((ModInit.modSettings.enableConsciousness && unitResult.pilot.StatCollection.GetValue<int>(MissionKilledStat) >=
                               pilot.StatCollection.GetValue<int>("MissionKilledThreshold")) ||
-                              unitResult.pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG)) &&
+                              unitResult.pilot.pilotDef.PilotTags.Any(x => x.StartsWith(DebilitatedPrefix))) &&
                              (unitResult.pilot.Injuries < unitResult.pilot.Health && !unitResult.pilot.LethalInjuries) || (unitResult.pilot.StatCollection.GetValue<bool>("BledOut") && !ModInit.modSettings.BleedingOutLethal))
 
                     {
@@ -675,9 +676,16 @@ namespace TisButAScratch.Patches
 
                 var sev = Math.Max((injuryList.Sum(x => x.severity) - 1), 0);
                 var crippled = 0f;
-                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && ModInit.modSettings.timeHealsAllWounds)
+
+                if (ModInit.modSettings.timeHealsAllWounds)
                 {
-                    crippled = (float) (ModInit.modSettings.debilitatedCost / (ModInit.modSettings.medtechDebilMultiplier * __instance.MedTechSkill));
+                    foreach (var tag in p.pilotDef.PilotTags)
+                    {
+                        if (tag.StartsWith(DebilitatedPrefix))
+                        {
+                            crippled += (float)(ModInit.modSettings.debilitatedCost / (ModInit.modSettings.medtechDebilMultiplier * __instance.MedTechSkill));
+                        }
+                    }
                 }
 
                 __result = Mathf.RoundToInt((__result * ModInit.modSettings.injuryHealTimeMultiplier) + (sev * ModInit.modSettings.severityCost) + crippled);
@@ -694,7 +702,7 @@ namespace TisButAScratch.Patches
                 PilotInjuryHolder.HolderInstance.pilotInjuriesMap[pKey] = new List<string>();
                 if (ModInit.modSettings.timeHealsAllWounds)
                 {
-                    __instance.pilotDef.PilotTags.Remove(DEBILITATEDTAG);
+                    __instance.pilotDef.PilotTags.RemoveRange(GlobalVars.DebilLocationList);
                 }
                 ModInit.modLog?.Info?.Write($"{__instance.Callsign} has been healed!!");
             }

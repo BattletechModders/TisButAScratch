@@ -16,36 +16,63 @@ namespace TisButAScratch.Framework
                 var currentRoll = UnityEngine.Random.Range(1, sides + 1);
                 sum += currentRoll;
             }
+
             return sum > success;
         }
 
         public static Regex TBAS_SimBleedStatMod =
-            new Regex("^TBAS_SimBleed__(?<type>.*?)__(?<value>.*?)$",//    __(?<operation>.*?)$",
+            new Regex("^TBAS_SimBleed__(?<type>.*?)__(?<value>.*?)$", //    __(?<operation>.*?)$",
                 RegexOptions.Compiled); //shamelessly stolen from BlueWinds
 
         public static SimGameState sim;
         public const string aiPilotFlag = "AI_TEMP_";
         public const string iGUID = "iGUID_";
+
         public const string injuryStateTag = "injuryState_";
-        public const string DEBILITATEDTAG = "DEBILITATED";
+
+        //public const string DEBILITATEDTAG = "DEBILITATED";
         public const string MissionKilledStat = "MissionKilled";
         public const string PermanentlyIncapacitated = "PermanentlyIncapacitated";
-
-        public static Injury DEBIL = new Injury
+        public const string DebilitatedPrefix = "DEBILITATED";
+        public const string DebilitatedHead = "DEBILITATED_Head";
+        public const string DebilitatedArmL = "DEBILITATED_ArmL";
+        public const string DebilitatedTorso = "DEBILITATED_Torso";
+        public const string DebilitatedArmR = "DEBILITATED_ArmR";
+        public const string DebilitatedLegL = "DEBILITATED_LegL";
+        public const string DebilitatedLegR = "DEBILITATED_LegR";
+        public static List<string> DebilLocationList = new List<string>()
         {
-            injuryID = "DEBILITATED",
-            injuryName = "DEBILITATED",
-            injuryLoc = InjuryLoc.NOT_SET,
-            couldBeThermal = false,
-            description = "Whether due to amputation or extensive tissue damage, this pilot is debilitated and is unable to deploy without rehabilitation.",
-            severity = 100,
-            effects = new List<EffectData>(),
-            effectDataJO = new List<JObject>()
+            "DEBILITATED_Head", "DEBILITATED_ArmL", "DEBILITATED_Torso", "DEBILITATED_ArmR", "DEBILITATED_LegL",
+            "DEBILITATED_LegR"
         };
-
-        [JsonIgnore]
-        public List<EffectData> effects = new List<EffectData>();
-        public List<JObject> effectDataJO = new List<JObject>();
+   
+        public static Dictionary<string, string> DebilitatingInjuryDescriptions = new Dictionary<string, string>()
+        {
+            {
+                "DEBILITATED_Head",
+                "This pilot has suffered extensive damage to their head, and is unable to deploy without rehabilitation."
+            },
+            {
+                "DEBILITATED_ArmL",
+                "This pilot has suffered extensive damage to their left arm, and is unable to deploy without rehabilitation."
+            },
+            {
+                "DEBILITATED_Torso",
+                "This pilot has suffered extensive damage to their torso, and is unable to deploy without rehabilitation."
+            },
+            {
+                "DEBILITATED_ArmR",
+                "This pilot has suffered extensive damage to their right arm, and is unable to deploy without rehabilitation."
+            },
+            {
+                "DEBILITATED_LegL",
+                "This pilot has suffered extensive damage to their left leg, and is unable to deploy without rehabilitation."
+            },
+            {
+                "DEBILITATED_LegR",
+                "This pilot has suffered extensive damage to their right leg, and is unable to deploy without rehabilitation."
+            },
+        };
 
 
         public enum InjuryLoc

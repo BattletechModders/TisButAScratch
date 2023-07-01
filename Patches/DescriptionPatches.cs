@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using static TisButAScratch.Framework.GlobalVars;
 using BattleTech;
 using BattleTech.UI;
@@ -53,11 +54,11 @@ namespace TisButAScratch.Patches
                     }
                 }
  
-                if (__instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
+                if (__instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(false) == null && !__instance.Pilot.pilotDef.PilotTags.Any(x=>x.StartsWith(DebilitatedPrefix)) && !displayAnyway) return;
 
                 var tooltip = __instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(false);
 
-                if (tooltip == null && (__instance.Pilot.pilotDef.PilotTags.Contains(DEBILITATEDTAG) || displayAnyway))
+                if (tooltip == null && (__instance.Pilot.pilotDef.PilotTags.Any(x => x.StartsWith(DebilitatedPrefix)) || displayAnyway))
                 {
                     __instance.incapacitatedObj.gameObject.SetActive(true);
                     tooltip = __instance.incapacitatedObj.GetComponentInChildren<HBSTooltip>(true);
@@ -99,13 +100,13 @@ namespace TisButAScratch.Patches
                 }
 
                 if (__instance.injureBackground.GetComponentInChildren<HBSTooltip>(false) == null &&
-                    !p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !displayAnyway) return;
+                    !p.pilotDef.PilotTags.Any(x => x.StartsWith(DebilitatedPrefix)) && !displayAnyway) return;
                 if (displayAnyway && !__instance.injureBackground.activeSelf)
                 {
                     __instance.injureBackground.SetActive(true);
                 }
 
-                if (p.pilotDef.PilotTags.Contains(DEBILITATEDTAG) && !__instance.injureBackground.activeSelf)
+                if (p.pilotDef.PilotTags.Any(x => x.StartsWith(DebilitatedPrefix)) && !__instance.injureBackground.activeSelf)
                 {
                     __instance.timeoutBackground.SetActive(true);
 
