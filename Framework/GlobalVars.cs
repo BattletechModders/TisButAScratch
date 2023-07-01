@@ -33,6 +33,7 @@ namespace TisButAScratch.Framework
         //public const string DEBILITATEDTAG = "DEBILITATED";
         public const string MissionKilledStat = "MissionKilled";
         public const string PermanentlyIncapacitated = "PermanentlyIncapacitated";
+        public const string DisableDebilEventsTag = "disable_debilHeal";
         public const string DebilitatedPrefix = "DEBILITATED";
         public const string DebilitatedHead = "DEBILITATED_Head";
         public const string DebilitatedArmL = "DEBILITATED_ArmL";
