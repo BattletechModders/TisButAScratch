@@ -18,7 +18,7 @@ namespace TisButAScratch.Framework
 {
     public static class PilotExtensions
     {
-        internal static bool TagReqsAreMet(this Pilot pilot, IMechLabDraggableItem item, LanceLoadoutSlot slot)
+        public static bool TagReqsAreMet(this Pilot pilot, IMechLabDraggableItem item, LanceLoadoutSlot slot)
         {
             if (item.ItemType == MechLabDraggableItemType.Mech)
             {
@@ -95,7 +95,7 @@ namespace TisButAScratch.Framework
             return true;
         }
 
-        internal static string FetchGUID(this Pilot pilot)
+        public static string FetchGUID(this Pilot pilot)
         {
             var guid = pilot.pilotDef.PilotTags.FirstOrDefault(x => x.StartsWith(iGUID));
             if (string.IsNullOrEmpty(guid))
@@ -113,7 +113,7 @@ namespace TisButAScratch.Framework
             return guid;
         }
 
-        internal static float CalcBloodBank(this Pilot pilot)
+        public static float CalcBloodBank(this Pilot pilot)
         {
             var factor = pilot.Health;
             if (ModInit.modSettings.UseGutsForBloodBank)
@@ -123,37 +123,37 @@ namespace TisButAScratch.Framework
             return Math.Max(ModInit.modSettings.minBloodBank, (factor * ModInit.modSettings.factorBloodBankMult) +
                                                                                ModInit.modSettings.baseBloodBankAdd);
         }
-        internal static float GetBloodCapacity(this Pilot pilot)
+        public static float GetBloodCapacity(this Pilot pilot)
         {
             return pilot.StatCollection.GetValue<float>("BloodCapacity");
         }
 
-        internal static float GetBloodBank(this Pilot pilot)
+        public static float GetBloodBank(this Pilot pilot)
         {
             return pilot.StatCollection.GetValue<float>("BloodBank");
         }
 
-        internal static void SetBloodBank(this Pilot pilot, float bank)
+        public static void SetBloodBank(this Pilot pilot, float bank)
         {
             pilot.StatCollection.Set<float>("BloodBank", bank);
         }
 
-        internal static float GetBleedingRate(this Pilot pilot)
+        public static float GetBleedingRate(this Pilot pilot)
         {
             return pilot.StatCollection.GetValue<float>("BleedingRate");
         }
 
-        internal static void SetBleedingRate(this Pilot pilot, float rate)
+        public static void SetBleedingRate(this Pilot pilot, float rate)
         {
             pilot.StatCollection.Set<float>("BleedingRate", rate);
         }
 
-        internal static float GetBleedingRateMulti(this Pilot pilot)
+        public static float GetBleedingRateMulti(this Pilot pilot)
         {
             return pilot.StatCollection.GetValue<float>("BleedingRateMulti");
         }
 
-        internal static void ApplyClosestSimGameResult(this Pilot pilot)
+        public static void ApplyClosestSimGameResult(this Pilot pilot)
         {
             if (ModInit.modSettings.SimBleedingEffects.Count == 0 || !ModInit.modSettings.UseSimBleedingEffects) return;
             var pKey = pilot.FetchGUID();
@@ -192,7 +192,7 @@ namespace TisButAScratch.Framework
             }
         }
 
-        internal static void ApplyClosestBleedingEffect(this Pilot pilot)
+        public static void ApplyClosestBleedingEffect(this Pilot pilot)
         {
             if (ModInit.modSettings.BleedingEffects.Count == 0 || !ModInit.modSettings.UseBleedingEffects) return;
             var bloodLevelDecimal = pilot.GetBloodBank() / pilot.GetBloodCapacity();
@@ -254,7 +254,7 @@ namespace TisButAScratch.Framework
 
     public class PilotInjuryManager
     {
-        private static PilotInjuryManager _instance;
+        public static PilotInjuryManager _instance;
         public List<OvercrowdedEffect> OvercrowdedEffectsList;
         public List<Injury> InjuryEffectsList;
         public List<Injury> InternalDmgInjuries;
@@ -271,7 +271,7 @@ namespace TisButAScratch.Framework
             }
         }
 
-        internal SimGameEventResult processSimBleedingSettings(JObject jObject)
+        public SimGameEventResult processSimBleedingSettings(JObject jObject)
         {
             var simResult = new SimGameEventResult();
 
@@ -291,7 +291,7 @@ namespace TisButAScratch.Framework
             return simResult;
         }
 
-        internal void Initialize()
+        public void Initialize()
         {
             OvercrowdedEffectsList = new List<OvercrowdedEffect>();
             ModInit.modLog.Info?.Write($"[InitializeEffects] Initializing effects for Overcrowding");
@@ -378,7 +378,7 @@ namespace TisButAScratch.Framework
                 }
             }
         }
-        internal static void PreloadIcons()
+        public static void PreloadIcons()
         {
             var dm = UnityGameInstance.BattleTechGame.DataManager;
             var loadRequest = dm.CreateLoadRequest();
@@ -412,7 +412,7 @@ namespace TisButAScratch.Framework
             loadRequest.ProcessRequests();
         }
 
-        internal void GatherAndApplyInjuries(AbstractActor actor)
+        public void GatherAndApplyInjuries(AbstractActor actor)
         {
             var p = actor.GetPilot();
             var pKey = p.FetchGUID();
@@ -458,7 +458,7 @@ namespace TisButAScratch.Framework
             }
         }
 
-        private void applyInjuryEffects(AbstractActor actor, Injury injury)
+        public void applyInjuryEffects(AbstractActor actor, Injury injury)
         {
             var p = actor.GetPilot();
             if (injury.InjuryTags.Count > 0)
@@ -532,7 +532,7 @@ namespace TisButAScratch.Framework
         }
 
 
-        internal void rollInjury(Pilot pilot, int dmg, DamageType damageType, InjuryReason reason) //to be postfix patched into InjurePilot
+        public void rollInjury(Pilot pilot, int dmg, DamageType damageType, InjuryReason reason) //to be postfix patched into InjurePilot
         {
             InjuryLoc loc;
             var pKey = pilot.FetchGUID();
@@ -744,7 +744,7 @@ namespace TisButAScratch.Framework
             }
         }
 
-        internal void rollInjuryFeedback(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
+        public void rollInjuryFeedback(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
             var pKey = pilot.FetchGUID();
 
@@ -799,7 +799,7 @@ namespace TisButAScratch.Framework
             }
         }
 
-        internal void rollInjurySG(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
+        public void rollInjurySG(Pilot pilot, int dmg, DamageType damageType) //to be postfix patched into InjurePilot
         {
             var pKey = pilot.FetchGUID();
 

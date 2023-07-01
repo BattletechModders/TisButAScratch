@@ -19,19 +19,19 @@ namespace TisButAScratch.Framework
             return sum > success;
         }
 
-        internal static Regex TBAS_SimBleedStatMod =
+        public static Regex TBAS_SimBleedStatMod =
             new Regex("^TBAS_SimBleed__(?<type>.*?)__(?<value>.*?)$",//    __(?<operation>.*?)$",
                 RegexOptions.Compiled); //shamelessly stolen from BlueWinds
 
-        internal static SimGameState sim;
-        internal const string aiPilotFlag = "AI_TEMP_";
-        internal const string iGUID = "iGUID_";
-        internal const string injuryStateTag = "injuryState_";
-        internal const string DEBILITATEDTAG = "DEBILITATED";
-        internal const string MissionKilledStat = "MissionKilled";
+        public static SimGameState sim;
+        public const string aiPilotFlag = "AI_TEMP_";
+        public const string iGUID = "iGUID_";
+        public const string injuryStateTag = "injuryState_";
+        public const string DEBILITATEDTAG = "DEBILITATED";
+        public const string MissionKilledStat = "MissionKilled";
         public const string PermanentlyIncapacitated = "PermanentlyIncapacitated";
 
-        internal static Injury DEBIL = new Injury
+        public static Injury DEBIL = new Injury
         {
             injuryID = "DEBILITATED",
             injuryName = "DEBILITATED",

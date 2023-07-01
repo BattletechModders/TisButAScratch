@@ -11,11 +11,11 @@ namespace TisButAScratch
 {
     public static class ModInit
     {
-        internal static DeferringLogger modLog;
-        private static string modDir;
+        public static DeferringLogger modLog;
+        public static string modDir;
 
 
-        internal static Settings modSettings;
+        public static Settings modSettings;
         public const string HarmonyPackage = "us.tbone.TisButAScratch";
         public static void Init(string directory, string settingsJSON)
         {
@@ -50,7 +50,7 @@ namespace TisButAScratch
         }
     }
 
-    class Settings
+    public class Settings
     {
         public bool enableLogging = false;
         public bool enableTrace = false;

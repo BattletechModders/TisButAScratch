@@ -6,7 +6,7 @@ namespace TisButAScratch.Framework
 {
     public static class InjuryDescriptions
     {
-        internal static string getPilotInjuryDescCompact(Pilot pilot)
+        public static string getPilotInjuryDescCompact(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
             if (string.IsNullOrEmpty(pilotID)) return null;
@@ -74,7 +74,7 @@ namespace TisButAScratch.Framework
 
             return rtrn;
         }
-        internal static string getPilotInjuryDesc(Pilot pilot)
+        public static string getPilotInjuryDesc(Pilot pilot)
         {
             var pilotID = pilot.FetchGUID();
             if (string.IsNullOrEmpty(pilotID)) return null;
@@ -142,6 +142,5 @@ namespace TisButAScratch.Framework
 
             return rtrn;
         }
-
     }
 }

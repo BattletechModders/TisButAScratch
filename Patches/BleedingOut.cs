@@ -188,7 +188,7 @@ namespace TisButAScratch.Patches
             }
         }
 
-        private static CombatHUDStatusPanel theInstance;
+        public static CombatHUDStatusPanel theInstance;
 
         [HarmonyPatch(typeof(CombatHUDStatusPanel), "ShowEffectStatuses")]
         public static class CombatHUDStatusPanel_ShowEffectStatuses

@@ -559,9 +559,9 @@ namespace TisButAScratch.Patches
        
         public class ContractFinalizeKilledMechwarriorsPatch
         {
-            //private static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
-            //private static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
-            //private static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
+            //public static MethodInfo pushReport = AccessTools.Method(typeof(Contract), "PushReport");
+            //public static MethodInfo popReport = AccessTools.Method(typeof(Contract), "PopReport");
+            //public static MethodInfo reportLog = AccessTools.Method(typeof(Contract), "ReportLog");
             [HarmonyAfter(new string[] { "co.uk.cwolf.MissionControl" })]
             public static void Prefix(ref bool __runOriginal, Contract __instance)
             {

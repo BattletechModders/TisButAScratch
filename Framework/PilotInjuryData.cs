@@ -64,7 +64,7 @@ namespace TisButAScratch.Framework
     
     public class PilotInjuryHolder
     {
-        private static PilotInjuryHolder _instance;
+        public static PilotInjuryHolder _instance;
         public Dictionary<string, List<string>> pilotInjuriesMap;
         public Dictionary<string, List<string>> combatInjuriesMap; //added for temprary injury storage to allow clean combat restarts
         public Dictionary<string, float> bloodStatForSimGame; //added for temprary injury storage to allow clean combat restarts
@@ -79,16 +79,16 @@ namespace TisButAScratch.Framework
             }
         }
 
-        internal void Initialize()
+        public void Initialize()
         {
             pilotInjuriesMap = new Dictionary<string, List<string>>();
             combatInjuriesMap = new Dictionary<string, List<string>>();
             bloodStatForSimGame = new Dictionary<string, float>();
         }
 
-        
+
         //serialize injurymap (dictionary) to tag and save to company
-        internal void SerializeInjuryState()
+        public void SerializeInjuryState()
         {
             var injuryState = sim.CompanyTags.FirstOrDefault(( x) => x.StartsWith(injuryStateTag));
             sim.CompanyTags.Remove(injuryState);
@@ -98,7 +98,7 @@ namespace TisButAScratch.Framework
         }
 
         //deserialize injurymap (dictionary) from tag and save to PilotInjuryHolder.Instance
-        internal void DeserializeInjuryState()
+        public void DeserializeInjuryState()
         {
             if (sim.CompanyTags.Any(x => x.StartsWith(injuryStateTag)))
             {
