@@ -555,12 +555,22 @@ namespace TisButAScratch.Patches
                 p.StatCollection.AddStatistic<int>("MissionKilledThreshold", ModInit.modSettings.missionKillSeverityThreshold);
                 p.StatCollection.AddStatistic<float>("BleedingRate", 0f);
                 p.StatCollection.AddStatistic<float>("BleedingRateMulti", 1f);
-                p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
+                //p.StatCollection.AddStatistic<List<string>>("LastInjuryId", new List<string>());
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.internalDmgStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.isTorsoMountStatName, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.OverheatInjuryStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.DisableBleedingStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat, false);
+            }
+        }
+
+        [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
+        public static class CombatGameState_OnCombatGameDestroyed
+        {
+            // Token: 0x0600003C RID: 60 RVA: 0x00004E84 File Offset: 0x00003084
+            public static void Postfix(CombatGameState __instance)
+            {
+                ModState.ResetStateAfterContract();
             }
         }
 

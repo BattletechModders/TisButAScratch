@@ -591,18 +591,23 @@ namespace TisButAScratch.Framework
 
                     else
                     {
-                        foreach (var inj in curInjuryList.Where(x => pilot != null && !pilot.StatCollection.GetValue<List<string>>("LastInjuryId").Contains(x.injuryID)))
+                        if (ModState.LastInjuryIDs.TryGetValue(pilot.FetchGUID(), out var lastInjuriesList))
                         {
-                            for (int t = 0; t < ModInit.modSettings.reInjureLocWeight; t++)
+                            foreach (var inj in curInjuryList.Where(x => !lastInjuriesList.Contains(x.injuryID)))
                             {
-                                injuryLocs.Add((int)inj.injuryLoc);
+                                for (int t = 0; t < ModInit.modSettings.reInjureLocWeight; t++)
+                                {
+                                    injuryLocs.Add((int) inj.injuryLoc);
+                                }
+
+                                ModInit.modLog?.Info?.Write(
+                                    $"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
                             }
-                            ModInit.modLog?.Info?.Write($"{inj.injuryLoc.ToString()} has weight of {ModInit.modSettings.reInjureLocWeight}");
                         }
+                        else ModState.LastInjuryIDs.Add(pilot.FetchGUID(), new List<string>());
                     }
                     ModInit.modLog?.Info?.Write($"Final list of injury location indices: {string.Join(",", injuryLocs)}");
                 }
-
 
                 var injuryList = new List<Injury>(ManagerInstance.InjuryEffectsList);
 
@@ -649,14 +654,21 @@ namespace TisButAScratch.Framework
                 ModInit.modLog?.Info?.Write(
                     $"Adding {chosen.injuryName} to {pilot?.Callsign}'s combat injury map. PilotID: {pKey}");
 
-                var newList = pilot?.StatCollection.GetValue<List<string>>("LastInjuryId");
-                newList?.Add(chosen.injuryID);
 
-                pilot?.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",
-                    StatCollection.StatOperation.Set, newList);
+                if (ModState.LastInjuryIDs.ContainsKey(pilot.FetchGUID()))
+                {
+                    ModState.LastInjuryIDs[pilot.FetchGUID()].Add(chosen.injuryID);
+                }
+                else
+                {
+                    ModState.LastInjuryIDs.Add(pilot.FetchGUID(), new List<string>(){chosen.injuryID});
+                }
+                //var newList = pilot?.StatCollection.GetValue<List<string>>("LastInjuryId");
+                //newList?.Add(chosen.injuryID);
+                //pilot?.StatCollection.ModifyStat<List<string>>("TBAS_Injuries", 0, "LastInjuryId",StatCollection.StatOperation.Set, newList);
 
                 ModInit.modLog?.Info?.Write(
-                    $"Setting {chosen.injuryName} to {pilot?.Callsign}'s LastInjuryId stat. PilotID: {pKey}");
+                    $"added {chosen.injuryName} to {pilot?.Callsign}'s LastInjuryId in modstate. PilotID: {pKey}");
 
                 pilot?.StatCollection.ModifyStat<int>("TBAS_Injuries", 0, MissionKilledStat,
                     StatCollection.StatOperation.Int_Add, chosen.severity);
