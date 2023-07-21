@@ -389,7 +389,7 @@ Example stat effect added to DNI cockpit given below:
 
 `debilitatedCost` - int, increases healing time required as a factor of pilot having `DEBILITATED` tag
 
-`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `crippledCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier = 0.5`, injury healing cost would be `2000/ (10 * .5)`
+`medtechDebilMultiplier` - float, multiplier for medtech skill divisor of `debilitatedCost`. E.g. for `debiledCost = 2000`,  `MedTechSkill = 10`, and `medtechDebilMultiplier = 0.5`, injury healing cost would be `2000/ (10 * .5)`
 
 `injuryHealTimeMultiplier` - float, multiplier for vanilla healing time (`severityCost` and `debiledCost` are added after this multiplier)
 
