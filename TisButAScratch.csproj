@@ -34,8 +34,8 @@
   <PropertyGroup>
     <!-- avoids IgnoresAccessChecksToAttribute warnings -->
     <PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
-    <AssemblyVersion>1.1.2.2</AssemblyVersion>
-    <FileVersion>1.1.2.2</FileVersion>
+    <AssemblyVersion>1.1.2.3</AssemblyVersion>
+    <FileVersion>1.1.2.3</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer" Version="2.2.1" />

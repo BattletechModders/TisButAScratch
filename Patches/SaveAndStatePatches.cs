@@ -180,7 +180,7 @@ namespace TisButAScratch.Patches
                     //sim.Commander.pilotDef.PilotTags.Add($"{iGUID}{sim.Commander.Description.Id}{sim.GenerateSimGameUID()}");
                     sim.Commander.pilotDef.PilotTags.Add($"{iGUID}{sim.Commander.Description.Id}{Guid.NewGuid()}");
                 }
-
+                sim.Commander.pilotDef.PilotTags.Remove(GlobalVars.DebilitatedPrefix); // nuke old DEBILITATED only tag
                 var pKey = sim.Commander.FetchGUID();
 
                 ModInit.modLog?.Info?.Write($"Fetched Commander iGUID {pKey}");
@@ -225,7 +225,7 @@ namespace TisButAScratch.Patches
 
                 foreach (Pilot p in sim.PilotRoster)
                 {
-
+                    p.pilotDef.PilotTags.Remove(GlobalVars.DebilitatedPrefix); // nuke old DEBILITATED only tag
                     if (!p.pilotDef.PilotTags.Any(x => x.StartsWith(iGUID)))
                     {
                         //p.pilotDef.PilotTags.Add($"{iGUID}{p.Description.Id}{sim.GenerateSimGameUID()}");
