@@ -41,6 +41,7 @@ namespace TisButAScratch.Framework
         public const string DebilitatedArmR = "DEBILITATED_ArmR";
         public const string DebilitatedLegL = "DEBILITATED_LegL";
         public const string DebilitatedLegR = "DEBILITATED_LegR";
+        public const string DebilitatedStat = "IsDebilitated";
         public static List<string> DebilLocationList = new List<string>()
         {
             "DEBILITATED_Head", "DEBILITATED_ArmL", "DEBILITATED_Torso", "DEBILITATED_ArmR", "DEBILITATED_LegL",
