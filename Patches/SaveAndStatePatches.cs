@@ -561,6 +561,24 @@ namespace TisButAScratch.Patches
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.OverheatInjuryStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.DisableBleedingStat, false);
                 __instance.StatCollection.AddStatistic<bool>(ModInit.modSettings.NullifiesInjuryEffectsStat, false);
+                __instance.StatCollection.AddStatistic<bool>(DebilitatedStat, false);
+                
+                // these values mirror stat collections but are faster to access for performance critical sections
+                __instance.IsDebilitated = false;
+                __instance.HasBledOut = false;
+                __instance.MissionStatSeverity = 0;
+            }
+        }
+        
+        [HarmonyPatch(typeof(AbstractActor), "Hydrate")]
+        public static class AbstractActor_Hydrate_Patch
+        {
+            public static void Postfix(AbstractActor __instance)
+            {
+                var p = __instance.GetPilot();
+                __instance.IsDebilitated = __instance.StatCollection.GetValue<bool>(DebilitatedStat);
+                __instance.HasBledOut = p.StatCollection.GetValue<bool>("BledOut");
+                __instance.MissionStatSeverity = p.StatCollection.GetValue<int>(MissionKilledStat);
             }
         }
 
