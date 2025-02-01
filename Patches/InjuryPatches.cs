@@ -503,7 +503,8 @@ namespace TisButAScratch.Patches
                                 __instance.pilotDef.PilotTags.Add($"{DebilitatedPrefix}_{injuryLoc.Key}");
                                 if (__instance.ParentActor != null)
                                 {
-                                    __instance.ParentActor.StatCollection.Set<bool>(GlobalVars.DebilitatedStat, true);
+                                    __instance.ParentActor.StatCollection.Set<bool>(DebilitatedStat, true);
+                                    __instance.ParentActor.IsDebilitated = true;
                                 }
                                 ModInit.modLog?.Info?.Write($"{__instance.Callsign}_{pKey} has been debilitated!");
                                 if (ModInit.modSettings.enableLethalTorsoHead && (injuryLoc.Key == InjuryLoc.Head ||
@@ -542,15 +543,6 @@ namespace TisButAScratch.Patches
                 }
             }
         }
-        
-        [HarmonyPatch(typeof(AbstractActor), "InitEffectStats")]
-        class AbstractActor_InitEffectStats
-        {
-            static void Postfix(AbstractActor __instance)
-            {
-                __instance.StatCollection.AddStatistic<bool>(GlobalVars.DebilitatedStat, false);
-            }
-        }
 
         [HarmonyPatch(typeof(Pilot))]
         [HarmonyPatch("IsIncapacitated", MethodType.Getter)]
@@ -560,9 +552,12 @@ namespace TisButAScratch.Patches
             [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
-                if ((ModInit.modSettings.debilIncapacitates && __instance.ParentActor != null && __instance.ParentActor.StatCollection.GetValue<bool>(GlobalVars.DebilitatedStat)) || 
-                    __instance.StatCollection.GetValue<bool>("BledOut") ||
-                    (ModInit.modSettings.enableConsciousness &&__instance.StatCollection.GetValue<int>(MissionKilledStat) >= __instance.StatCollection.GetValue<int>("MissionKilledThreshold") && __instance.StatCollection.GetValue<int>("MissionKilledThreshold") > 0))
+                var pilotKilledThreshold = __instance.StatCollection.GetValue<int>("MissionKilledThreshold");
+                if (__instance.ParentActor == null) return;
+                
+                if ((ModInit.modSettings.debilIncapacitates && __instance.ParentActor.IsDebilitated) || 
+                    __instance.ParentActor.HasBledOut ||
+                    (ModInit.modSettings.enableConsciousness && __instance.ParentActor.MissionStatSeverity >= pilotKilledThreshold && pilotKilledThreshold > 0))
                 {
                     __result = true;
                 }
