@@ -552,6 +552,13 @@ namespace TisButAScratch.Patches
             [HarmonyPriority(Priority.Last)]
             public static void Postfix(Pilot __instance, ref bool __result)
             {
+
+                if (__instance.BledOutOrDebilitated)
+                {
+                    __result = true;
+                    return;
+                }
+                
                 var pilotKilledThreshold = __instance.StatCollection.GetValue<int>("MissionKilledThreshold");
                 if (__instance.ParentActor == null) return;
                 
@@ -559,8 +566,20 @@ namespace TisButAScratch.Patches
                     __instance.ParentActor.HasBledOut ||
                     (ModInit.modSettings.enableConsciousness && __instance.ParentActor.MissionStatSeverity >= pilotKilledThreshold && pilotKilledThreshold > 0))
                 {
+                    __instance.BledOutOrDebilitated = true;
                     __result = true;
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(Pilot))]
+        [HarmonyPatch("MakeDumbClone")]
+        public static class Pilot_MakeDumbClone_Patch
+        {
+            public static void Postfix(Pilot original, ref Pilot __result)
+            {
+                __result.BledOutOrDebilitated = original.BledOutOrDebilitated;
+                ModInit.modLog.Info?.Write($"[MakeDumbClone] BledOutOrDebilitated set to {__result.BledOutOrDebilitated} for {__result.Callsign}");
             }
         }
 
