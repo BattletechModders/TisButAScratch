@@ -91,6 +91,7 @@ namespace TisButAScratch.Patches
                     
                     p.StatCollection.ModifyStat<bool>("TBAS_Injuries", 0, "BledOut",
                         StatCollection.StatOperation.Set, true);
+                    __instance.HasBledOut = true;
                     ModInit.modLog?.Info?.Write(
                         $"{p.Callsign}_{pKey} has bled out!");
 
